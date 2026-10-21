@@ -1,0 +1,49 @@
+:root {
+  --fond: #f6efe4;
+  --texte: #3a2e28;
+  --carte: #fffcf7;
+  --texte-doux: #6e5f57;
+  --accent: #b4582f;
+  --sauge: #7e9c80;
+  --miel: #e3b26a;
+  --trait: #e0d3c0;
+  --police-titre: "Fraunces", serif;
+  --police-texte: "Nunito Sans", sans-serif;
+}
+[data-theme="lagon"] {
+  --fond: #edf3f1;
+  --texte: #20323a;
+  --carte: #fbfdfc;
+  --texte-doux: #56686e;
+  --accent: #2f7f86;
+  --sauge: #5fa8a0;
+  --miel: #e0a45e;
+  --trait: #d9e4e1;
+}
+
+[data-theme="lavande"] {
+  --fond: #f2eff6;
+  --texte: #2d2738;
+  --carte: #fdfcfe;
+  --texte-doux: #645c70;
+  --accent: #7a5c9e;
+  --sauge: #8db39e;
+  --miel: #e3b26a;
+  --trait: #e2dcea;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--police-titre);
+}
+
+body {
+  background: var(--fond);
+  color: var(--texte);
+  font-family: var(--police-texte);
+}
+
+.test {
+  color: var(--texte-doux);
+}
