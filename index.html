@@ -13,7 +13,43 @@
     <link rel="stylesheet" href="css/base.css" />
   </head>
   <body>
-    <h1>Bienvenue sur Mon Hub</h1>
-    <p class="test">Petit texte doux</p>
+    <main>
+      <section id="accueil" class="ecran">
+        <h1>Accueil</h1>
+      </section>
+      <section id="agenda" class="ecran">
+        <h1>Agenda</h1>
+      </section>
+      <section id="foyer" class="ecran">
+        <h1>Foyer</h1>
+      </section>
+      <section id="moi" class="ecran">
+        <h1>Moi</h1>
+      </section>
+    </main>
+    <nav class="barre-nav">
+      <button class="onglet" data-ecran="accueil">
+        <i data-lucide="house"></i>
+        <span>Accueil</span>
+      </button>
+      <button class="onglet" data-ecran="agenda">
+        <i data-lucide="calendar-days"></i>
+        <span>Agenda</span>
+      </button>
+      <button class="bouton-plus">
+        <i data-lucide="plus"></i>
+      </button>
+      <button class="onglet" data-ecran="foyer">
+        <i data-lucide="sofa"></i>
+        <span>Foyer</span>
+      </button>
+      <button class="onglet" data-ecran="moi">
+        <i data-lucide="flower"></i>
+        <span>Moi</span>
+      </button>
+    </nav>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/app.js"></script>
   </body>
 </html>
