@@ -33,4 +33,23 @@ if (prenom) {
 }
 document.getElementById("salutation").textContent = texte;
 
+// Carte menu //
+const menu = [
+  { moment: "Midi", plat: "Salade de lentilles" },
+  { moment: "Soir", plat: "Curry de légumes" },
+  { moment: "Goûter", plat: "Banane" },
+];
+const listeMenu = document.getElementById("liste-menu");
+
+menu.forEach((repas) => {
+  const ligne = document.createElement("p");
+
+  const moment = document.createElement("strong");
+  moment.textContent = repas.moment;
+
+  ligne.appendChild(moment);
+  ligne.append(` · ${repas.plat}`);
+  listeMenu.appendChild(ligne);
+});
+
 lucide.createIcons();

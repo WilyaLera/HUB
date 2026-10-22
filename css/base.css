@@ -61,3 +61,18 @@ body {
 .salutation {
   margin-top: 0;
 }
+
+.carte {
+  background: var(--carte);
+  border-radius: 24px;
+  padding: 16px 20px;
+  margin-top: 16px;
+  box-shadow: 0 4px 12px rgba(58, 46, 40, 0.06);
+}
+.carte h2 {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+.carte p {
+  margin: 4px 0;
+}
