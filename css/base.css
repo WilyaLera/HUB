@@ -52,3 +52,12 @@ body {
 .ecran.actif {
   display: block;
 }
+
+.sous-titre {
+  color: var(--texte-doux);
+  margin: 0;
+}
+
+.salutation {
+  margin-top: 0;
+}

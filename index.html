@@ -16,15 +16,26 @@
 
   <body>
     <main>
+      // Module Accueil
       <section id="accueil" class="ecran actif">
-        <h1>Accueil</h1>
+        <p id="date-du-jour" class="sous-titre"></p>
+        <h1 class="salutation">
+          <span id="salutation">Bonjour</span>
+          <i data-lucide="plant-pot"></i>
+        </h1>
       </section>
+
+      // Module Agenda
       <section id="agenda" class="ecran">
         <h1>Agenda</h1>
       </section>
+
+      //Module Foyer
       <section id="foyer" class="ecran">
         <h1>Foyer</h1>
       </section>
+
+      //Module Moi
       <section id="moi" class="ecran">
         <h1>Moi</h1>
       </section>
@@ -53,6 +64,7 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/donnees/stockage.js"></script>
     <script src="js/app.js"></script>
   </body>
 </html>
