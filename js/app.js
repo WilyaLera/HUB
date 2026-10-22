@@ -52,4 +52,28 @@ menu.forEach((repas) => {
   listeMenu.appendChild(ligne);
 });
 
+//Carte Aujourd'hui //
+const tachesParDefaut = [
+  { id: 1, titre: "Arroser la plante", fait: false },
+  { id: 2, titre: "Appeler le garage", fait: false },
+  { id: 3, titre: "Lancer une machine", fait: true },
+];
+
+const taches = charger("taches", tachesParDefaut);
+
+const listeTaches = document.getElementById("liste-taches");
+
+taches.forEach((tache) => {
+  const ligne = document.createElement("label");
+  ligne.classList.add("tache");
+
+  const caseACocher = document.createElement("input");
+  caseACocher.type = "checkbox";
+  caseACocher.checked = tache.fait;
+
+  ligne.appendChild(caseACocher);
+  ligne.append(tache.titre);
+  listeTaches.appendChild(ligne);
+});
+
 lucide.createIcons();

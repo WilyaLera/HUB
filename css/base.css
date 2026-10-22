@@ -76,3 +76,11 @@ body {
 .carte p {
   margin: 4px 0;
 }
+
+.tache {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  cursor: pointer;
+}
