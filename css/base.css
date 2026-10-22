@@ -44,6 +44,11 @@ body {
   font-family: var(--police-texte);
 }
 
-.test {
-  color: var(--texte-doux);
+.ecran {
+  display: none;
+  padding: 20px;
+  padding-bottom: 100px;
+}
+.ecran.actif {
+  display: block;
 }
