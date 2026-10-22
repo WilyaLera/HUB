@@ -71,6 +71,11 @@ taches.forEach((tache) => {
   caseACocher.type = "checkbox";
   caseACocher.checked = tache.fait;
 
+  caseACocher.addEventListener("change", () => {
+    tache.fait = caseACocher.checked;
+    sauvegarder("taches", taches);
+  });
+
   ligne.appendChild(caseACocher);
   ligne.append(tache.titre);
   listeTaches.appendChild(ligne);
