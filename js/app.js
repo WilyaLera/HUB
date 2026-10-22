@@ -63,7 +63,7 @@ const taches = charger("taches", tachesParDefaut);
 
 const listeTaches = document.getElementById("liste-taches");
 
-taches.forEach((tache) => {
+function afficherTache(tache) {
   const ligne = document.createElement("label");
   ligne.classList.add("tache");
 
@@ -79,6 +79,24 @@ taches.forEach((tache) => {
   ligne.appendChild(caseACocher);
   ligne.append(tache.titre);
   listeTaches.appendChild(ligne);
+}
+taches.forEach(afficherTache);
+
+const formTache = document.getElementById("form-tache");
+const champTache = document.getElementById("champ-tache");
+
+formTache.addEventListener("submit", (evenement) => {
+  evenement.preventDefault();
+
+  const titre = champTache.value.trim();
+  if (!titre) return;
+
+  const nouvelle = { id: Date.now(), titre: titre, fait: false };
+  taches.push(nouvelle);
+  sauvegarder("taches", taches);
+  afficherTache(nouvelle);
+
+  champTache.value = "";
 });
 
 lucide.createIcons();
