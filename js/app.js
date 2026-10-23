@@ -99,4 +99,22 @@ formTache.addEventListener("submit", (evenement) => {
   champTache.value = "";
 });
 
+//Carte Budget//
+const budgetDuMois = 120000;
+const depenses = [
+  { libelle: "Courses", montant: 45000 },
+  { libelle: "Loisirs", montant: 18500 },
+  { libelle: "Essence", montant: 8000 },
+];
+
+let totalDepense = 0;
+depenses.forEach((depense) => {
+  totalDepense = totalDepense + depense.montant;
+});
+
+const reste = budgetDuMois - totalDepense;
+
+document.getElementById("montant-reste").textContent =
+  `${reste.toLocaleString("fr-FR")} F`;
+
 lucide.createIcons();
