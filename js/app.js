@@ -117,4 +117,15 @@ const reste = budgetDuMois - totalDepense;
 document.getElementById("montant-reste").textContent =
   `${reste.toLocaleString("fr-FR")} F`;
 
+const dernierJour = new Date(
+  aujourdhui.getFullYear(),
+  aujourdhui.getMonth() + 1,
+  0,
+).getDate();
+
+const joursRestants = dernierJour - aujourdhui.getDate();
+
+document.getElementById("jours-restants").textContent =
+  `${joursRestants} jours restants`;
+
 lucide.createIcons();
