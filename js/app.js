@@ -125,7 +125,24 @@ const dernierJour = new Date(
 
 const joursRestants = dernierJour - aujourdhui.getDate();
 
-document.getElementById("jours-restants").textContent =
-  `${joursRestants} jours restants`;
+let texteJours = `${joursRestants} jours restants`;
+
+if (joursRestants === 1) {
+  texteJours = "Plus qu'un jour";
+} else if (joursRestants === 0) {
+  texteJours = "Dernier jour du mois";
+}
+
+document.getElementById("jours-restants").textContent = texteJours;
+
+const nomDuMois = aujourdhui.toLocaleDateString("fr-FR", { month: "long" });
+
+let liaison = "de ";
+if ("aeiou".includes(nomDuMois[0])) {
+  liaison = "d'";
+}
+
+document.getElementById("titre-budget").textContent =
+  `Budget ${liaison}${nomDuMois}`;
 
 lucide.createIcons();
