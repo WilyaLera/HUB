@@ -10,9 +10,9 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css" />
-    <link rel="stylesheet" href="css/navigation.css" />
-    <link rel="stylesheet" href="css/budget.css" />
+    <link rel="stylesheet" href="css/base.css?v=4" />
+    <link rel="stylesheet" href="css/navigation.css?v=4" />
+    <link rel="stylesheet" href="css/budget.css?v=4" />
   </head>
 
   <body>
@@ -153,6 +153,36 @@
               />
               du mois
             </label>
+            <!-- Organisation du compte commun (à deux seulement) -->
+            <div class="si-a-deux">
+              <p class="etiquette">Sur le compte commun, on met…</p>
+              <div class="choix">
+                <label class="pastille">
+                  <input type="radio" name="organisation" value="charges" />
+                  Les charges fixes
+                </label>
+                <label class="pastille">
+                  <input type="radio" name="organisation" value="charges-vie" />
+                  Charges + vie courante + épargne
+                </label>
+                <label class="pastille">
+                  <input type="radio" name="organisation" value="tout" /> Tout
+                </label>
+              </div>
+
+              <div id="choix-partage">
+                <p class="etiquette">On partage…</p>
+                <div class="choix">
+                  <label class="pastille">
+                    <input type="radio" name="partage" value="salaires" /> Selon
+                    les salaires
+                  </label>
+                  <label class="pastille">
+                    <input type="radio" name="partage" value="moitie" /> 50 / 50
+                  </label>
+                </div>
+              </div>
+            </div>
           </details>
 
           <!-- Où va ton argent -->
@@ -190,7 +220,7 @@
             </p>
 
             <button type="button" class="bouton-ajout" data-formulaire="form-revenu">
-              + Ajouter un revenu
+              <span class="plus-rond">+</span> Ajouter un revenu
             </button>
             <form id="form-revenu" class="formulaire" hidden>
               <p class="formulaire-titre" data-titre-ajout="Ajouter un revenu">
@@ -232,7 +262,7 @@
             </p>
 
             <button type="button" class="bouton-ajout" data-formulaire="form-charge">
-              + Ajouter une charge fixe
+              <span class="plus-rond">+</span> Ajouter une charge fixe
             </button>
             <form id="form-charge" class="formulaire" hidden>
               <p
@@ -289,7 +319,7 @@
             </p>
 
             <button type="button" class="bouton-ajout" data-formulaire="form-bocal">
-              + Ajouter un bocal
+              <span class="plus-rond">+</span> Ajouter un bocal
             </button>
             <form id="form-bocal" class="formulaire" hidden>
               <p class="formulaire-titre" data-titre-ajout="Ajouter un bocal">
@@ -329,35 +359,14 @@
 
           <!-- Virements vers le compte commun (à deux seulement) -->
           <article class="carte si-a-deux">
-            <h2>Le compte commun</h2>
+            <h2>Les virements</h2>
 
-            <p class="etiquette">On y met…</p>
-            <div class="choix">
-              <label class="pastille">
-                <input type="radio" name="organisation" value="charges" />
-                Les charges fixes
-              </label>
-              <label class="pastille">
-                <input type="radio" name="organisation" value="charges-vie" />
-                Charges + vie courante + épargne
-              </label>
-              <label class="pastille">
-                <input type="radio" name="organisation" value="tout" /> Tout
-              </label>
-            </div>
-
-            <div id="choix-partage">
-              <p class="etiquette">On partage…</p>
-              <div class="choix">
-                <label class="pastille">
-                  <input type="radio" name="partage" value="salaires" /> Selon
-                  les salaires
-                </label>
-                <label class="pastille">
-                  <input type="radio" name="partage" value="moitie" /> 50 / 50
-                </label>
-              </div>
-            </div>
+            <p class="sous-titre">
+              Ce que chacun verse, calculé à partir de tout ton budget.
+              <button type="button" id="lien-reglages-commun" class="lien">
+                Changer l'organisation
+              </button>
+            </p>
 
             <p class="besoin">
               Il a besoin de <strong id="besoin-commun"></strong> par mois
@@ -407,11 +416,11 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js"></script>
-    <script src="js/modules/navigation.js"></script>
-    <script src="js/modules/accueil.js"></script>
-    <script src="js/modules/budget.js"></script>
-    <script src="js/modules/budget-repartition.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/donnees/stockage.js?v=4"></script>
+    <script src="js/modules/navigation.js?v=4"></script>
+    <script src="js/modules/accueil.js?v=4"></script>
+    <script src="js/modules/budget.js?v=4"></script>
+    <script src="js/modules/budget-repartition.js?v=4"></script>
+    <script src="js/app.js?v=4"></script>
   </body>
 </html>

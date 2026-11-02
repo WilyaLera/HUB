@@ -392,6 +392,13 @@ function afficherMessageVirements() {
   }
 }
 
+// « Changer l'organisation » : ouvre les réglages et y fait glisser l'écran
+document.getElementById("lien-reglages-commun").addEventListener("click", () => {
+  const carteReglages = document.getElementById("carte-reglages");
+  carteReglages.open = true;
+  carteReglages.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
 // Changer d'organisation ou de partage remet les montants calculés
 function remettreCalcule() {
   budget.reglages.virementAjuste = { moi: null, partenaire: null };

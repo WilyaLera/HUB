@@ -475,16 +475,41 @@
 
 /* ---------- Ajouter discrètement, modifier « sur place » ---------- */
 
+/* Le bouton « + Ajouter… » : une petite carte en pointillés,
+   comme les espaces « à découvrir » de la maquette */
 .bouton-ajout {
-  display: block;
-  margin-top: 8px;
-  padding: 8px 0;
-  border: none;
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border: 2px dashed var(--trait);
+  border-radius: 16px;
   background: transparent;
   font-family: var(--police-texte);
   font-size: 15px;
   font-weight: 700;
+  color: var(--texte-doux);
+  cursor: pointer;
+}
+
+.bouton-ajout:hover {
+  border-color: var(--accent);
   color: var(--accent);
+}
+
+/* Un petit lien dans le texte */
+.lien {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: var(--police-texte);
+  font-size: inherit;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: underline;
   cursor: pointer;
 }
 
@@ -510,4 +535,18 @@
 .apres-perso {
   margin-top: 6px !important;
   font-weight: 700;
+}
+
+/* Le « + » dans un petit rond terracotta */
+.plus-rond {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  line-height: 1;
 }
