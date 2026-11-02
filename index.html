@@ -107,9 +107,9 @@
 
         <!-- Onglet 2 : Mon budget (le plan) -->
         <div id="panneau-mon-budget" class="panneau-budget actif">
-          <!-- Réglages -->
-          <article class="carte">
-            <h2>Mes réglages</h2>
+          <!-- Réglages (une carte qui se replie) -->
+          <details id="carte-reglages" class="carte carte-repliable">
+            <summary><h2>Mes réglages</h2></summary>
 
             <p class="etiquette">Je gère mon budget</p>
             <div class="choix">
@@ -153,6 +153,32 @@
               />
               du mois
             </label>
+          </details>
+
+          <!-- Où va ton argent -->
+          <article class="carte">
+            <h2>Où va ton argent</h2>
+            <div id="barre-argent" class="barre-argent"></div>
+            <p id="indice-barre" class="sous-titre indice">
+              Touche une couleur pour savoir ce qu'elle contient.
+            </p>
+            <div id="explication-barre" class="explication" hidden>
+              <button
+                id="fermer-explication"
+                class="bouton-supprimer"
+                aria-label="Fermer"
+              >
+                ✕
+              </button>
+              <strong id="explication-titre"></strong>
+              <p id="explication-texte"></p>
+            </div>
+
+            <div class="sans-role">
+              <p class="sous-titre">Sans rôle</p>
+              <p id="montant-sans-role" class="montant"></p>
+              <p id="message-sans-role" class="sous-titre"></p>
+            </div>
           </article>
 
           <!-- Revenus -->
@@ -164,6 +190,9 @@
             </p>
 
             <form id="form-revenu" class="formulaire">
+              <p class="formulaire-titre" data-titre-ajout="Ajouter un revenu">
+                Ajouter un revenu
+              </p>
               <input
                 id="revenu-nom"
                 type="text"
@@ -180,6 +209,9 @@
               />
               <select id="revenu-personne" class="si-a-deux"></select>
               <button type="submit" class="bouton">Ajouter</button>
+              <button type="button" class="bouton-annuler" hidden>
+                Annuler
+              </button>
             </form>
           </article>
 
@@ -197,6 +229,12 @@
             </p>
 
             <form id="form-charge" class="formulaire">
+              <p
+                class="formulaire-titre"
+                data-titre-ajout="Ajouter une charge fixe"
+              >
+                Ajouter une charge fixe
+              </p>
               <input
                 id="charge-nom"
                 type="text"
@@ -226,16 +264,97 @@
                 <option value="perso">Mon compte perso</option>
               </select>
               <button type="submit" class="bouton">Ajouter</button>
+              <button type="button" class="bouton-annuler" hidden>
+                Annuler
+              </button>
             </form>
           </article>
 
-          <!-- Ce qu'il reste -->
-          <article class="carte carte-reste">
+          <!-- Vie courante (les bocaux) -->
+          <article class="carte">
+            <h2>Ma vie courante</h2>
             <p class="sous-titre">
-              Après les charges fixes, il reste chaque mois
+              Un bocal par type de dépense : combien tu prévois chaque mois.
+              Touche un nom pour le modifier.
             </p>
-            <p id="reste-apres-charges" class="montant"></p>
-            <p id="message-reste" class="sous-titre"></p>
+            <div id="liste-bocaux" class="liste-budget"></div>
+            <p class="total">
+              Total par mois : <strong id="total-bocaux"></strong>
+            </p>
+
+            <form id="form-bocal" class="formulaire">
+              <p class="formulaire-titre" data-titre-ajout="Ajouter un bocal">
+                Ajouter un bocal
+              </p>
+              <input
+                id="bocal-nom"
+                type="text"
+                placeholder="Ex. : Bus & taxi"
+                required
+              />
+              <select id="bocal-compte" class="si-a-deux">
+                <option value="commun">Commun</option>
+                <option value="perso">Perso</option>
+              </select>
+              <button type="submit" class="bouton">Ajouter</button>
+              <button type="button" class="bouton-annuler" hidden>
+                Annuler
+              </button>
+            </form>
+          </article>
+
+          <!-- Épargne -->
+          <article class="carte">
+            <h2>Mon épargne</h2>
+            <div class="ligne-budget ligne-epargne">
+              <span class="ligne-budget-textes">
+                <strong>Mettre de côté chaque mois</strong>
+                <span class="sous-titre">
+                  Le détail (sécurité, projets) arrivera dans « Épargne &
+                  projets ».
+                </span>
+              </span>
+              <div id="zone-compteur-epargne"></div>
+            </div>
+          </article>
+
+          <!-- Virements vers le compte commun (à deux seulement) -->
+          <article class="carte si-a-deux">
+            <h2>Le compte commun</h2>
+
+            <p class="etiquette">On y met…</p>
+            <div class="choix">
+              <label class="pastille">
+                <input type="radio" name="organisation" value="charges" />
+                Les charges fixes
+              </label>
+              <label class="pastille">
+                <input type="radio" name="organisation" value="charges-vie" />
+                Charges + vie courante + épargne
+              </label>
+              <label class="pastille">
+                <input type="radio" name="organisation" value="tout" /> Tout
+              </label>
+            </div>
+
+            <div id="choix-partage">
+              <p class="etiquette">On partage…</p>
+              <div class="choix">
+                <label class="pastille">
+                  <input type="radio" name="partage" value="salaires" /> Selon
+                  les salaires
+                </label>
+                <label class="pastille">
+                  <input type="radio" name="partage" value="moitie" /> 50 / 50
+                </label>
+              </div>
+            </div>
+
+            <p class="besoin">
+              Il a besoin de <strong id="besoin-commun"></strong> par mois
+            </p>
+            <div id="liste-virements"></div>
+            <p id="message-virements" class="sous-titre message-doux"></p>
           </article>
         </div>
 
@@ -283,6 +402,7 @@
     <script src="js/modules/navigation.js"></script>
     <script src="js/modules/accueil.js"></script>
     <script src="js/modules/budget.js"></script>
+    <script src="js/modules/budget-repartition.js"></script>
     <script src="js/app.js"></script>
   </body>
 </html>

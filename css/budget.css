@@ -204,9 +204,19 @@
 
 .ligne-budget-textes {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  /* C'est un <button> : on enlève son look de bouton */
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font-family: var(--police-texte);
+  font-size: 16px;
+  color: var(--texte);
+  cursor: pointer;
 }
 
 .ligne-budget-textes .sous-titre {
@@ -252,4 +262,205 @@
 /* Jamais de rouge : le miel dit « attention » en douceur */
 .montant-attention {
   color: var(--miel);
+}
+
+/* ---------- Étape 2 : modifier une ligne ---------- */
+
+/* La ligne en cours de modification */
+.ligne-budget.en-cours {
+  background: var(--fond);
+  border-radius: 12px;
+  padding-left: 8px;
+  padding-right: 4px;
+}
+
+.formulaire-titre {
+  margin: 0 !important;
+  font-weight: 700;
+  color: var(--texte-doux);
+}
+
+.formulaire.en-modification .formulaire-titre {
+  color: var(--accent);
+}
+
+.bouton-annuler {
+  border: none;
+  background: transparent;
+  padding: 8px;
+  font-family: var(--police-texte);
+  font-size: 15px;
+  color: var(--texte-doux);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ---------- Carte qui se replie (les réglages) ---------- */
+
+.carte-repliable summary {
+  list-style: none; /* enlève le petit triangle par défaut */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.carte-repliable summary::-webkit-details-marker {
+  display: none;
+}
+
+.carte-repliable summary h2 {
+  margin: 0;
+}
+
+/* Notre propre flèche, qui tourne quand la carte est ouverte */
+.carte-repliable summary::after {
+  content: "›";
+  font-size: 24px;
+  color: var(--texte-doux);
+  transition: transform 0.2s;
+}
+
+.carte-repliable[open] summary::after {
+  transform: rotate(90deg);
+}
+
+/* ---------- Le compteur − [montant] + ---------- */
+
+.compteur {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.compteur button {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: var(--fond);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.compteur input {
+  width: 84px;
+  padding: 6px 4px;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  background: var(--carte);
+  font-family: var(--police-texte);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--texte);
+  text-align: center;
+}
+
+/* Les bocaux et l'épargne : le compteur est centré verticalement */
+.ligne-bocal,
+.ligne-epargne {
+  align-items: center;
+}
+
+.ligne-epargne {
+  border-bottom: none;
+}
+
+/* ---------- La barre « Où va ton argent » ---------- */
+
+.barre-argent {
+  display: flex;
+  height: 28px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--fond);
+}
+
+.morceau {
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.morceau-charges {
+  background: var(--accent);
+}
+.morceau-vie {
+  background: var(--sauge);
+}
+.morceau-epargne {
+  background: var(--miel);
+}
+.morceau-sansRole {
+  background: var(--trait);
+}
+
+.indice {
+  margin-top: 8px !important;
+  font-size: 14px;
+}
+
+.explication {
+  position: relative;
+  margin-top: 10px;
+  padding: 12px 40px 12px 14px;
+  border-radius: 16px;
+  background: var(--fond);
+  border-left: 6px solid var(--trait);
+}
+
+.explication p {
+  margin: 4px 0 0;
+  color: var(--texte-doux);
+}
+
+.explication .bouton-supprimer {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
+.explication-charges {
+  border-left-color: var(--accent);
+}
+.explication-vie {
+  border-left-color: var(--sauge);
+}
+.explication-epargne {
+  border-left-color: var(--miel);
+}
+
+.sans-role {
+  margin-top: 14px;
+  text-align: center;
+}
+
+/* ---------- Le compte commun ---------- */
+
+.besoin {
+  margin-top: 16px !important;
+  font-size: 17px;
+}
+
+.virement {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--fond);
+}
+
+.virement-ligne {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.message-doux {
+  margin-top: 12px !important;
+  text-align: center;
 }

@@ -1,12 +1,27 @@
 // =====================================================
-// Module Budget
-// Étape 1 : « Mon budget » (le plan)
-//   - mes réglages (seul·e ou à deux, début du mois)
-//   - mes revenus
-//   - mes charges fixes, avec la mise de côté mensuelle
+// Module Budget — partie 1
+//   - les données et les petits outils
+//   - les onglets du Budget
+//   - mes réglages, mes revenus, mes charges fixes
+// La partie 2 (bocaux, épargne, barre, virements) est
+// dans budget-repartition.js.
 // =====================================================
 
 // ---------- 1. Les données ----------
+
+// Les bocaux proposés au départ (on peut les renommer, en ajouter, en retirer)
+const bocauxDeDepart = [
+  { id: 1, nom: "Courses", montant: 0, compte: "commun" },
+  { id: 2, nom: "Essence", montant: 0, compte: "commun" },
+  { id: 3, nom: "Maison & entretien", montant: 0, compte: "commun" },
+  { id: 4, nom: "Animaux", montant: 0, compte: "commun" },
+  { id: 5, nom: "Sorties & restos", montant: 0, compte: "commun" },
+  { id: 6, nom: "Santé", montant: 0, compte: "commun" },
+  { id: 7, nom: "Imprévus", montant: 0, compte: "commun" },
+  { id: 8, nom: "Plaisirs", montant: 0, compte: "perso" },
+  { id: 9, nom: "Vêtements", montant: 0, compte: "perso" },
+  { id: 10, nom: "Cadeaux", montant: 0, compte: "perso" },
+];
 
 // Tout le budget est rangé dans UN seul tiroir : "budget".
 // La première fois, le tiroir est vide : on part de ce modèle.
@@ -16,12 +31,26 @@ const budgetParDefaut = {
     prenomPartenaire: "",
     debutMois: "premier", // "premier" ou "salaire"
     jourSalaire: 25,
+    organisation: "charges", // "charges", "charges-vie" ou "tout"
+    partage: "salaires", // "salaires" ou "moitie"
+    virementAjuste: { moi: null, partenaire: null }, // null = calculé
+    argentPerso: { moi: 0, partenaire: 0 }, // pour « Tout en commun »
   },
   revenus: [], // { id, nom, montant, personne: "moi" | "partenaire" }
   chargesFixes: [], // { id, nom, montant, frequence, prochaineEcheance, compte }
+  bocaux: bocauxDeDepart, // { id, nom, montant, compte }
+  epargneMensuelle: 0,
 };
 
 const budget = charger("budget", budgetParDefaut);
+
+// Ton budget de l'étape 1 n'a pas encore les nouveautés de l'étape 2.
+// On complète ce qui manque, sans rien effacer de ce qui existe.
+// Les « ... » veulent dire : « recopie tout le contenu de cette boîte ici ».
+// Donc : d'abord les réglages par défaut, puis TES réglages par-dessus.
+budget.reglages = { ...budgetParDefaut.reglages, ...budget.reglages };
+if (!budget.bocaux) budget.bocaux = bocauxDeDepart;
+if (budget.epargneMensuelle === undefined) budget.epargneMensuelle = 0;
 
 function sauvegarderBudget() {
   sauvegarder("budget", budget);
@@ -65,14 +94,28 @@ function nomPersonne(code) {
   return budget.reglages.prenomPartenaire || "L'autre personne";
 }
 
+// Additionne une propriété dans une liste.
+// Ex. : sommer(budget.revenus, (r) => r.montant)
+function sommer(liste, quoiAdditionner) {
+  let total = 0;
+  liste.forEach((element) => {
+    total = total + quoiAdditionner(element);
+  });
+  return total;
+}
+
 // Fabrique une ligne de liste : titre, détail, montant et bouton ✕.
-// Elle sert aux revenus ET aux charges, pour ne pas écrire le code deux fois.
-function creerLigneBudget(titre, detail, montant, quandOnSupprime) {
+// Toucher le titre appelle quandOnTouche (pour modifier la ligne).
+// Elle sert aux revenus, aux charges et aux bocaux.
+function creerLigneBudget(titre, detail, droite, quandOnTouche, quandOnSupprime) {
   const ligne = document.createElement("div");
   ligne.classList.add("ligne-budget");
 
-  const textes = document.createElement("div");
+  // Les textes sont dans un <button> : on peut les toucher pour modifier
+  const textes = document.createElement("button");
+  textes.type = "button";
   textes.classList.add("ligne-budget-textes");
+  textes.addEventListener("click", quandOnTouche);
 
   const elementTitre = document.createElement("strong");
   elementTitre.textContent = titre;
@@ -85,11 +128,17 @@ function creerLigneBudget(titre, detail, montant, quandOnSupprime) {
     textes.appendChild(elementDetail);
   }
 
-  const elementMontant = document.createElement("span");
-  elementMontant.classList.add("ligne-budget-montant");
-  elementMontant.textContent = montant;
+  // « droite » peut être un texte (un montant) ou un élément déjà fabriqué
+  // (le compteur − + des bocaux)
+  let elementDroite = droite;
+  if (typeof droite === "string") {
+    elementDroite = document.createElement("span");
+    elementDroite.classList.add("ligne-budget-montant");
+    elementDroite.textContent = droite;
+  }
 
   const boutonSupprimer = document.createElement("button");
+  boutonSupprimer.type = "button";
   boutonSupprimer.classList.add("bouton-supprimer");
   boutonSupprimer.setAttribute("aria-label", `Supprimer ${titre}`);
   boutonSupprimer.textContent = "✕";
@@ -99,8 +148,29 @@ function creerLigneBudget(titre, detail, montant, quandOnSupprime) {
     }
   });
 
-  ligne.append(textes, elementMontant, boutonSupprimer);
+  ligne.append(textes, elementDroite, boutonSupprimer);
   return ligne;
+}
+
+// Met un formulaire en mode « modifier » ou « ajouter »
+function changerModeFormulaire(formulaire, titreModification) {
+  const titre = formulaire.querySelector(".formulaire-titre");
+  const boutonValider = formulaire.querySelector('button[type="submit"]');
+  const boutonAnnuler = formulaire.querySelector(".bouton-annuler");
+
+  if (titreModification) {
+    titre.textContent = `Modifier « ${titreModification} »`;
+    boutonValider.textContent = "Enregistrer";
+    boutonAnnuler.hidden = false;
+    formulaire.classList.add("en-modification");
+    // On fait glisser l'écran jusqu'au formulaire
+    formulaire.scrollIntoView({ behavior: "smooth", block: "center" });
+  } else {
+    titre.textContent = titre.dataset.titreAjout;
+    boutonValider.textContent = "Ajouter";
+    boutonAnnuler.hidden = true;
+    formulaire.classList.remove("en-modification");
+  }
 }
 
 // ---------- 3. Les onglets du Budget ----------
@@ -123,6 +193,9 @@ ongletsBudget.forEach((ongletBudget) => {
 const champPrenomPartenaire = document.getElementById("champ-prenom-partenaire");
 const champJourSalaire = document.getElementById("champ-jour-salaire");
 const blocJourSalaire = document.getElementById("bloc-jour-salaire");
+
+// La première fois (pas encore de revenus), les réglages sont ouverts
+document.getElementById("carte-reglages").open = budget.revenus.length === 0;
 
 function afficherReglages() {
   const reglages = budget.reglages;
@@ -167,6 +240,7 @@ champPrenomPartenaire.addEventListener("input", () => {
   sauvegarderBudget();
   afficherChoixPersonne();
   afficherRevenus();
+  afficherVirements();
 });
 
 // Le jour du salaire : entre 1 et 31
@@ -187,6 +261,9 @@ const revenuNom = document.getElementById("revenu-nom");
 const revenuMontant = document.getElementById("revenu-montant");
 const revenuPersonne = document.getElementById("revenu-personne");
 
+// L'id du revenu en cours de modification (null = on ajoute)
+let revenuEnModification = null;
+
 // Le menu « à qui est ce revenu ? » (Moi / son prénom)
 function afficherChoixPersonne() {
   const choixActuel = revenuPersonne.value || "moi";
@@ -201,11 +278,13 @@ function afficherChoixPersonne() {
 }
 
 function totalRevenus() {
-  let total = 0;
-  budget.revenus.forEach((revenu) => {
-    total = total + revenu.montant;
-  });
-  return total;
+  return sommer(budget.revenus, (revenu) => revenu.montant);
+}
+
+// Les revenus d'une seule personne ("moi" ou "partenaire")
+function revenusDe(personne) {
+  const sesRevenus = budget.revenus.filter((r) => r.personne === personne);
+  return sommer(sesRevenus, (revenu) => revenu.montant);
 }
 
 function afficherRevenus() {
@@ -220,13 +299,16 @@ function afficherRevenus() {
       revenu.nom,
       detail,
       formaterMontant(revenu.montant),
+      () => modifierRevenu(revenu),
       () => {
         // filter garde tous les revenus SAUF celui-ci
         budget.revenus = budget.revenus.filter((r) => r.id !== revenu.id);
         sauvegarderBudget();
+        annulerRevenu();
         afficherBudget();
       },
     );
+    ligne.classList.toggle("en-cours", revenu.id === revenuEnModification);
     listeRevenus.appendChild(ligne);
   });
 
@@ -235,6 +317,26 @@ function afficherRevenus() {
   );
 }
 
+// Toucher une ligne : le formulaire se remplit avec ses valeurs
+function modifierRevenu(revenu) {
+  revenuEnModification = revenu.id;
+  revenuNom.value = revenu.nom;
+  revenuMontant.value = revenu.montant;
+  revenuPersonne.value = revenu.personne;
+  changerModeFormulaire(formRevenu, revenu.nom);
+  afficherRevenus();
+}
+
+function annulerRevenu() {
+  revenuEnModification = null;
+  formRevenu.reset();
+  afficherChoixPersonne();
+  changerModeFormulaire(formRevenu, null);
+  afficherRevenus();
+}
+
+formRevenu.querySelector(".bouton-annuler").addEventListener("click", annulerRevenu);
+
 formRevenu.addEventListener("submit", (evenement) => {
   evenement.preventDefault();
 
@@ -242,17 +344,21 @@ formRevenu.addEventListener("submit", (evenement) => {
   const montant = Number(revenuMontant.value);
   if (!nom || montant <= 0) return;
 
-  budget.revenus.push({
-    id: Date.now(),
-    nom: nom,
-    montant: montant,
-    personne: budget.reglages.aDeux ? revenuPersonne.value : "moi",
-  });
-  sauvegarderBudget();
-  afficherBudget();
+  const personne = budget.reglages.aDeux ? revenuPersonne.value : "moi";
 
-  formRevenu.reset();
-  afficherChoixPersonne();
+  if (revenuEnModification) {
+    // find trouve LE revenu qui a cet id, et on change ses valeurs
+    const revenu = budget.revenus.find((r) => r.id === revenuEnModification);
+    revenu.nom = nom;
+    revenu.montant = montant;
+    revenu.personne = personne;
+  } else {
+    budget.revenus.push({ id: Date.now(), nom, montant, personne });
+  }
+
+  sauvegarderBudget();
+  annulerRevenu();
+  afficherBudget();
 });
 
 // ---------- 6. Mes charges fixes ----------
@@ -266,6 +372,8 @@ const chargeEcheance = document.getElementById("charge-echeance");
 const chargeCompte = document.getElementById("charge-compte");
 const blocChargeEcheance = document.getElementById("bloc-charge-echeance");
 
+let chargeEnModification = null;
+
 // La date d'échéance ne sert que pour les charges qui ne tombent pas chaque mois
 function afficherChampEcheance() {
   blocChargeEcheance.hidden = chargeFrequence.value === "1";
@@ -273,11 +381,7 @@ function afficherChampEcheance() {
 chargeFrequence.addEventListener("change", afficherChampEcheance);
 
 function totalMiseDeCote() {
-  let total = 0;
-  budget.chargesFixes.forEach((charge) => {
-    total = total + miseDeCoteMensuelle(charge);
-  });
-  return total;
+  return sommer(budget.chargesFixes, miseDeCoteMensuelle);
 }
 
 function afficherCharges() {
@@ -301,12 +405,15 @@ function afficherCharges() {
       charge.nom,
       detail,
       `${formaterMontant(miseDeCoteMensuelle(charge))} / mois`,
+      () => modifierCharge(charge),
       () => {
         budget.chargesFixes = budget.chargesFixes.filter((c) => c.id !== charge.id);
         sauvegarderBudget();
+        annulerCharge();
         afficherBudget();
       },
     );
+    ligne.classList.toggle("en-cours", charge.id === chargeEnModification);
     listeCharges.appendChild(ligne);
   });
 
@@ -314,6 +421,28 @@ function afficherCharges() {
     totalMiseDeCote(),
   );
 }
+
+function modifierCharge(charge) {
+  chargeEnModification = charge.id;
+  chargeNom.value = charge.nom;
+  chargeMontant.value = charge.montant;
+  chargeFrequence.value = charge.frequence;
+  chargeEcheance.value = charge.prochaineEcheance;
+  chargeCompte.value = charge.compte;
+  afficherChampEcheance();
+  changerModeFormulaire(formCharge, charge.nom);
+  afficherCharges();
+}
+
+function annulerCharge() {
+  chargeEnModification = null;
+  formCharge.reset();
+  afficherChampEcheance();
+  changerModeFormulaire(formCharge, null);
+  afficherCharges();
+}
+
+formCharge.querySelector(".bouton-annuler").addEventListener("click", annulerCharge);
 
 formCharge.addEventListener("submit", (evenement) => {
   evenement.preventDefault();
@@ -323,51 +452,36 @@ formCharge.addEventListener("submit", (evenement) => {
   if (!nom || montant <= 0) return;
 
   const frequence = Number(chargeFrequence.value);
-
-  budget.chargesFixes.push({
-    id: Date.now(),
+  const valeurs = {
     nom: nom,
     montant: montant,
     frequence: frequence,
     prochaineEcheance: frequence > 1 ? chargeEcheance.value : "",
     compte: budget.reglages.aDeux ? chargeCompte.value : "perso",
-  });
-  sauvegarderBudget();
-  afficherBudget();
+  };
 
-  formCharge.reset();
-  afficherChampEcheance();
+  if (chargeEnModification) {
+    const charge = budget.chargesFixes.find((c) => c.id === chargeEnModification);
+    // Object.assign recopie les nouvelles valeurs dans la charge existante
+    Object.assign(charge, valeurs);
+  } else {
+    budget.chargesFixes.push({ id: Date.now(), ...valeurs });
+  }
+
+  sauvegarderBudget();
+  annulerCharge();
+  afficherBudget();
 });
 
-// ---------- 7. Ce qu'il reste après les charges ----------
-
-function afficherReste() {
-  const resteApresCharges = totalRevenus() - totalMiseDeCote();
-  const elementReste = document.getElementById("reste-apres-charges");
-  const elementMessage = document.getElementById("message-reste");
-
-  elementReste.textContent = formaterMontant(resteApresCharges);
-  elementReste.classList.toggle("montant-attention", resteApresCharges < 0);
-
-  if (budget.revenus.length === 0) {
-    elementMessage.textContent = "Ajoute tes revenus pour voir ce qu'il reste.";
-  } else if (resteApresCharges < 0) {
-    elementMessage.textContent = `Il manque ${formaterMontant(-resteApresCharges)}. Pas de panique : on regardera ensemble où ajuster.`;
-  } else {
-    elementMessage.textContent =
-      "C'est ce qui servira à la vie courante et à l'épargne. On le répartira à l'étape 2.";
-  }
-}
-
-// ---------- 8. Tout afficher ----------
+// ---------- 7. Tout afficher ----------
+// (appelée au démarrage par app.js, et après chaque changement important)
 
 function afficherBudget() {
   afficherReglages();
+  afficherChoixPersonne();
+  afficherChampEcheance();
   afficherRevenus();
   afficherCharges();
-  afficherReste();
+  afficherBocaux(); // dans budget-repartition.js
+  afficherTotaux(); // dans budget-repartition.js
 }
-
-afficherChoixPersonne();
-afficherChampEcheance();
-afficherBudget();
