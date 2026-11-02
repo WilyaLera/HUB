@@ -1,0 +1,255 @@
+/* =====================================================
+   Module Budget (et la carte-lien du Foyer)
+   ===================================================== */
+
+/* Un élément avec l'attribut hidden doit TOUJOURS disparaître,
+   même si une autre règle lui donne un display. */
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- Carte-lien (Foyer → Budget) ---------- */
+
+.carte-lien {
+  width: 100%;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  font-family: var(--police-texte);
+  color: var(--texte);
+  cursor: pointer;
+}
+
+.carte-lien-icone {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--fond);
+  color: var(--accent);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.carte-lien-texte {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.carte-lien-texte strong {
+  font-family: var(--police-titre);
+  font-size: 18px;
+}
+
+/* ---------- Bouton retour ---------- */
+
+.retour {
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+  font-family: var(--police-texte);
+  font-size: 15px;
+  color: var(--texte-doux);
+  cursor: pointer;
+}
+
+/* ---------- Les 3 onglets du Budget ---------- */
+
+.onglets-budget {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--carte);
+  box-shadow: 0 4px 12px rgba(58, 46, 40, 0.06);
+}
+
+.onglet-budget {
+  flex: 1;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 6px;
+  background: transparent;
+  font-family: var(--police-texte);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--texte-doux);
+  cursor: pointer;
+}
+
+.onglet-budget.actif {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+/* Un seul panneau visible à la fois (comme les écrans) */
+.panneau-budget {
+  display: none;
+}
+.panneau-budget.actif {
+  display: block;
+}
+
+/* ---------- Réglages : étiquettes et pastilles ---------- */
+
+.etiquette {
+  font-weight: 700;
+  margin: 14px 0 6px;
+}
+
+.choix {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pastille {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--trait);
+  cursor: pointer;
+}
+
+/* On cache le petit rond : c'est la pastille entière qui se colore */
+.pastille input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* :has() = « la pastille QUI CONTIENT un bouton coché » */
+.pastille:has(input:checked) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.champ {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* ---------- Champs de saisie ---------- */
+
+.champ input,
+.formulaire input,
+.formulaire select {
+  font-family: var(--police-texte);
+  font-size: 16px; /* 16px minimum : sinon l'iPhone zoome tout seul */
+  color: var(--texte);
+  background: var(--fond);
+  border: 1px solid var(--trait);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.champ input {
+  flex: 1;
+  min-width: 120px;
+}
+
+.champ input.champ-court {
+  flex: 0;
+  min-width: 70px;
+  text-align: center;
+}
+
+.formulaire {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--trait);
+}
+
+.formulaire .champ {
+  margin-top: 0;
+  color: var(--texte-doux);
+}
+
+.bouton {
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--accent);
+  color: #ffffff;
+  font-family: var(--police-texte);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ---------- Lignes de liste ---------- */
+
+.ligne-budget {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--trait);
+}
+
+.ligne-budget-textes {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ligne-budget-textes .sous-titre {
+  font-size: 13px;
+}
+
+.ligne-budget-montant {
+  padding-top: 6px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.bouton-supprimer {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--texte-doux);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.bouton-supprimer:hover {
+  background: var(--fond);
+}
+
+.total {
+  margin-top: 10px !important;
+  color: var(--texte-doux);
+}
+
+.total strong {
+  color: var(--texte);
+}
+
+/* ---------- Ce qu'il reste ---------- */
+
+.carte-reste {
+  text-align: center;
+}
+
+/* Jamais de rouge : le miel dit « attention » en douceur */
+.montant-attention {
+  color: var(--miel);
+}

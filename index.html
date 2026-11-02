@@ -12,6 +12,7 @@
     />
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/navigation.css" />
+    <link rel="stylesheet" href="css/budget.css" />
   </head>
 
   <body>
@@ -31,7 +32,7 @@
           <form id="form-tache">
             <input
               id="champ-tache"
-              type="texte"
+              type="text"
               placeholder="Ajouter une tâche..."
             />
           </form>
@@ -60,6 +61,193 @@
       <!-- Module Foyer -->
       <section id="foyer" class="ecran">
         <h1>Foyer</h1>
+        <p class="sous-titre">La maison et ce qui la fait tourner</p>
+
+        <!-- Carte qui mène au Budget -->
+        <button class="carte carte-lien" data-ecran="budget">
+          <span class="carte-lien-icone"><i data-lucide="piggy-bank"></i></span>
+          <span class="carte-lien-texte">
+            <strong>Budget</strong>
+            <span class="sous-titre">Ton plan du mois et ton suivi</span>
+          </span>
+          <i data-lucide="chevron-right"></i>
+        </button>
+      </section>
+
+      <!-- Module Budget (pas d'onglet à lui : il s'allume sous Foyer) -->
+      <section id="budget" class="ecran" data-parent="foyer">
+        <button class="retour" data-ecran="foyer">
+          <i data-lucide="chevron-left"></i> Foyer
+        </button>
+        <h1>Budget</h1>
+
+        <!-- Les 3 onglets du Budget -->
+        <div class="onglets-budget">
+          <button class="onglet-budget" data-panneau="panneau-mon-mois">
+            Mon mois
+          </button>
+          <button class="onglet-budget actif" data-panneau="panneau-mon-budget">
+            Mon budget
+          </button>
+          <button class="onglet-budget" data-panneau="panneau-epargne">
+            Épargne & projets
+          </button>
+        </div>
+
+        <!-- Onglet 1 : Mon mois (le suivi) -->
+        <div id="panneau-mon-mois" class="panneau-budget">
+          <article class="carte carte-bientot">
+            <h2>Bientôt ici 🌱</h2>
+            <p class="sous-titre">
+              Ton suivi du mois arrive à l'étape 3. Commence par remplir
+              « Mon budget » : c'est ton plan, et le suivi s'appuiera dessus.
+            </p>
+          </article>
+        </div>
+
+        <!-- Onglet 2 : Mon budget (le plan) -->
+        <div id="panneau-mon-budget" class="panneau-budget actif">
+          <!-- Réglages -->
+          <article class="carte">
+            <h2>Mes réglages</h2>
+
+            <p class="etiquette">Je gère mon budget</p>
+            <div class="choix">
+              <label class="pastille">
+                <input type="radio" name="mode" value="seul" /> Seul·e
+              </label>
+              <label class="pastille">
+                <input type="radio" name="mode" value="deux" /> À deux
+              </label>
+            </div>
+
+            <label class="champ si-a-deux">
+              Avec qui ?
+              <input
+                id="champ-prenom-partenaire"
+                type="text"
+                placeholder="Son prénom"
+              />
+            </label>
+
+            <p class="etiquette">Mon mois commence</p>
+            <div class="choix">
+              <label class="pastille">
+                <input type="radio" name="debut" value="premier" /> Le 1er
+              </label>
+              <label class="pastille">
+                <input type="radio" name="debut" value="salaire" /> Le jour de
+                mon salaire
+              </label>
+            </div>
+
+            <label id="bloc-jour-salaire" class="champ">
+              Il arrive le
+              <input
+                id="champ-jour-salaire"
+                class="champ-court"
+                type="number"
+                min="1"
+                max="31"
+                inputmode="numeric"
+              />
+              du mois
+            </label>
+          </article>
+
+          <!-- Revenus -->
+          <article class="carte">
+            <h2>Mes revenus</h2>
+            <div id="liste-revenus" class="liste-budget"></div>
+            <p class="total">
+              Total par mois : <strong id="total-revenus"></strong>
+            </p>
+
+            <form id="form-revenu" class="formulaire">
+              <input
+                id="revenu-nom"
+                type="text"
+                placeholder="Ex. : Salaire"
+                required
+              />
+              <input
+                id="revenu-montant"
+                type="number"
+                min="0"
+                inputmode="numeric"
+                placeholder="Montant par mois"
+                required
+              />
+              <select id="revenu-personne" class="si-a-deux"></select>
+              <button type="submit" class="bouton">Ajouter</button>
+            </form>
+          </article>
+
+          <!-- Charges fixes -->
+          <article class="carte">
+            <h2>Mes charges fixes</h2>
+            <p class="sous-titre">
+              Tout ce qui revient : loyer, électricité, assurances,
+              abonnements… Pour celles qui tombent tous les 3, 6 ou 12 mois,
+              l'appli calcule combien mettre de côté chaque mois.
+            </p>
+            <div id="liste-charges" class="liste-budget"></div>
+            <p class="total">
+              À prévoir chaque mois : <strong id="total-charges"></strong>
+            </p>
+
+            <form id="form-charge" class="formulaire">
+              <input
+                id="charge-nom"
+                type="text"
+                placeholder="Ex. : Assurance voiture"
+                required
+              />
+              <input
+                id="charge-montant"
+                type="number"
+                min="0"
+                inputmode="numeric"
+                placeholder="Montant"
+                required
+              />
+              <select id="charge-frequence">
+                <option value="1">Chaque mois</option>
+                <option value="3">Tous les 3 mois</option>
+                <option value="6">Tous les 6 mois</option>
+                <option value="12">Une fois par an</option>
+              </select>
+              <label id="bloc-charge-echeance" class="champ">
+                Prochaine échéance
+                <input id="charge-echeance" type="date" />
+              </label>
+              <select id="charge-compte" class="si-a-deux">
+                <option value="commun">Compte commun</option>
+                <option value="perso">Mon compte perso</option>
+              </select>
+              <button type="submit" class="bouton">Ajouter</button>
+            </form>
+          </article>
+
+          <!-- Ce qu'il reste -->
+          <article class="carte carte-reste">
+            <p class="sous-titre">
+              Après les charges fixes, il reste chaque mois
+            </p>
+            <p id="reste-apres-charges" class="montant"></p>
+            <p id="message-reste" class="sous-titre"></p>
+          </article>
+        </div>
+
+        <!-- Onglet 3 : Épargne & projets -->
+        <div id="panneau-epargne" class="panneau-budget">
+          <article class="carte carte-bientot">
+            <h2>Bientôt ici 🌱</h2>
+            <p class="sous-titre">
+              Ton épargne de sécurité et tes projets arriveront plus tard.
+            </p>
+          </article>
+        </div>
       </section>
 
       <!-- Module Moi -->
@@ -92,6 +280,9 @@
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="js/donnees/stockage.js"></script>
+    <script src="js/modules/navigation.js"></script>
+    <script src="js/modules/accueil.js"></script>
+    <script src="js/modules/budget.js"></script>
     <script src="js/app.js"></script>
   </body>
 </html>
