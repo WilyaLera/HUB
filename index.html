@@ -10,9 +10,9 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=4" />
-    <link rel="stylesheet" href="css/navigation.css?v=4" />
-    <link rel="stylesheet" href="css/budget.css?v=4" />
+    <link rel="stylesheet" href="css/base.css?v=6" />
+    <link rel="stylesheet" href="css/navigation.css?v=6" />
+    <link rel="stylesheet" href="css/budget.css?v=6" />
   </head>
 
   <body>
@@ -44,8 +44,8 @@
           <div id="liste-menu"></div>
         </article>
 
-        <!-- carte budget -->
-        <article class="carte">
+        <!-- carte budget : la toucher ouvre le Budget -->
+        <article class="carte carte-touchable" data-ecran="budget">
           <h2 id="titre-budget">Budget du mois</h2>
           <p id="jours-restants" class="sous-titre"></p>
           <p class="sous-titre">Il te reste</p>
@@ -96,12 +96,58 @@
 
         <!-- Onglet 1 : Mon mois (le suivi) -->
         <div id="panneau-mon-mois" class="panneau-budget">
-          <article class="carte carte-bientot">
-            <h2>Bientôt ici 🌱</h2>
-            <p class="sous-titre">
-              Ton suivi du mois arrive à l'étape 3. Commence par remplir
-              « Mon budget » : c'est ton plan, et le suivi s'appuiera dessus.
+          <!-- Filtre Tout / Commun / Perso (à deux seulement) -->
+          <div class="choix filtre-mois si-a-deux">
+            <label class="pastille">
+              <input type="radio" name="filtre-mois" value="tout" /> Tout
+            </label>
+            <label class="pastille">
+              <input type="radio" name="filtre-mois" value="commun" /> Commun
+            </label>
+            <label class="pastille">
+              <input type="radio" name="filtre-mois" value="perso" /> Perso
+            </label>
+          </div>
+
+          <!-- Ce qu'il reste -->
+          <article class="carte carte-mois">
+            <h2 id="mois-titre"></h2>
+            <p id="mois-jours" class="sous-titre"></p>
+            <p class="sous-titre">Il te reste pour la vie courante</p>
+            <p id="mois-reste" class="montant"></p>
+            <p id="mois-par-jour" class="sous-titre"></p>
+
+            <div class="barre-mois">
+              <div id="mois-barre-remplie" class="barre-mois-remplie"></div>
+              <div id="mois-repere" class="barre-mois-repere"></div>
+            </div>
+            <p id="mois-rythme" class="sous-titre petit"></p>
+
+            <button type="button" id="bouton-noter-depense" class="bouton">
+              + Noter une dépense
+            </button>
+          </article>
+
+          <!-- Les bocaux -->
+          <article class="carte">
+            <h2>Mes bocaux</h2>
+            <div id="mois-bocaux"></div>
+          </article>
+
+          <!-- Les prochaines échéances -->
+          <article id="carte-echeances" class="carte">
+            <h2>Prochaines échéances</h2>
+            <p class="sous-titre petit">
+              Les charges qui tombent tous les 3, 6 ou 12 mois. L'argent est
+              mis de côté chaque mois pour elles.
             </p>
+            <div id="mois-echeances"></div>
+          </article>
+
+          <!-- Les dernières dépenses -->
+          <article class="carte">
+            <h2>Dépenses du mois</h2>
+            <div id="mois-depenses" class="liste-budget"></div>
           </article>
         </div>
 
@@ -359,20 +405,15 @@
 
           <!-- Virements vers le compte commun (à deux seulement) -->
           <article class="carte si-a-deux">
-            <h2>Les virements</h2>
+            <h2 id="titre-virements">Ce que chacun verse</h2>
+            <p id="intro-virements" class="sous-titre"></p>
+            <p id="besoin-commun" class="montant"></p>
 
-            <p class="sous-titre">
-              Ce que chacun verse, calculé à partir de tout ton budget.
-              <button type="button" id="lien-reglages-commun" class="lien">
-                Changer l'organisation
-              </button>
-            </p>
-
-            <p class="besoin">
-              Il a besoin de <strong id="besoin-commun"></strong> par mois
-            </p>
             <div id="liste-virements"></div>
             <p id="message-virements" class="sous-titre message-doux"></p>
+            <button type="button" id="lien-reglages-commun" class="lien lien-centre">
+              Changer l'organisation
+            </button>
           </article>
         </div>
 
@@ -393,6 +434,77 @@
       </section>
     </main>
 
+    <!-- Noter une dépense : la feuille qui monte du bas -->
+    <div id="voile" class="voile" hidden></div>
+    <div id="feuille-depense" class="feuille" hidden>
+      <form id="form-depense">
+        <div class="feuille-haut">
+          <h2 id="feuille-titre">Nouvelle dépense</h2>
+          <button
+            type="button"
+            id="fermer-feuille"
+            class="bouton-supprimer"
+            aria-label="Fermer"
+          >
+            ✕
+          </button>
+        </div>
+
+        <label class="montant-saisie">
+          <input
+            id="depense-montant"
+            type="number"
+            min="1"
+            inputmode="numeric"
+            placeholder="0"
+            required
+          />
+          <span>F</span>
+        </label>
+
+        <p class="etiquette">Dans quel bocal ?</p>
+        <div id="choix-bocaux" class="choix"></div>
+
+        <details id="depense-options" class="options">
+          <summary>Plus d'options</summary>
+
+          <p class="etiquette">Quand ?</p>
+          <div class="choix">
+            <label class="pastille">
+              <input type="radio" name="depense-quand" value="aujourdhui" />
+              Aujourd'hui
+            </label>
+            <label class="pastille">
+              <input type="radio" name="depense-quand" value="hier" /> Hier
+            </label>
+            <label class="pastille">
+              <input type="radio" name="depense-quand" value="autre" /> Autre
+              jour
+            </label>
+          </div>
+          <input id="depense-date-autre" class="champ-date" type="date" hidden />
+
+          <p class="etiquette">Une petite note ?</p>
+          <input
+            id="depense-note"
+            class="champ-note"
+            type="text"
+            placeholder="Ex. : marché du samedi"
+          />
+
+          <div id="depense-options-a-deux">
+            <p class="etiquette">Payé par</p>
+            <select id="depense-paye-par" class="champ-note"></select>
+          </div>
+        </details>
+
+        <button type="submit" class="bouton bouton-large">Noter</button>
+      </form>
+    </div>
+
+    <!-- Petit message qui apparaît puis disparaît -->
+    <p id="petit-message" class="petit-message" hidden></p>
+
     <nav class="barre-nav">
       <button class="onglet actif" data-ecran="accueil">
         <i data-lucide="house"></i>
@@ -402,7 +514,7 @@
         <i data-lucide="calendar-days"></i>
         <span>Agenda</span>
       </button>
-      <button class="bouton-plus">
+      <button class="bouton-plus" aria-label="Noter une dépense">
         <i data-lucide="plus"></i>
       </button>
       <button class="onglet" data-ecran="foyer">
@@ -416,11 +528,12 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=4"></script>
-    <script src="js/modules/navigation.js?v=4"></script>
-    <script src="js/modules/accueil.js?v=4"></script>
-    <script src="js/modules/budget.js?v=4"></script>
-    <script src="js/modules/budget-repartition.js?v=4"></script>
-    <script src="js/app.js?v=4"></script>
+    <script src="js/donnees/stockage.js?v=6"></script>
+    <script src="js/modules/navigation.js?v=6"></script>
+    <script src="js/modules/accueil.js?v=6"></script>
+    <script src="js/modules/budget.js?v=6"></script>
+    <script src="js/modules/budget-repartition.js?v=6"></script>
+    <script src="js/modules/budget-mois.js?v=6"></script>
+    <script src="js/app.js?v=6"></script>
   </body>
 </html>

@@ -92,48 +92,5 @@ formTache.addEventListener("submit", (evenement) => {
 });
 
 //Carte Budget//
-// (fausses données pour l'instant : elle lira le vrai budget à l'étape 3)
-const budgetDuMois = 120000;
-const depenses = [
-  { libelle: "Courses", montant: 45000 },
-  { libelle: "Loisirs", montant: 18500 },
-  { libelle: "Essence", montant: 8000 },
-];
-
-let totalDepense = 0;
-depenses.forEach((depense) => {
-  totalDepense = totalDepense + depense.montant;
-});
-
-const reste = budgetDuMois - totalDepense;
-
-document.getElementById("montant-reste").textContent =
-  `${reste.toLocaleString("fr-FR")} F`;
-
-const dernierJour = new Date(
-  aujourdhui.getFullYear(),
-  aujourdhui.getMonth() + 1,
-  0,
-).getDate();
-
-const joursRestants = dernierJour - aujourdhui.getDate();
-
-let texteJours = `${joursRestants} jours restants`;
-
-if (joursRestants === 1) {
-  texteJours = "Plus qu'un jour";
-} else if (joursRestants === 0) {
-  texteJours = "Dernier jour du mois";
-}
-
-document.getElementById("jours-restants").textContent = texteJours;
-
-const nomDuMois = aujourdhui.toLocaleDateString("fr-FR", { month: "long" });
-
-let liaison = "de ";
-if ("aeiou".includes(nomDuMois[0])) {
-  liaison = "d'";
-}
-
-document.getElementById("titre-budget").textContent =
-  `Budget ${liaison}${nomDuMois}`;
+// Elle affiche maintenant les VRAIES données du Budget :
+// c'est budget-mois.js qui la remplit (fonction afficherCarteAccueil).

@@ -112,6 +112,7 @@
 }
 
 .pastille {
+  -webkit-tap-highlight-color: transparent; /* pas de flash gris au toucher */
   padding: 8px 14px;
   border-radius: 999px;
   border: 1px solid var(--trait);
@@ -446,12 +447,7 @@
   text-align: center;
 }
 
-/* ---------- Le compte commun ---------- */
-
-.besoin {
-  margin-top: 16px !important;
-  font-size: 17px;
-}
+/* ---------- Ce que chacun verse ---------- */
 
 .virement {
   margin-top: 10px;
@@ -460,12 +456,42 @@
   background: var(--fond);
 }
 
-.virement-ligne {
+/* Le prénom à gauche, le compteur à droite, sur la même ligne */
+.virement-haut {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  margin-top: 6px;
+  font-size: 17px;
+}
+
+/* « étiquette …… valeur » sur une seule ligne */
+.ligne-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 6px 0 0 !important;
+  color: var(--texte-doux);
+}
+
+.ligne-info strong {
+  color: var(--texte);
+  white-space: nowrap;
+}
+
+.lien.lien-petit {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 400;
+  text-align: left;
+}
+
+.lien.lien-centre {
+  display: block;
+  margin: 8px auto 0;
+  font-size: 14px;
+  font-weight: 400;
 }
 
 .message-doux {
@@ -549,4 +575,261 @@
   align-items: center;
   font-size: 18px;
   line-height: 1;
+}
+
+.virement-nom {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.virement-nom .sous-titre {
+  font-size: 13px;
+}
+
+/* =====================================================
+   Étape 3 : Mon mois
+   ===================================================== */
+
+.petit {
+  font-size: 14px;
+}
+
+.filtre-mois {
+  margin-top: 16px;
+}
+
+/* ---------- Ce qu'il reste ---------- */
+
+.carte-mois .bouton {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.barre-mois {
+  position: relative;
+  height: 14px;
+  margin-top: 14px;
+  border-radius: 999px;
+  background: var(--fond);
+}
+
+.barre-mois-remplie {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--sauge);
+}
+
+.barre-mois-remplie.remplie-attention {
+  background: var(--miel);
+}
+
+/* Le petit trait : « on en est là du mois » */
+.barre-mois-repere {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--texte);
+}
+
+/* ---------- Les bocaux du mois ---------- */
+
+.bocal-mois {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--trait);
+}
+
+.bocal-mois:last-child {
+  border-bottom: none;
+}
+
+.bocal-mois-haut {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bocal-mois-haut span {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.bocal-mois .sous-titre {
+  font-size: 13px;
+}
+
+/* La jauge du bocal : pleine au début du mois, elle se vide */
+.jauge {
+  height: 10px;
+  margin: 6px 0 4px;
+  border-radius: 999px;
+  background: var(--fond);
+  overflow: hidden;
+}
+
+.jauge-remplie {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--sauge);
+}
+
+.jauge-remplie.jauge-presque-vide {
+  background: var(--miel);
+}
+
+/* ---------- Les échéances ---------- */
+
+.echeance {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--trait);
+}
+
+.echeance:last-child {
+  border-bottom: none;
+}
+
+.echeance .sous-titre {
+  font-size: 13px;
+}
+
+.bouton-petit {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: var(--sauge);
+  color: #ffffff;
+  font-family: var(--police-texte);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ---------- La carte de l'Accueil, qu'on peut toucher ---------- */
+
+.carte-touchable {
+  cursor: pointer;
+}
+
+/* ---------- La feuille « Noter une dépense » ---------- */
+
+/* Le voile sombre derrière la feuille */
+.voile {
+  position: fixed;
+  inset: 0; /* = top, right, bottom et left à 0 */
+  background: rgba(58, 46, 40, 0.35);
+  z-index: 15;
+}
+
+.feuille {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 18px 20px 28px;
+  border-radius: 28px 28px 0 0;
+  background: var(--carte);
+  box-shadow: 0 -8px 24px rgba(58, 46, 40, 0.15);
+  z-index: 20;
+  /* Elle monte doucement en apparaissant */
+  animation: monter 0.25s ease-out;
+}
+
+@keyframes monter {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.feuille-haut {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.feuille-haut h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+/* Le grand champ du montant */
+.montant-saisie {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 6px;
+  margin: 14px 0 4px;
+  font-family: var(--police-titre);
+  font-size: 40px;
+}
+
+.montant-saisie input {
+  width: 200px;
+  border: none;
+  border-bottom: 2px solid var(--trait);
+  background: transparent;
+  font-family: var(--police-titre);
+  font-size: 40px;
+  color: var(--texte);
+  text-align: center;
+}
+
+.montant-saisie input:focus {
+  outline: none;
+  border-bottom-color: var(--accent);
+}
+
+.options {
+  margin-top: 14px;
+}
+
+.options summary {
+  font-weight: 700;
+  color: var(--texte-doux);
+  cursor: pointer;
+}
+
+.champ-note,
+.champ-date {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--trait);
+  border-radius: 12px;
+  background: var(--fond);
+  font-family: var(--police-texte);
+  font-size: 16px;
+  color: var(--texte);
+}
+
+.bouton-large {
+  width: 100%;
+  margin-top: 18px;
+}
+
+/* ---------- Le petit message ---------- */
+
+.petit-message {
+  position: fixed;
+  left: 50%;
+  bottom: 100px;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: var(--texte);
+  color: var(--carte);
+  font-weight: 700;
+  z-index: 30;
 }

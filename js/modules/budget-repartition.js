@@ -289,17 +289,46 @@ function virementDe(personne) {
 
 const listeVirements = document.getElementById("liste-virements");
 
+// Fabrique une ligne « étiquette …… valeur », sur une seule ligne
+function creerLigneInfo(etiquette, valeur, enAttention) {
+  const ligne = document.createElement("p");
+  ligne.classList.add("ligne-info");
+  const elementEtiquette = document.createElement("span");
+  elementEtiquette.textContent = etiquette;
+  const elementValeur = document.createElement("strong");
+  elementValeur.textContent = valeur;
+  elementValeur.classList.toggle("montant-attention", enAttention === true);
+  ligne.append(elementEtiquette, elementValeur);
+  return ligne;
+}
+
+// Ce que JE dépense en perso chaque mois (charges perso + bocaux perso)
+function depensesPersoPrevues() {
+  const chargesPerso = budget.chargesFixes.filter((c) => c.compte === "perso");
+  return sommer(chargesPerso, miseDeCoteMensuelle) + totalBocauxDu("perso");
+}
+
 function afficherVirements() {
   if (!budget.reglages.aDeux) return;
   const reglages = budget.reglages;
   const toutEnCommun = reglages.organisation === "tout";
 
+  // Les boutons ronds des réglages
   document.querySelector(`input[name="organisation"][value="${reglages.organisation}"]`).checked = true;
   document.querySelector(`input[name="partage"][value="${reglages.partage}"]`).checked = true;
   document.getElementById("choix-partage").hidden = toutEnCommun;
 
-  const besoin = besoinCompteCommun();
-  document.getElementById("besoin-commun").textContent = formaterMontant(besoin);
+  // Le titre et la phrase d'introduction changent selon l'organisation
+  const titre = document.getElementById("titre-virements");
+  const intro = document.getElementById("intro-virements");
+  if (toutEnCommun) {
+    titre.textContent = "Ce que chacun reçoit";
+    intro.textContent = "Vos revenus arrivent tous sur le compte commun, soit chaque mois :";
+  } else {
+    titre.textContent = "Ce que chacun verse";
+    intro.textContent = "Chaque mois, le compte commun a besoin de :";
+  }
+  document.getElementById("besoin-commun").textContent = formaterMontant(besoinCompteCommun());
 
   listeVirements.replaceChildren();
 
@@ -307,61 +336,64 @@ function afficherVirements() {
     const bloc = document.createElement("div");
     bloc.classList.add("virement");
 
-    const nom = document.createElement("strong");
-    nom.textContent = nomPersonne(personne);
-    bloc.appendChild(nom);
+    // 1re ligne : le prénom à gauche, le compteur à droite
+    const haut = document.createElement("div");
+    haut.classList.add("virement-haut");
 
+    const nom = document.createElement("span");
+    nom.classList.add("virement-nom");
+    const prenomVirement = document.createElement("strong");
+    prenomVirement.textContent = nomPersonne(personne);
+    const action = document.createElement("span");
+    action.classList.add("sous-titre");
+    action.textContent = toutEnCommun ? "reçoit chaque mois" : "vire chaque mois";
+    nom.append(prenomVirement, action);
+
+    let compteur;
     if (toutEnCommun) {
-      // Tout le salaire va sur le commun, qui reverse de l'argent perso
-      const verse = document.createElement("p");
-      verse.classList.add("sous-titre");
-      verse.textContent = `verse tout son revenu : ${formaterMontant(revenusDe(personne))}`;
-
-      const ligne = document.createElement("div");
-      ligne.classList.add("virement-ligne");
-      const etiquette = document.createElement("span");
-      etiquette.textContent = "Argent perso reversé";
-      const compteur = creerCompteur(reglages.argentPerso[personne], (montant) => {
+      compteur = creerCompteur(reglages.argentPerso[personne], (montant) => {
         reglages.argentPerso[personne] = montant;
         sauvegarderBudget();
         afficherVirements();
       });
-      ligne.append(etiquette, compteur);
-      bloc.append(verse, ligne);
     } else {
-      const ligne = document.createElement("div");
-      ligne.classList.add("virement-ligne");
-
-      const etiquette = document.createElement("span");
-      const estAjuste = reglages.virementAjuste[personne] !== null;
-      etiquette.textContent = estAjuste ? "Verse (ajusté)" : "Verse (calculé)";
-
-      const compteur = creerCompteur(virementDe(personne), (montant) => {
+      compteur = creerCompteur(virementDe(personne), (montant) => {
         reglages.virementAjuste[personne] = montant;
         sauvegarderBudget();
         afficherVirements();
       });
-      ligne.append(etiquette, compteur);
+    }
+    haut.append(nom, compteur);
+    bloc.appendChild(haut);
 
-      const reste = document.createElement("p");
-      reste.classList.add("sous-titre");
-      reste.textContent = `Il reste ${formaterMontant(revenusDe(personne) - virementDe(personne))} sur son compte perso`;
-
-      bloc.append(ligne, reste);
+    // Si le montant a été ajusté à la main : un petit lien pour revenir au calcul
+    if (!toutEnCommun && reglages.virementAjuste[personne] !== null) {
+      const remettre = document.createElement("button");
+      remettre.type = "button";
+      remettre.classList.add("lien", "lien-petit");
+      remettre.textContent = `↺ Ajusté · revenir au calcul (${formaterMontant(virementsCalcules()[personne])})`;
+      remettre.addEventListener("click", () => {
+        reglages.virementAjuste[personne] = null;
+        sauvegarderBudget();
+        afficherVirements();
+      });
+      bloc.appendChild(remettre);
     }
 
-    // Pour moi : ce qu'il reste une fois mes charges perso et mes bocaux perso prévus
+    // Les lignes d'info, « étiquette …… valeur »
+    const argentPerso = toutEnCommun
+      ? reglages.argentPerso[personne]
+      : revenusDe(personne) - virementDe(personne);
+
     if (personne === "moi") {
-      const argentPerso = toutEnCommun
-        ? reglages.argentPerso.moi
-        : revenusDe("moi") - virementDe("moi");
-      const chargesPerso = budget.chargesFixes.filter((c) => c.compte === "perso");
-      const depensesPerso = sommer(chargesPerso, miseDeCoteMensuelle) + totalBocauxDu("perso");
-      const apres = document.createElement("p");
-      apres.classList.add("sous-titre", "apres-perso");
-      apres.textContent = `Après tes charges et bocaux perso : ${formaterMontant(argentPerso - depensesPerso)}`;
-      apres.classList.toggle("montant-attention", argentPerso - depensesPerso < 0);
-      bloc.appendChild(apres);
+      const etiquette = toutEnCommun ? "Ton argent perso" : "Il te reste";
+      if (!toutEnCommun) bloc.appendChild(creerLigneInfo(etiquette, formaterMontant(argentPerso)));
+      const apres = argentPerso - depensesPersoPrevues();
+      bloc.appendChild(
+        creerLigneInfo("Après tes dépenses perso", formaterMontant(apres), apres < 0),
+      );
+    } else if (!toutEnCommun) {
+      bloc.appendChild(creerLigneInfo("Il lui reste", formaterMontant(argentPerso)));
     }
 
     listeVirements.appendChild(bloc);
@@ -376,8 +408,7 @@ function afficherMessageVirements() {
   const reglages = budget.reglages;
 
   if (reglages.organisation === "tout") {
-    const reverse = reglages.argentPerso.moi + reglages.argentPerso.partenaire;
-    message.textContent = `Le compte commun reverse ${formaterMontant(reverse)} en argent perso. Les bocaux perso se remplissent avec cet argent.`;
+    message.textContent = "Le compte commun reverse à chacun son argent perso. Tes bocaux perso se paient avec le tien.";
     return;
   }
 
@@ -388,7 +419,8 @@ function afficherMessageVirements() {
   } else if (ecart < 0) {
     message.textContent = `Il manque ${formaterMontant(-ecart)} sur le compte commun.`;
   } else {
-    message.textContent = "Le compte commun a exactement ce qu'il lui faut 🌱";
+    const motPartage = reglages.partage === "salaires" ? "selon vos salaires" : "à 50 / 50";
+    message.textContent = `Partagé ${motPartage}, le compte a exactement ce qu'il lui faut 🌱`;
   }
 }
 
@@ -438,4 +470,5 @@ function afficherTotaux() {
   afficherBarre(montants);
   afficherSansRole(montants.sansRole);
   afficherVirements();
+  afficherMois(); // dans budget-mois.js : le suivi dépend aussi du plan
 }

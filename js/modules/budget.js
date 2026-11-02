@@ -40,6 +40,7 @@ const budgetParDefaut = {
   chargesFixes: [], // { id, nom, montant, frequence, prochaineEcheance, compte }
   bocaux: bocauxDeDepart, // { id, nom, montant, compte }
   epargneMensuelle: 0,
+  depenses: [], // { id, montant, bocalId, date, note, payePar, auteurId }
 };
 
 const budget = charger("budget", budgetParDefaut);
@@ -51,6 +52,7 @@ const budget = charger("budget", budgetParDefaut);
 budget.reglages = { ...budgetParDefaut.reglages, ...budget.reglages };
 if (!budget.bocaux) budget.bocaux = bocauxDeDepart;
 if (budget.epargneMensuelle === undefined) budget.epargneMensuelle = 0;
+if (!budget.depenses) budget.depenses = [];
 
 function sauvegarderBudget() {
   sauvegarder("budget", budget);
@@ -63,15 +65,16 @@ function formaterMontant(nombre) {
   return `${Math.round(nombre).toLocaleString("fr-FR")} F`;
 }
 
-// "2027-01-15" → "15 janvier 2027"
-function formaterDate(texteDate) {
+// "2027-01-15" → "15 janvier 2027" (ou "15 janvier" sans l'année)
+function formaterDate(texteDate, avecAnnee = true) {
   // On ajoute l'heure pour éviter un décalage de fuseau horaire
   const date = new Date(`${texteDate}T00:00`);
-  return date.toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  const options = { day: "numeric", month: "long" };
+  if (avecAnnee) options.year = "numeric";
+  let texte = date.toLocaleDateString("fr-FR", options);
+  // En français, on écrit « 1er » et pas « 1 »
+  if (date.getDate() === 1) texte = texte.replace(/^1 /, "1er ");
+  return texte;
 }
 
 // Les mots pour chaque fréquence (en nombre de mois)
@@ -224,14 +227,26 @@ function fermerFormulaire(formulaire) {
 const ongletsBudget = document.querySelectorAll(".onglet-budget");
 const panneauxBudget = document.querySelectorAll(".panneau-budget");
 
+function choisirOngletBudget(idPanneau) {
+  ongletsBudget.forEach((o) => {
+    o.classList.toggle("actif", o.dataset.panneau === idPanneau);
+  });
+  panneauxBudget.forEach((p) => {
+    p.classList.toggle("actif", p.id === idPanneau);
+  });
+}
+
 ongletsBudget.forEach((ongletBudget) => {
   ongletBudget.addEventListener("click", () => {
-    ongletsBudget.forEach((o) => o.classList.remove("actif"));
-    ongletBudget.classList.add("actif");
-    panneauxBudget.forEach((p) => p.classList.remove("actif"));
-    document.getElementById(ongletBudget.dataset.panneau).classList.add("actif");
+    choisirOngletBudget(ongletBudget.dataset.panneau);
   });
 });
+
+// Au démarrage : tant que le budget est vide, on ouvre « Mon budget » (le plan).
+// Ensuite, on ouvre « Mon mois » (le suivi), celui qu'on regarde au quotidien.
+if (budget.revenus.length > 0) {
+  choisirOngletBudget("panneau-mon-mois");
+}
 
 // ---------- 4. Mes réglages ----------
 
@@ -556,5 +571,5 @@ function afficherBudget() {
   afficherRevenus();
   afficherCharges();
   afficherBocaux(); // dans budget-repartition.js
-  afficherTotaux(); // dans budget-repartition.js
+  afficherTotaux(); // dans budget-repartition.js (qui redessine aussi Mon mois)
 }
