@@ -68,6 +68,7 @@ function totalBocauxDu(compte) {
 }
 
 function afficherBocaux() {
+  rangerFormulaire(formBocal);
   listeBocaux.replaceChildren();
 
   budget.bocaux.forEach((bocal) => {
@@ -92,32 +93,43 @@ function afficherBocaux() {
       () => {
         budget.bocaux = budget.bocaux.filter((b) => b.id !== bocal.id);
         sauvegarderBudget();
-        annulerBocal();
+        fermerBocal();
         afficherTotaux();
       },
     );
     ligne.classList.add("ligne-bocal");
-    ligne.classList.toggle("en-cours", bocal.id === bocalEnModification);
     listeBocaux.appendChild(ligne);
+
+    if (bocal.id === bocalEnModification) {
+      ligne.classList.add("en-cours");
+      ligne.after(formBocal);
+    }
   });
 }
 
 function modifierBocal(bocal) {
+  if (bocalEnModification === bocal.id) {
+    fermerBocal();
+    return;
+  }
   bocalEnModification = bocal.id;
   bocalNom.value = bocal.nom;
   bocalCompte.value = bocal.compte;
-  changerModeFormulaire(formBocal, bocal.nom);
+  ouvrirModification(formBocal, bocal.nom);
   afficherBocaux();
 }
 
-function annulerBocal() {
+function fermerBocal() {
   bocalEnModification = null;
-  formBocal.reset();
-  changerModeFormulaire(formBocal, null);
+  fermerFormulaire(formBocal);
   afficherBocaux();
 }
 
-formBocal.querySelector(".bouton-annuler").addEventListener("click", annulerBocal);
+boutonAjoutDe(formBocal).addEventListener("click", () => {
+  fermerBocal();
+  ouvrirAjout(formBocal);
+});
+formBocal.querySelector(".bouton-annuler").addEventListener("click", fermerBocal);
 
 formBocal.addEventListener("submit", (evenement) => {
   evenement.preventDefault();
@@ -135,7 +147,7 @@ formBocal.addEventListener("submit", (evenement) => {
   }
 
   sauvegarderBudget();
-  annulerBocal();
+  fermerBocal();
   afficherTotaux();
 });
 
@@ -312,7 +324,7 @@ function afficherVirements() {
       const compteur = creerCompteur(reglages.argentPerso[personne], (montant) => {
         reglages.argentPerso[personne] = montant;
         sauvegarderBudget();
-        afficherMessageVirements();
+        afficherVirements();
       });
       ligne.append(etiquette, compteur);
       bloc.append(verse, ligne);
@@ -336,6 +348,20 @@ function afficherVirements() {
       reste.textContent = `Il reste ${formaterMontant(revenusDe(personne) - virementDe(personne))} sur son compte perso`;
 
       bloc.append(ligne, reste);
+    }
+
+    // Pour moi : ce qu'il reste une fois mes charges perso et mes bocaux perso prévus
+    if (personne === "moi") {
+      const argentPerso = toutEnCommun
+        ? reglages.argentPerso.moi
+        : revenusDe("moi") - virementDe("moi");
+      const chargesPerso = budget.chargesFixes.filter((c) => c.compte === "perso");
+      const depensesPerso = sommer(chargesPerso, miseDeCoteMensuelle) + totalBocauxDu("perso");
+      const apres = document.createElement("p");
+      apres.classList.add("sous-titre", "apres-perso");
+      apres.textContent = `Après tes charges et bocaux perso : ${formaterMontant(argentPerso - depensesPerso)}`;
+      apres.classList.toggle("montant-attention", argentPerso - depensesPerso < 0);
+      bloc.appendChild(apres);
     }
 
     listeVirements.appendChild(bloc);

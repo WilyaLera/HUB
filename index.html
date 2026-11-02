@@ -189,7 +189,10 @@
               Total par mois : <strong id="total-revenus"></strong>
             </p>
 
-            <form id="form-revenu" class="formulaire">
+            <button type="button" class="bouton-ajout" data-formulaire="form-revenu">
+              + Ajouter un revenu
+            </button>
+            <form id="form-revenu" class="formulaire" hidden>
               <p class="formulaire-titre" data-titre-ajout="Ajouter un revenu">
                 Ajouter un revenu
               </p>
@@ -209,7 +212,7 @@
               />
               <select id="revenu-personne" class="si-a-deux"></select>
               <button type="submit" class="bouton">Ajouter</button>
-              <button type="button" class="bouton-annuler" hidden>
+              <button type="button" class="bouton-annuler">
                 Annuler
               </button>
             </form>
@@ -228,7 +231,10 @@
               À prévoir chaque mois : <strong id="total-charges"></strong>
             </p>
 
-            <form id="form-charge" class="formulaire">
+            <button type="button" class="bouton-ajout" data-formulaire="form-charge">
+              + Ajouter une charge fixe
+            </button>
+            <form id="form-charge" class="formulaire" hidden>
               <p
                 class="formulaire-titre"
                 data-titre-ajout="Ajouter une charge fixe"
@@ -264,7 +270,7 @@
                 <option value="perso">Mon compte perso</option>
               </select>
               <button type="submit" class="bouton">Ajouter</button>
-              <button type="button" class="bouton-annuler" hidden>
+              <button type="button" class="bouton-annuler">
                 Annuler
               </button>
             </form>
@@ -282,7 +288,10 @@
               Total par mois : <strong id="total-bocaux"></strong>
             </p>
 
-            <form id="form-bocal" class="formulaire">
+            <button type="button" class="bouton-ajout" data-formulaire="form-bocal">
+              + Ajouter un bocal
+            </button>
+            <form id="form-bocal" class="formulaire" hidden>
               <p class="formulaire-titre" data-titre-ajout="Ajouter un bocal">
                 Ajouter un bocal
               </p>
@@ -297,7 +306,7 @@
                 <option value="perso">Perso</option>
               </select>
               <button type="submit" class="bouton">Ajouter</button>
-              <button type="button" class="bouton-annuler" hidden>
+              <button type="button" class="bouton-annuler">
                 Annuler
               </button>
             </form>

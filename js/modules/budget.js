@@ -105,17 +105,20 @@ function sommer(liste, quoiAdditionner) {
 }
 
 // Fabrique une ligne de liste : titre, détail, montant et bouton ✕.
-// Toucher le titre appelle quandOnTouche (pour modifier la ligne).
+// Toucher la ligne (titre OU montant) appelle quandOnTouche, pour la modifier.
 // Elle sert aux revenus, aux charges et aux bocaux.
 function creerLigneBudget(titre, detail, droite, quandOnTouche, quandOnSupprime) {
   const ligne = document.createElement("div");
   ligne.classList.add("ligne-budget");
 
-  // Les textes sont dans un <button> : on peut les toucher pour modifier
-  const textes = document.createElement("button");
-  textes.type = "button";
+  // Toute la zone titre + montant est un <button> : on peut la toucher
+  const zone = document.createElement("button");
+  zone.type = "button";
+  zone.classList.add("ligne-budget-ouvrir");
+  zone.addEventListener("click", quandOnTouche);
+
+  const textes = document.createElement("span");
   textes.classList.add("ligne-budget-textes");
-  textes.addEventListener("click", quandOnTouche);
 
   const elementTitre = document.createElement("strong");
   elementTitre.textContent = titre;
@@ -127,14 +130,19 @@ function creerLigneBudget(titre, detail, droite, quandOnTouche, quandOnSupprime)
     elementDetail.textContent = detail;
     textes.appendChild(elementDetail);
   }
+  zone.appendChild(textes);
 
-  // « droite » peut être un texte (un montant) ou un élément déjà fabriqué
-  // (le compteur − + des bocaux)
-  let elementDroite = droite;
+  // « droite » peut être un texte (un montant) : il va DANS la zone touchable.
+  // Ou un élément déjà fabriqué (le compteur − + des bocaux) : il reste à côté,
+  // pour que toucher − ou + n'ouvre pas la modification.
+  let elementDroite = null;
   if (typeof droite === "string") {
-    elementDroite = document.createElement("span");
-    elementDroite.classList.add("ligne-budget-montant");
-    elementDroite.textContent = droite;
+    const montant = document.createElement("span");
+    montant.classList.add("ligne-budget-montant");
+    montant.textContent = droite;
+    zone.appendChild(montant);
+  } else {
+    elementDroite = droite;
   }
 
   const boutonSupprimer = document.createElement("button");
@@ -148,29 +156,66 @@ function creerLigneBudget(titre, detail, droite, quandOnTouche, quandOnSupprime)
     }
   });
 
-  ligne.append(textes, elementDroite, boutonSupprimer);
+  ligne.appendChild(zone);
+  if (elementDroite) ligne.appendChild(elementDroite);
+  ligne.appendChild(boutonSupprimer);
   return ligne;
 }
 
-// Met un formulaire en mode « modifier » ou « ajouter »
+// ---------- Les formulaires qui s'ouvrent et se ferment ----------
+// Chaque formulaire est caché au départ, sous un petit bouton « + Ajouter… ».
+// Pour MODIFIER, il vient s'ouvrir juste sous la ligne touchée.
+
+// Le bouton « + Ajouter… » qui va avec un formulaire
+function boutonAjoutDe(formulaire) {
+  return document.querySelector(`[data-formulaire="${formulaire.id}"]`);
+}
+
+// Remet le formulaire à sa place d'origine : juste après son bouton « + Ajouter »
+function rangerFormulaire(formulaire) {
+  boutonAjoutDe(formulaire).after(formulaire);
+}
+
+// Met le formulaire en mode « modifier » (avec un titre) ou « ajouter » (null)
 function changerModeFormulaire(formulaire, titreModification) {
   const titre = formulaire.querySelector(".formulaire-titre");
   const boutonValider = formulaire.querySelector('button[type="submit"]');
-  const boutonAnnuler = formulaire.querySelector(".bouton-annuler");
 
   if (titreModification) {
     titre.textContent = `Modifier « ${titreModification} »`;
     boutonValider.textContent = "Enregistrer";
-    boutonAnnuler.hidden = false;
     formulaire.classList.add("en-modification");
-    // On fait glisser l'écran jusqu'au formulaire
-    formulaire.scrollIntoView({ behavior: "smooth", block: "center" });
   } else {
     titre.textContent = titre.dataset.titreAjout;
     boutonValider.textContent = "Ajouter";
-    boutonAnnuler.hidden = true;
     formulaire.classList.remove("en-modification");
   }
+}
+
+// Ouvre le formulaire pour AJOUTER
+function ouvrirAjout(formulaire) {
+  formulaire.reset();
+  changerModeFormulaire(formulaire, null);
+  rangerFormulaire(formulaire);
+  formulaire.hidden = false;
+  boutonAjoutDe(formulaire).hidden = true;
+  formulaire.querySelector("input").focus();
+}
+
+// Ouvre le formulaire pour MODIFIER (il sera placé sous la ligne au réaffichage)
+function ouvrirModification(formulaire, titre) {
+  changerModeFormulaire(formulaire, titre);
+  formulaire.hidden = false;
+  boutonAjoutDe(formulaire).hidden = false;
+}
+
+// Ferme le formulaire et le remet à sa place
+function fermerFormulaire(formulaire) {
+  formulaire.reset();
+  changerModeFormulaire(formulaire, null);
+  rangerFormulaire(formulaire);
+  formulaire.hidden = true;
+  boutonAjoutDe(formulaire).hidden = false;
 }
 
 // ---------- 3. Les onglets du Budget ----------
@@ -288,6 +333,8 @@ function revenusDe(personne) {
 }
 
 function afficherRevenus() {
+  // On range d'abord le formulaire (sinon il serait effacé avec la liste)
+  rangerFormulaire(formRevenu);
   // On vide la liste, puis on la refabrique entièrement
   listeRevenus.replaceChildren();
 
@@ -304,12 +351,17 @@ function afficherRevenus() {
         // filter garde tous les revenus SAUF celui-ci
         budget.revenus = budget.revenus.filter((r) => r.id !== revenu.id);
         sauvegarderBudget();
-        annulerRevenu();
+        fermerRevenu();
         afficherBudget();
       },
     );
-    ligne.classList.toggle("en-cours", revenu.id === revenuEnModification);
     listeRevenus.appendChild(ligne);
+
+    // La ligne en cours de modification : le formulaire s'ouvre juste dessous
+    if (revenu.id === revenuEnModification) {
+      ligne.classList.add("en-cours");
+      ligne.after(formRevenu);
+    }
   });
 
   document.getElementById("total-revenus").textContent = formaterMontant(
@@ -317,25 +369,33 @@ function afficherRevenus() {
   );
 }
 
-// Toucher une ligne : le formulaire se remplit avec ses valeurs
+// Toucher une ligne : elle « s'ouvre » avec ses valeurs
 function modifierRevenu(revenu) {
+  // Toucher à nouveau la ligne déjà ouverte la referme
+  if (revenuEnModification === revenu.id) {
+    fermerRevenu();
+    return;
+  }
   revenuEnModification = revenu.id;
   revenuNom.value = revenu.nom;
   revenuMontant.value = revenu.montant;
   revenuPersonne.value = revenu.personne;
-  changerModeFormulaire(formRevenu, revenu.nom);
+  ouvrirModification(formRevenu, revenu.nom);
   afficherRevenus();
 }
 
-function annulerRevenu() {
+function fermerRevenu() {
   revenuEnModification = null;
-  formRevenu.reset();
+  fermerFormulaire(formRevenu);
   afficherChoixPersonne();
-  changerModeFormulaire(formRevenu, null);
   afficherRevenus();
 }
 
-formRevenu.querySelector(".bouton-annuler").addEventListener("click", annulerRevenu);
+boutonAjoutDe(formRevenu).addEventListener("click", () => {
+  fermerRevenu();
+  ouvrirAjout(formRevenu);
+});
+formRevenu.querySelector(".bouton-annuler").addEventListener("click", fermerRevenu);
 
 formRevenu.addEventListener("submit", (evenement) => {
   evenement.preventDefault();
@@ -357,7 +417,7 @@ formRevenu.addEventListener("submit", (evenement) => {
   }
 
   sauvegarderBudget();
-  annulerRevenu();
+  fermerRevenu();
   afficherBudget();
 });
 
@@ -385,6 +445,7 @@ function totalMiseDeCote() {
 }
 
 function afficherCharges() {
+  rangerFormulaire(formCharge);
   listeCharges.replaceChildren();
 
   budget.chargesFixes.forEach((charge) => {
@@ -409,12 +470,16 @@ function afficherCharges() {
       () => {
         budget.chargesFixes = budget.chargesFixes.filter((c) => c.id !== charge.id);
         sauvegarderBudget();
-        annulerCharge();
+        fermerCharge();
         afficherBudget();
       },
     );
-    ligne.classList.toggle("en-cours", charge.id === chargeEnModification);
     listeCharges.appendChild(ligne);
+
+    if (charge.id === chargeEnModification) {
+      ligne.classList.add("en-cours");
+      ligne.after(formCharge);
+    }
   });
 
   document.getElementById("total-charges").textContent = formaterMontant(
@@ -423,6 +488,10 @@ function afficherCharges() {
 }
 
 function modifierCharge(charge) {
+  if (chargeEnModification === charge.id) {
+    fermerCharge();
+    return;
+  }
   chargeEnModification = charge.id;
   chargeNom.value = charge.nom;
   chargeMontant.value = charge.montant;
@@ -430,19 +499,23 @@ function modifierCharge(charge) {
   chargeEcheance.value = charge.prochaineEcheance;
   chargeCompte.value = charge.compte;
   afficherChampEcheance();
-  changerModeFormulaire(formCharge, charge.nom);
+  ouvrirModification(formCharge, charge.nom);
   afficherCharges();
 }
 
-function annulerCharge() {
+function fermerCharge() {
   chargeEnModification = null;
-  formCharge.reset();
+  fermerFormulaire(formCharge);
   afficherChampEcheance();
-  changerModeFormulaire(formCharge, null);
   afficherCharges();
 }
 
-formCharge.querySelector(".bouton-annuler").addEventListener("click", annulerCharge);
+boutonAjoutDe(formCharge).addEventListener("click", () => {
+  fermerCharge();
+  ouvrirAjout(formCharge);
+  afficherChampEcheance();
+});
+formCharge.querySelector(".bouton-annuler").addEventListener("click", fermerCharge);
 
 formCharge.addEventListener("submit", (evenement) => {
   evenement.preventDefault();
@@ -469,7 +542,7 @@ formCharge.addEventListener("submit", (evenement) => {
   }
 
   sauvegarderBudget();
-  annulerCharge();
+  fermerCharge();
   afficherBudget();
 });
 

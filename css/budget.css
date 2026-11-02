@@ -208,7 +208,15 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  /* C'est un <button> : on enlève son look de bouton */
+}
+
+/* La zone touchable (titre + montant) : un <button> sans look de bouton */
+.ligne-budget-ouvrir {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   background: transparent;
   border: none;
   padding: 0;
@@ -463,4 +471,43 @@
 .message-doux {
   margin-top: 12px !important;
   text-align: center;
+}
+
+/* ---------- Ajouter discrètement, modifier « sur place » ---------- */
+
+.bouton-ajout {
+  display: block;
+  margin-top: 8px;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  font-family: var(--police-texte);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+/* Le formulaire ouvert sous une ligne : il « prolonge » la ligne */
+.liste-budget .formulaire {
+  margin: 0 0 10px;
+  padding: 12px;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  background: var(--fond);
+}
+
+.liste-budget .formulaire input,
+.liste-budget .formulaire select {
+  background: var(--carte);
+}
+
+.ligne-budget.en-cours {
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+}
+
+.apres-perso {
+  margin-top: 6px !important;
+  font-weight: 700;
 }
