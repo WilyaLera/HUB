@@ -10,9 +10,9 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=6" />
-    <link rel="stylesheet" href="css/navigation.css?v=6" />
-    <link rel="stylesheet" href="css/budget.css?v=6" />
+    <link rel="stylesheet" href="css/base.css?v=7" />
+    <link rel="stylesheet" href="css/navigation.css?v=7" />
+    <link rel="stylesheet" href="css/budget.css?v=7" />
   </head>
 
   <body>
@@ -109,23 +109,53 @@
             </label>
           </div>
 
-          <!-- Ce qu'il reste -->
+          <!-- Ce qu'il reste : UN grand chiffre -->
           <article class="carte carte-mois">
-            <h2 id="mois-titre"></h2>
-            <p id="mois-jours" class="sous-titre"></p>
-            <p class="sous-titre">Il te reste pour la vie courante</p>
-            <p id="mois-reste" class="montant"></p>
-            <p id="mois-par-jour" class="sous-titre"></p>
+            <div class="mois-entete">
+              <h2 id="mois-titre"></h2>
+              <span id="mois-jours" class="pastille-info"></span>
+            </div>
+
+            <p id="mois-reste" class="montant montant-grand"></p>
+            <p class="sous-titre">restent pour ta vie courante</p>
+            <span id="mois-par-jour" class="pastille-douce"></span>
 
             <div class="barre-mois">
               <div id="mois-barre-remplie" class="barre-mois-remplie"></div>
               <div id="mois-repere" class="barre-mois-repere"></div>
             </div>
-            <p id="mois-rythme" class="sous-titre petit"></p>
+            <div class="legende">
+              <span><span class="puce puce-depense"></span>
+                <span id="mois-legende-depense"></span></span>
+              <span><span class="puce puce-repere"></span> aujourd'hui</span>
+            </div>
+            <p id="mois-rythme" class="rythme"></p>
 
             <button type="button" id="bouton-noter-depense" class="bouton">
               + Noter une dépense
             </button>
+          </article>
+
+          <!-- Mes comptes : le solde réel -->
+          <article class="carte">
+            <div class="titre-carte">
+              <h2>Mes comptes</h2>
+              <button
+                type="button"
+                class="bouton-info"
+                data-info="info-comptes"
+                aria-label="En savoir plus"
+              >
+                i
+              </button>
+            </div>
+            <p id="info-comptes" class="info" hidden>
+              Quand tu veux, note ce qu'il y a vraiment sur ton compte.
+              Ensuite, chaque dépense et chaque charge notée comme payée est
+              retirée toute seule : tu vois un solde estimé, sans ouvrir l'appli
+              de ta banque. Quand ton salaire arrive, remets ton solde à jour.
+            </p>
+            <div id="mois-comptes"></div>
           </article>
 
           <!-- Les bocaux -->
@@ -134,17 +164,49 @@
             <div id="mois-bocaux"></div>
           </article>
 
+          <!-- Les charges du mois -->
+          <article class="carte">
+            <div class="titre-carte">
+              <h2>Charges du mois</h2>
+              <button
+                type="button"
+                class="bouton-info"
+                data-info="info-charges-mois"
+                aria-label="En savoir plus"
+              >
+                i
+              </button>
+            </div>
+            <p id="info-charges-mois" class="info" hidden>
+              Toutes les charges qui tombent ce mois-ci. Touche « C'est payé »
+              quand elle est passée : tu peux corriger le montant si ce n'était
+              pas tout à fait le même. Le ↺ annule un paiement.
+            </p>
+            <p id="mois-charges-reste" class="sous-titre"></p>
+            <div id="mois-charges"></div>
+          </article>
+
           <!-- Les prochaines échéances -->
           <article id="carte-echeances" class="carte">
-            <h2>Prochaines échéances</h2>
-            <p class="sous-titre petit">
-              Les charges qui tombent tous les 3, 6 ou 12 mois. L'argent est
-              mis de côté chaque mois pour elles.
+            <div class="titre-carte">
+              <h2>Prochaines échéances</h2>
+              <button
+                type="button"
+                class="bouton-info"
+                data-info="info-echeances"
+                aria-label="En savoir plus"
+              >
+                i
+              </button>
+            </div>
+            <p id="info-echeances" class="info" hidden>
+              Les charges à 3, 6 ou 12 mois des prochains mois. L'argent est
+              mis de côté chaque mois pour elles : le jour venu, il est là.
             </p>
             <div id="mois-echeances"></div>
           </article>
 
-          <!-- Les dernières dépenses -->
+          <!-- Les dépenses du mois -->
           <article class="carte">
             <h2>Dépenses du mois</h2>
             <div id="mois-depenses" class="liste-budget"></div>
@@ -199,6 +261,18 @@
               />
               du mois
             </label>
+
+            <p class="etiquette">L'argent des grosses échéances est gardé</p>
+            <div class="choix">
+              <label class="pastille">
+                <input type="radio" name="reserve" value="courant" /> Sur le
+                compte courant
+              </label>
+              <label class="pastille">
+                <input type="radio" name="reserve" value="livret" /> Sur un
+                livret à part
+              </label>
+            </div>
             <!-- Organisation du compte commun (à deux seulement) -->
             <div class="si-a-deux">
               <p class="etiquette">Sur le compte commun, on met…</p>
@@ -233,11 +307,22 @@
 
           <!-- Où va ton argent -->
           <article class="carte">
-            <h2>Où va ton argent</h2>
-            <div id="barre-argent" class="barre-argent"></div>
-            <p id="indice-barre" class="sous-titre indice">
-              Touche une couleur pour savoir ce qu'elle contient.
+            <div class="titre-carte">
+              <h2>Où va ton argent</h2>
+              <button
+                type="button"
+                class="bouton-info"
+                data-info="info-barre"
+                aria-label="En savoir plus"
+              >
+                i
+              </button>
+            </div>
+            <p id="info-barre" class="info" hidden>
+              Chaque couleur est une part de tes revenus. Touche une couleur
+              pour savoir ce qu'elle contient.
             </p>
+            <div id="barre-argent" class="barre-argent"></div>
             <div id="explication-barre" class="explication" hidden>
               <button
                 id="fermer-explication"
@@ -296,11 +381,22 @@
 
           <!-- Charges fixes -->
           <article class="carte">
-            <h2>Mes charges fixes</h2>
-            <p class="sous-titre">
+            <div class="titre-carte">
+              <h2>Mes charges fixes</h2>
+              <button
+                type="button"
+                class="bouton-info"
+                data-info="info-charges"
+                aria-label="En savoir plus"
+              >
+                i
+              </button>
+            </div>
+            <p id="info-charges" class="info" hidden>
               Tout ce qui revient : loyer, électricité, assurances,
               abonnements… Pour celles qui tombent tous les 3, 6 ou 12 mois,
-              l'appli calcule combien mettre de côté chaque mois.
+              l'appli calcule combien mettre de côté chaque mois. Touche une
+              ligne pour la modifier.
             </p>
             <div id="liste-charges" class="liste-budget"></div>
             <p class="total">
@@ -354,10 +450,21 @@
 
           <!-- Vie courante (les bocaux) -->
           <article class="carte">
-            <h2>Ma vie courante</h2>
-            <p class="sous-titre">
+            <div class="titre-carte">
+              <h2>Ma vie courante</h2>
+              <button
+                type="button"
+                class="bouton-info"
+                data-info="info-bocaux"
+                aria-label="En savoir plus"
+              >
+                i
+              </button>
+            </div>
+            <p id="info-bocaux" class="info" hidden>
               Un bocal par type de dépense : combien tu prévois chaque mois.
-              Touche un nom pour le modifier.
+              Règle le montant avec − et +, et touche un nom pour le
+              renommer.
             </p>
             <div id="liste-bocaux" class="liste-budget"></div>
             <p class="total">
@@ -390,14 +497,24 @@
 
           <!-- Épargne -->
           <article class="carte">
-            <h2>Mon épargne</h2>
+            <div class="titre-carte">
+              <h2>Mon épargne</h2>
+              <button
+                type="button"
+                class="bouton-info"
+                data-info="info-epargne"
+                aria-label="En savoir plus"
+              >
+                i
+              </button>
+            </div>
+            <p id="info-epargne" class="info" hidden>
+              Le détail (épargne de sécurité, projets) arrivera dans l'onglet
+              « Épargne & projets ».
+            </p>
             <div class="ligne-budget ligne-epargne">
               <span class="ligne-budget-textes">
                 <strong>Mettre de côté chaque mois</strong>
-                <span class="sous-titre">
-                  Le détail (sécurité, projets) arrivera dans « Épargne &
-                  projets ».
-                </span>
               </span>
               <div id="zone-compteur-epargne"></div>
             </div>
@@ -462,8 +579,8 @@
           <span>F</span>
         </label>
 
-        <p class="etiquette">Dans quel bocal ?</p>
-        <div id="choix-bocaux" class="choix"></div>
+        <label class="etiquette" for="depense-bocal">Dans quel bocal ?</label>
+        <select id="depense-bocal" class="champ-note"></select>
 
         <details id="depense-options" class="options">
           <summary>Plus d'options</summary>
@@ -528,12 +645,13 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=6"></script>
-    <script src="js/modules/navigation.js?v=6"></script>
-    <script src="js/modules/accueil.js?v=6"></script>
-    <script src="js/modules/budget.js?v=6"></script>
-    <script src="js/modules/budget-repartition.js?v=6"></script>
-    <script src="js/modules/budget-mois.js?v=6"></script>
-    <script src="js/app.js?v=6"></script>
+    <script src="js/donnees/stockage.js?v=7"></script>
+    <script src="js/modules/navigation.js?v=7"></script>
+    <script src="js/modules/infos.js?v=7"></script>
+    <script src="js/modules/accueil.js?v=7"></script>
+    <script src="js/modules/budget.js?v=7"></script>
+    <script src="js/modules/budget-repartition.js?v=7"></script>
+    <script src="js/modules/budget-mois.js?v=7"></script>
+    <script src="js/app.js?v=7"></script>
   </body>
 </html>

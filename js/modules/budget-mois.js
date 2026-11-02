@@ -1,11 +1,16 @@
 // =====================================================
 // Module Budget — partie 3 : « Mon mois » (le suivi)
-//   - la période en cours (selon le début du mois choisi)
-//   - ce qu'il reste, et le rythme du mois
-//   - ce qu'il reste dans chaque bocal
-//   - les prochaines échéances des charges
-//   - noter une dépense (la « saisie express »)
-//   - la carte Budget de l'Accueil
+//   1. les dates et la période en cours
+//   2. les comptes, les dépenses et le filtre
+//   3. le résumé du mois
+//   4. les bocaux (qui se vident !)
+//   5. les charges du mois (« C'est payé »)
+//   6. les prochaines échéances
+//   7. mes comptes : solde réel, solde estimé, surplus
+//   8. les dépenses du mois
+//   9. la carte Budget de l'Accueil
+//  10. tout « Mon mois »
+//  11. noter une dépense (la feuille qui monte du bas)
 // =====================================================
 
 // ---------- 1. Les dates ----------
@@ -49,16 +54,22 @@ function periodeEnCours() {
   return {
     debut: debut,
     suivant: suivant,
+    debutTexte: dateEnTexte(debut),
+    suivantTexte: dateEnTexte(suivant),
     joursTotal: Math.round((suivant - debut) / UN_JOUR),
     joursRestants: Math.round((suivant - auj) / UN_JOUR), // aujourd'hui compris
   };
 }
 
-// Le nom du mois de la période, avec « de » ou « d' » (ton code de l'Accueil !)
-// Si le mois commence le 25 octobre, on l'appelle « novembre ».
-function titreDuMois(periode) {
+// Le nom du mois de la période. Si le mois commence le 25 octobre, c'est « novembre ».
+function nomDuMoisDe(periode) {
   const milieu = new Date(periode.debut.getTime() + 15 * UN_JOUR);
-  const nomMois = milieu.toLocaleDateString("fr-FR", { month: "long" });
+  return milieu.toLocaleDateString("fr-FR", { month: "long" });
+}
+
+// « Budget de novembre », « Budget d'octobre » (ton code de l'Accueil !)
+function titreDuMois(periode) {
+  const nomMois = nomDuMoisDe(periode);
   let liaisonMois = "de ";
   if ("aeiou".includes(nomMois[0])) {
     liaisonMois = "d'";
@@ -66,21 +77,54 @@ function titreDuMois(periode) {
   return `Budget ${liaisonMois}${nomMois}`;
 }
 
-// "Plus qu'un jour", "8 jours restants"…
+// "Dernier jour", "Plus que 2 jours", "8 jours restants"
 function texteJoursRestants(jours) {
   if (jours <= 1) return "Dernier jour du mois";
   if (jours === 2) return "Plus que 2 jours";
   return `${jours} jours restants`;
 }
 
-// ---------- 2. Les dépenses de la période ----------
+// Ajoute des mois à une date "AAAA-MM-JJ"
+function ajouterMois(texteDate, nombreMois) {
+  const date = new Date(`${texteDate}T00:00`);
+  date.setMonth(date.getMonth() + nombreMois);
+  return dateEnTexte(date);
+}
 
-// Les dépenses de la période en cours (et du filtre choisi)
+// ---------- 2. Les comptes, les dépenses et le filtre ----------
+
+// Seul·e : un seul compte. À deux : le compte commun et ton compte perso.
+function comptesSuivis() {
+  return budget.reglages.aDeux ? ["commun", "perso"] : ["perso"];
+}
+
+function nomCompte(compte) {
+  if (!budget.reglages.aDeux) return "Mon compte";
+  return compte === "commun" ? "Compte commun" : "Mon compte perso";
+}
+
+// Sur quel compte tombe une charge, un bocal, une dépense ?
+function compteDeCharge(charge) {
+  return budget.reglages.aDeux ? charge.compte : "perso";
+}
+
+function compteDeBocal(bocal) {
+  return budget.reglages.aDeux ? bocal.compte : "perso";
+}
+
+function compteDeDepense(depense) {
+  if (!budget.reglages.aDeux) return "perso";
+  if (depense.payePar === "commun") return "commun";
+  if (depense.payePar === "moi") return "perso";
+  return null; // payée par l'autre personne : son compte n'est pas suivi
+}
+
+// Les dépenses de la période en cours
 function depensesDeLaPeriode(periode) {
-  const debut = dateEnTexte(periode.debut);
-  const suivant = dateEnTexte(periode.suivant);
   // Les dates "AAAA-MM-JJ" se comparent comme des mots : "2026-11-03" < "2026-11-25"
-  return budget.depenses.filter((d) => d.date >= debut && d.date < suivant);
+  return budget.depenses.filter(
+    (d) => d.date >= periode.debutTexte && d.date < periode.suivantTexte,
+  );
 }
 
 // Ce qui a été dépensé dans un bocal pendant la période
@@ -92,9 +136,9 @@ function depenseDansBocal(bocal, depensesPeriode) {
 // Le filtre Tout / Commun / Perso (à deux seulement)
 let filtreMois = "tout";
 
-function bocauxFiltres() {
-  if (!budget.reglages.aDeux || filtreMois === "tout") return budget.bocaux;
-  return budget.bocaux.filter((b) => b.compte === filtreMois);
+function passeLeFiltre(compte) {
+  if (!budget.reglages.aDeux || filtreMois === "tout") return true;
+  return compte === filtreMois;
 }
 
 document.querySelectorAll('input[name="filtre-mois"]').forEach((bouton) => {
@@ -104,101 +148,110 @@ document.querySelectorAll('input[name="filtre-mois"]').forEach((bouton) => {
   });
 });
 
-// ---------- 3. Le résumé : ce qu'il reste, et le rythme ----------
+// ---------- 3. Le résumé du mois ----------
 
 function afficherResumeMois(periode, depensesPeriode) {
-  const bocaux = bocauxFiltres();
+  const bocaux = budget.bocaux.filter((b) => passeLeFiltre(compteDeBocal(b)));
   const prevu = sommer(bocaux, (b) => b.montant);
   const depense = sommer(bocaux, (b) => depenseDansBocal(b, depensesPeriode));
   const resteMois = prevu - depense;
 
-  document.getElementById("mois-titre").textContent = titreDuMois(periode);
+  // « Novembre » avec une majuscule
+  const nomMois = nomDuMoisDe(periode);
+  document.getElementById("mois-titre").textContent =
+    nomMois[0].toUpperCase() + nomMois.slice(1);
   document.getElementById("mois-jours").textContent = texteJoursRestants(
     periode.joursRestants,
   );
+
   const elementReste = document.getElementById("mois-reste");
   elementReste.textContent = formaterMontant(resteMois);
   elementReste.classList.toggle("montant-attention", resteMois < 0);
 
   // Combien par jour, pour se repérer
   const parJour = document.getElementById("mois-par-jour");
-  if (resteMois > 0) {
-    parJour.textContent = `soit environ ${formaterMontant(resteMois / periode.joursRestants)} par jour`;
-  } else if (resteMois < 0) {
-    parJour.textContent = `${formaterMontant(-resteMois)} de plus que prévu : pas de panique, on ajuste au prochain mois.`;
-  } else {
-    parJour.textContent = "";
-  }
+  parJour.hidden = resteMois <= 0;
+  parJour.textContent = `≈ ${formaterMontant(resteMois / periode.joursRestants)} par jour`;
 
-  // La barre : ce qui est dépensé, et un petit trait pour « où on en est du mois »
+  // La barre : ce qui est dépensé, et un petit trait pour « aujourd'hui »
   const partDepensee = prevu > 0 ? Math.min(depense / prevu, 1) : 0;
   const partEcoulee = (periode.joursTotal - periode.joursRestants) / periode.joursTotal;
-  document.getElementById("mois-barre-remplie").style.width = `${partDepensee * 100}%`;
+  const remplie = document.getElementById("mois-barre-remplie");
+  remplie.style.width = `${partDepensee * 100}%`;
+  remplie.classList.toggle("remplie-attention", depense > prevu);
   document.getElementById("mois-repere").style.left = `${partEcoulee * 100}%`;
-  document
-    .getElementById("mois-barre-remplie")
-    .classList.toggle("remplie-attention", depense > prevu);
+  document.getElementById("mois-legende-depense").textContent =
+    `${formaterMontant(depense)} dépensés sur ${formaterMontant(prevu)}`;
 
   // La phrase douce sur le rythme
   const rythme = document.getElementById("mois-rythme");
   if (prevu === 0) {
     rythme.textContent = "Remplis tes bocaux dans « Mon budget » pour suivre ton mois.";
+  } else if (resteMois < 0) {
+    rythme.textContent = `${formaterMontant(-resteMois)} de plus que prévu : pas de panique, on ajustera le mois prochain.`;
   } else if (partDepensee <= partEcoulee + 0.05) {
     rythme.textContent = "Tu es dans le rythme du mois 🌱";
   } else {
     rythme.textContent =
       "Un peu plus vite que le mois : rien de grave, garde juste un œil dessus.";
   }
-
-  return { resteMois, periode };
 }
 
-// ---------- 4. Chaque bocal : ce qu'il reste ----------
+// ---------- 4. Les bocaux, qui se vident au fil du mois ----------
+
+// Fabrique un petit bocal dessiné, rempli à « part » (de 0 à 1)
+function creerBocalDessine(part, presqueVide) {
+  const bocal = document.createElement("div");
+  bocal.classList.add("bocal-dessin");
+  const contenu = document.createElement("div");
+  contenu.classList.add("bocal-contenu");
+  contenu.classList.toggle("bocal-presque-vide", presqueVide);
+  contenu.style.height = `${part * 100}%`;
+  bocal.appendChild(contenu);
+  return bocal;
+}
 
 function afficherBocauxDuMois(depensesPeriode) {
   const liste = document.getElementById("mois-bocaux");
   liste.replaceChildren();
 
-  bocauxFiltres().forEach((bocal) => {
-    const depense = depenseDansBocal(bocal, depensesPeriode);
-    // Un bocal vide ET sans dépense n'a rien à dire : on ne l'affiche pas
-    if (bocal.montant === 0 && depense === 0) return;
+  budget.bocaux
+    .filter((b) => passeLeFiltre(compteDeBocal(b)))
+    .forEach((bocal) => {
+      const depense = depenseDansBocal(bocal, depensesPeriode);
+      // Un bocal vide ET sans dépense n'a rien à dire : on ne l'affiche pas
+      if (bocal.montant === 0 && depense === 0) return;
 
-    const resteBocal = bocal.montant - depense;
+      const resteBocal = bocal.montant - depense;
+      const partRestante =
+        bocal.montant > 0 ? Math.max(resteBocal / bocal.montant, 0) : 0;
 
-    const ligne = document.createElement("div");
-    ligne.classList.add("bocal-mois");
+      const ligne = document.createElement("div");
+      ligne.classList.add("bocal-mois");
 
-    const haut = document.createElement("div");
-    haut.classList.add("bocal-mois-haut");
-    const nom = document.createElement("strong");
-    nom.textContent = bocal.nom;
-    const montant = document.createElement("span");
-    if (resteBocal >= 0) {
-      montant.textContent = `reste ${formaterMontant(resteBocal)}`;
-    } else {
-      montant.textContent = `dépassé de ${formaterMontant(-resteBocal)}`;
-    }
-    haut.append(nom, montant);
+      // Miel quand il reste moins d'un cinquième (jamais de rouge)
+      const dessin = creerBocalDessine(partRestante, partRestante < 0.2);
 
-    // La jauge du bocal : elle se vide au fil des dépenses
-    const jauge = document.createElement("div");
-    jauge.classList.add("jauge");
-    const remplissage = document.createElement("div");
-    remplissage.classList.add("jauge-remplie");
-    const partRestante = bocal.montant > 0 ? Math.max(resteBocal / bocal.montant, 0) : 0;
-    remplissage.style.width = `${partRestante * 100}%`;
-    // Miel quand il reste moins d'un cinquième (jamais de rouge)
-    remplissage.classList.toggle("jauge-presque-vide", partRestante < 0.2);
-    jauge.appendChild(remplissage);
+      const textes = document.createElement("div");
+      textes.classList.add("ligne-budget-textes");
+      const nom = document.createElement("strong");
+      nom.textContent = bocal.nom;
+      const reste = document.createElement("span");
+      reste.classList.add("bocal-reste");
+      if (resteBocal >= 0) {
+        reste.textContent = `reste ${formaterMontant(resteBocal)}`;
+      } else {
+        reste.textContent = `dépassé de ${formaterMontant(-resteBocal)}`;
+        reste.classList.add("montant-attention");
+      }
+      const detail = document.createElement("span");
+      detail.classList.add("sous-titre");
+      detail.textContent = `${formaterMontant(depense)} dépensés sur ${formaterMontant(bocal.montant)}`;
+      textes.append(nom, reste, detail);
 
-    const detail = document.createElement("span");
-    detail.classList.add("sous-titre");
-    detail.textContent = `${formaterMontant(depense)} dépensés sur ${formaterMontant(bocal.montant)}`;
-
-    ligne.append(haut, jauge, detail);
-    liste.appendChild(ligne);
-  });
+      ligne.append(dessin, textes);
+      liste.appendChild(ligne);
+    });
 
   if (liste.children.length === 0) {
     const vide = document.createElement("p");
@@ -208,76 +261,377 @@ function afficherBocauxDuMois(depensesPeriode) {
   }
 }
 
-// ---------- 5. Les prochaines échéances ----------
+// ---------- 5. Les charges du mois ----------
 
-// Ajoute des mois à une date "AAAA-MM-JJ"
-function ajouterMois(texteDate, nombreMois) {
-  const date = new Date(`${texteDate}T00:00`);
-  date.setMonth(date.getMonth() + nombreMois);
-  return dateEnTexte(date);
+// Le paiement d'une charge pour la période en cours (ou undefined)
+function paiementDuMois(charge, periode) {
+  return budget.paiements.find(
+    (p) => p.chargeId === charge.id && p.periode === periode.debutTexte,
+  );
 }
 
-function afficherEcheances() {
+// Les charges qui tombent ce mois-ci : toutes les mensuelles,
+// plus les autres si leur échéance arrive avant la fin du mois (ou est passée)
+function chargesDuMois(periode) {
+  return budget.chargesFixes.filter((charge) => {
+    if (paiementDuMois(charge, periode)) return true;
+    if (charge.frequence === 1) return true;
+    return Boolean(charge.prochaineEcheance) && charge.prochaineEcheance < periode.suivantTexte;
+  });
+}
+
+// L'id de la charge qu'on est en train de payer (le petit formulaire est ouvert)
+let chargeEnPaiement = null;
+
+function afficherChargesDuMois(periode) {
+  const liste = document.getElementById("mois-charges");
+  liste.replaceChildren();
+
+  const charges = chargesDuMois(periode).filter((c) => passeLeFiltre(compteDeCharge(c)));
+  // Celles à payer d'abord, les payées ensuite
+  charges.sort((a, b) => Number(Boolean(paiementDuMois(a, periode))) - Number(Boolean(paiementDuMois(b, periode))));
+
+  charges.forEach((charge) => {
+    const paiement = paiementDuMois(charge, periode);
+    const ligne = document.createElement("div");
+    ligne.classList.add("charge-mois");
+
+    const textes = document.createElement("div");
+    textes.classList.add("ligne-budget-textes");
+    const nom = document.createElement("strong");
+    nom.textContent = charge.nom;
+    const detail = document.createElement("span");
+    detail.classList.add("sous-titre");
+    textes.append(nom, detail);
+    ligne.appendChild(textes);
+
+    if (paiement) {
+      // Déjà payée : on l'affiche en plus discret, avec un bouton pour annuler
+      ligne.classList.add("charge-payee");
+      detail.textContent = `Payée le ${formaterDate(paiement.date, false)} · ${formaterMontant(paiement.montant)}`;
+      const annuler = document.createElement("button");
+      annuler.type = "button";
+      annuler.classList.add("bouton-supprimer");
+      annuler.textContent = "↺";
+      annuler.setAttribute("aria-label", `Annuler le paiement de ${charge.nom}`);
+      annuler.addEventListener("click", () => {
+        if (!confirm(`Annuler le paiement de « ${charge.nom} » ?`)) return;
+        // Si c'était une grosse échéance, on remet sa date d'avant
+        if (paiement.echeanceAvant) charge.prochaineEcheance = paiement.echeanceAvant;
+        budget.paiements = budget.paiements.filter((p) => p.id !== paiement.id);
+        sauvegarderBudget();
+        afficherBudget();
+      });
+      ligne.appendChild(annuler);
+    } else {
+      detail.textContent = `${formaterMontant(charge.montant)} à payer`;
+      if (charge.frequence > 1 && charge.prochaineEcheance) {
+        detail.textContent = `${detail.textContent} · le ${formaterDate(charge.prochaineEcheance, false)}`;
+      }
+
+      if (chargeEnPaiement === charge.id) {
+        // Le petit formulaire : le montant prévu, qu'on peut corriger
+        ligne.classList.add("charge-en-paiement");
+        ligne.appendChild(creerFormulairePaiement(charge, periode));
+      } else {
+        const payer = document.createElement("button");
+        payer.type = "button";
+        payer.classList.add("bouton-petit");
+        payer.textContent = "C'est payé";
+        payer.addEventListener("click", () => {
+          chargeEnPaiement = charge.id;
+          afficherChargesDuMois(periode);
+        });
+        ligne.appendChild(payer);
+      }
+    }
+    liste.appendChild(ligne);
+  });
+
+  if (charges.length === 0) {
+    const vide = document.createElement("p");
+    vide.classList.add("sous-titre");
+    vide.textContent = "Aucune charge ce mois-ci.";
+    liste.appendChild(vide);
+  }
+
+  // Combien de charges restent à payer
+  const aPayer = charges.filter((c) => !paiementDuMois(c, periode));
+  document.getElementById("mois-charges-reste").textContent =
+    aPayer.length === 0
+      ? "Tout est payé 🌱"
+      : `${aPayer.length} à payer · ${formaterMontant(sommer(aPayer, (c) => c.montant))}`;
+}
+
+function creerFormulairePaiement(charge, periode) {
+  const formulaire = document.createElement("form");
+  formulaire.classList.add("form-paiement");
+
+  const champ = document.createElement("input");
+  champ.type = "number";
+  champ.min = "0";
+  champ.inputMode = "numeric";
+  champ.value = charge.montant;
+  champ.setAttribute("aria-label", "Montant vraiment payé");
+
+  const valider = document.createElement("button");
+  valider.type = "submit";
+  valider.classList.add("bouton-petit");
+  valider.textContent = "Valider";
+
+  const annuler = document.createElement("button");
+  annuler.type = "button";
+  annuler.classList.add("bouton-annuler");
+  annuler.textContent = "Annuler";
+  annuler.addEventListener("click", () => {
+    chargeEnPaiement = null;
+    afficherChargesDuMois(periode);
+  });
+
+  formulaire.addEventListener("submit", (evenement) => {
+    evenement.preventDefault();
+    const montant = Number(champ.value);
+    if (montant < 0) return;
+
+    const paiement = {
+      id: Date.now(),
+      chargeId: charge.id,
+      montant: montant,
+      date: dateEnTexte(aujourdhuiAMinuit()),
+      periode: periode.debutTexte,
+      compte: compteDeCharge(charge),
+      echeanceAvant: null,
+    };
+
+    // Une grosse échéance passe à la suivante (on garde l'ancienne date au cas où)
+    if (charge.frequence > 1 && charge.prochaineEcheance) {
+      paiement.echeanceAvant = charge.prochaineEcheance;
+      let prochaine = ajouterMois(charge.prochaineEcheance, charge.frequence);
+      while (prochaine < periode.suivantTexte) {
+        prochaine = ajouterMois(prochaine, charge.frequence);
+      }
+      charge.prochaineEcheance = prochaine;
+    }
+
+    budget.paiements.push(paiement);
+    chargeEnPaiement = null;
+    sauvegarderBudget();
+    afficherBudget();
+    montrerPetitMessage("C'est noté 🌱");
+  });
+
+  formulaire.append(champ, valider, annuler);
+  // On place le curseur dans le champ, prêt à corriger
+  setTimeout(() => champ.focus(), 0);
+  return formulaire;
+}
+
+// ---------- 6. Les prochaines échéances (après ce mois-ci) ----------
+
+function afficherEcheances(periode) {
   const liste = document.getElementById("mois-echeances");
   liste.replaceChildren();
-  const aujourdhuiTexte = dateEnTexte(aujourdhuiAMinuit());
 
-  // Les charges qui ne tombent pas chaque mois, et qui ont une date
+  // Les grosses charges dont l'échéance tombe APRÈS ce mois-ci
   const aVenir = budget.chargesFixes
-    .filter((c) => c.frequence > 1 && c.prochaineEcheance)
+    .filter((c) => c.frequence > 1 && c.prochaineEcheance >= periode.suivantTexte)
+    .filter((c) => passeLeFiltre(compteDeCharge(c)))
     // sort range la liste : la date la plus proche d'abord
     .sort((a, b) => a.prochaineEcheance.localeCompare(b.prochaineEcheance));
 
   document.getElementById("carte-echeances").hidden = aVenir.length === 0;
 
   aVenir.forEach((charge) => {
-    const ligne = document.createElement("div");
-    ligne.classList.add("echeance");
-
-    const textes = document.createElement("div");
-    textes.classList.add("ligne-budget-textes");
-    const nom = document.createElement("strong");
-    nom.textContent = `${charge.nom} · ${formaterMontant(charge.montant)}`;
-    const quand = document.createElement("span");
-    quand.classList.add("sous-titre");
-
     const jours = Math.round(
       (new Date(`${charge.prochaineEcheance}T00:00`) - aujourdhuiAMinuit()) / UN_JOUR,
     );
-    if (jours < 0) {
-      quand.textContent = `Le ${formaterDate(charge.prochaineEcheance)} : c'est passé`;
-    } else if (jours === 0) {
-      quand.textContent = "C'est aujourd'hui";
-    } else {
-      quand.textContent = `Le ${formaterDate(charge.prochaineEcheance)}, dans ${jours} jour${jours > 1 ? "s" : ""}`;
-    }
-    textes.append(nom, quand);
-    ligne.appendChild(textes);
-
-    // Une fois l'échéance arrivée : « C'est payé » passe à la suivante
-    if (charge.prochaineEcheance <= aujourdhuiTexte) {
-      const bouton = document.createElement("button");
-      bouton.type = "button";
-      bouton.classList.add("bouton-petit");
-      bouton.textContent = "C'est payé ✓";
-      bouton.addEventListener("click", () => {
-        // On avance d'une fréquence… jusqu'à tomber dans le futur
-        let prochaine = ajouterMois(charge.prochaineEcheance, charge.frequence);
-        while (prochaine <= aujourdhuiTexte) {
-          prochaine = ajouterMois(prochaine, charge.frequence);
-        }
-        charge.prochaineEcheance = prochaine;
-        sauvegarderBudget();
-        afficherBudget();
-      });
-      ligne.appendChild(bouton);
-    }
-
+    const ligne = document.createElement("p");
+    ligne.classList.add("ligne-info");
+    const gauche = document.createElement("span");
+    // On écrit l'année seulement si ce n'est pas celle d'aujourd'hui
+    const autreAnnee =
+      charge.prochaineEcheance.slice(0, 4) !== String(aujourdhuiAMinuit().getFullYear());
+    gauche.textContent = `${charge.nom} · le ${formaterDate(charge.prochaineEcheance, autreAnnee)}`;
+    const droite = document.createElement("strong");
+    droite.textContent = `${formaterMontant(charge.montant)} · ${jours} j`;
+    ligne.append(gauche, droite);
     liste.appendChild(ligne);
   });
 }
 
-// ---------- 6. Les dernières dépenses ----------
+// ---------- 7. Mes comptes : solde réel, solde estimé, surplus ----------
+
+// Le solde estimé : le solde noté, moins tout ce qui a été noté APRÈS
+function soldeEstime(compte) {
+  const solde = budget.soldes[compte];
+  if (!solde) return null;
+  // L'id d'une dépense est l'heure à laquelle elle a été notée (Date.now())
+  const depensesApres = budget.depenses.filter(
+    (d) => d.id > solde.quand && compteDeDepense(d) === compte,
+  );
+  const paiementsApres = budget.paiements.filter(
+    (p) => p.id > solde.quand && p.compte === compte,
+  );
+  return (
+    solde.montant -
+    sommer(depensesApres, (d) => d.montant) -
+    sommer(paiementsApres, (p) => p.montant)
+  );
+}
+
+// Combien de mois avant une date (0 = ce mois-ci)
+function moisAvant(texteDate) {
+  const auj = aujourdhuiAMinuit();
+  const date = new Date(`${texteDate}T00:00`);
+  return (date.getFullYear() - auj.getFullYear()) * 12 + (date.getMonth() - auj.getMonth());
+}
+
+// L'argent déjà mis de côté pour les grosses échéances à venir (ce mois-ci compris)
+function reserveGardee(compte, periode) {
+  return sommer(
+    budget.chargesFixes.filter(
+      (c) =>
+        c.frequence > 1 &&
+        c.prochaineEcheance >= periode.suivantTexte &&
+        compteDeCharge(c) === compte,
+    ),
+    (c) => {
+      // Ex. : tous les 3 mois, échéance dans 2 mois → 2 parts déjà mises de côté
+      const parts = Math.min(Math.max(c.frequence - moisAvant(c.prochaineEcheance) + 1, 1), c.frequence);
+      return miseDeCoteMensuelle(c) * parts;
+    },
+  );
+}
+
+// Ce dont le compte a encore besoin d'ici la fin du mois
+function besoinJusquaFinDuMois(compte, periode, depensesPeriode) {
+  const chargesAPayer = chargesDuMois(periode).filter(
+    (c) => compteDeCharge(c) === compte && !paiementDuMois(c, periode),
+  );
+  const resteBocaux = sommer(
+    budget.bocaux.filter((b) => compteDeBocal(b) === compte),
+    (b) => Math.max(b.montant - depenseDansBocal(b, depensesPeriode), 0),
+  );
+  let besoin = sommer(chargesAPayer, (c) => c.montant) + resteBocaux;
+  if (budget.reglages.reserve === "courant") {
+    besoin = besoin + reserveGardee(compte, periode);
+  }
+  return besoin;
+}
+
+// Le compte dont on est en train de noter le solde
+let compteEnMiseAJour = null;
+
+function afficherComptes(periode, depensesPeriode) {
+  const liste = document.getElementById("mois-comptes");
+  liste.replaceChildren();
+
+  comptesSuivis()
+    .filter((compte) => passeLeFiltre(compte))
+    .forEach((compte) => {
+      const bloc = document.createElement("div");
+      bloc.classList.add("compte");
+
+      // 1re ligne : le nom du compte, et « Mettre à jour »
+      const haut = document.createElement("div");
+      haut.classList.add("compte-haut");
+      const nom = document.createElement("strong");
+      nom.textContent = nomCompte(compte);
+      const lien = document.createElement("button");
+      lien.type = "button";
+      lien.classList.add("lien", "lien-petit");
+      lien.textContent = budget.soldes[compte] ? "Mettre à jour" : "Noter mon solde";
+      lien.addEventListener("click", () => {
+        compteEnMiseAJour = compte;
+        afficherComptes(periode, depensesPeriode);
+      });
+      haut.append(nom, lien);
+      bloc.appendChild(haut);
+
+      // Le petit formulaire pour noter le solde réel
+      if (compteEnMiseAJour === compte) {
+        bloc.appendChild(creerFormulaireSolde(compte));
+      }
+
+      const estime = soldeEstime(compte);
+      if (estime === null) {
+        const vide = document.createElement("p");
+        vide.classList.add("sous-titre");
+        vide.textContent = "Pas encore noté.";
+        bloc.appendChild(vide);
+      } else {
+        const montant = document.createElement("p");
+        montant.classList.add("compte-solde");
+        montant.textContent = formaterMontant(estime);
+        const quand = document.createElement("p");
+        quand.classList.add("sous-titre", "petit");
+        const solde = budget.soldes[compte];
+        quand.textContent = `Estimé · noté le ${formaterDate(dateEnTexte(new Date(solde.quand)), false)} : ${formaterMontant(solde.montant)}`;
+        bloc.append(montant, quand);
+
+        // Ce qu'il faut encore, et ce qui est en trop
+        const besoin = besoinJusquaFinDuMois(compte, periode, depensesPeriode);
+        bloc.appendChild(creerLigneInfo("Il faut encore d'ici la fin du mois", formaterMontant(besoin)));
+
+        const ecart = estime - besoin;
+        const message = document.createElement("p");
+        message.classList.add("message-compte");
+        if (ecart > 5000) {
+          message.textContent = `Environ ${formaterMontant(ecart)} ne servent pas ce mois-ci. Pourquoi ne pas les mettre de côté ? 🌱`;
+        } else if (ecart < -5000) {
+          message.textContent = `Il pourrait manquer environ ${formaterMontant(-ecart)} d'ici la fin du mois.`;
+          message.classList.add("montant-attention");
+        } else {
+          message.textContent = "Ton compte couvre juste ce qu'il faut 🌱";
+        }
+        bloc.appendChild(message);
+      }
+
+      liste.appendChild(bloc);
+    });
+}
+
+function creerFormulaireSolde(compte) {
+  const formulaire = document.createElement("form");
+  formulaire.classList.add("form-paiement");
+
+  const champ = document.createElement("input");
+  champ.type = "number";
+  champ.inputMode = "numeric";
+  champ.placeholder = "Ce qu'il y a vraiment";
+  champ.setAttribute("aria-label", `Solde réel de ${nomCompte(compte)}`);
+
+  const valider = document.createElement("button");
+  valider.type = "submit";
+  valider.classList.add("bouton-petit");
+  valider.textContent = "Valider";
+
+  const annuler = document.createElement("button");
+  annuler.type = "button";
+  annuler.classList.add("bouton-annuler");
+  annuler.textContent = "Annuler";
+  annuler.addEventListener("click", () => {
+    compteEnMiseAJour = null;
+    afficherMois();
+  });
+
+  formulaire.addEventListener("submit", (evenement) => {
+    evenement.preventDefault();
+    if (champ.value === "") return;
+    // quand : l'heure exacte. Tout ce qui sera noté APRÈS sera retiré du solde.
+    budget.soldes[compte] = { montant: Number(champ.value), quand: Date.now() };
+    compteEnMiseAJour = null;
+    sauvegarderBudget();
+    afficherMois();
+    montrerPetitMessage("Solde noté 🌱");
+  });
+
+  formulaire.append(champ, valider, annuler);
+  setTimeout(() => champ.focus(), 0);
+  return formulaire;
+}
+
+// ---------- 8. Les dépenses du mois ----------
 
 function nomBocal(bocalId) {
   const bocal = budget.bocaux.find((b) => b.id === bocalId);
@@ -290,6 +644,7 @@ function afficherDernieresDepenses(depensesPeriode) {
 
   // Les plus récentes d'abord ; slice() fait une copie pour ne pas déranger l'original
   const triees = depensesPeriode
+    .filter((d) => passeLeFiltre(compteDeDepense(d)))
     .slice()
     .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
 
@@ -322,68 +677,83 @@ function afficherDernieresDepenses(depensesPeriode) {
   }
 }
 
-// ---------- 7. La carte Budget de l'Accueil ----------
+// ---------- 9. La carte Budget de l'Accueil ----------
 
-function afficherCarteAccueil(resume) {
-  document.getElementById("titre-budget").textContent = titreDuMois(resume.periode);
+function afficherCarteAccueil(periode, depensesPeriode) {
+  // L'Accueil montre toujours le total de TOUS les bocaux (sans filtre)
+  const resteTotal =
+    sommer(budget.bocaux, (b) => b.montant) -
+    sommer(budget.bocaux, (b) => depenseDansBocal(b, depensesPeriode));
+
+  document.getElementById("titre-budget").textContent = titreDuMois(periode);
   document.getElementById("jours-restants").textContent = texteJoursRestants(
-    resume.periode.joursRestants,
+    periode.joursRestants,
   );
   const elementReste = document.getElementById("montant-reste");
-  elementReste.textContent = formaterMontant(resume.resteMois);
-  elementReste.classList.toggle("montant-attention", resume.resteMois < 0);
+  elementReste.textContent = formaterMontant(resteTotal);
+  elementReste.classList.toggle("montant-attention", resteTotal < 0);
 }
 
-// ---------- 8. Tout « Mon mois » ----------
+// ---------- 10. Tout « Mon mois » ----------
 
 function afficherMois() {
-  // Le filtre Tout / Commun / Perso n'existe qu'à deux
   document.querySelector(`input[name="filtre-mois"][value="${filtreMois}"]`).checked = true;
 
   const periode = periodeEnCours();
   const depensesPeriode = depensesDeLaPeriode(periode);
 
-  const resume = afficherResumeMois(periode, depensesPeriode);
+  afficherResumeMois(periode, depensesPeriode);
+  afficherComptes(periode, depensesPeriode);
   afficherBocauxDuMois(depensesPeriode);
-  afficherEcheances();
+  afficherChargesDuMois(periode);
+  afficherEcheances(periode);
   afficherDernieresDepenses(depensesPeriode);
-
-  // L'Accueil montre toujours le total de TOUS les bocaux (sans filtre)
-  const resteTotal =
-    sommer(budget.bocaux, (b) => b.montant) -
-    sommer(budget.bocaux, (b) => depenseDansBocal(b, depensesPeriode));
-  afficherCarteAccueil({ periode: resume.periode, resteMois: resteTotal });
+  afficherCarteAccueil(periode, depensesPeriode);
 }
 
 // =====================================================
-// 9. Noter une dépense : la « feuille » qui monte du bas
+// 11. Noter une dépense : la « feuille » qui monte du bas
 // =====================================================
 
 const feuille = document.getElementById("feuille-depense");
 const voile = document.getElementById("voile");
 const formDepense = document.getElementById("form-depense");
 const depenseMontant = document.getElementById("depense-montant");
+const depenseBocal = document.getElementById("depense-bocal");
 const depenseNote = document.getElementById("depense-note");
 const depenseDateAutre = document.getElementById("depense-date-autre");
-const choixBocaux = document.getElementById("choix-bocaux");
 
 let depenseEnModification = null;
 
-// Les bocaux, en pastilles à toucher
+// Le menu déroulant des bocaux (rangés en Commun / Perso quand on est deux)
 function afficherChoixBocaux(bocalChoisi) {
-  choixBocaux.replaceChildren();
-  budget.bocaux.forEach((bocal) => {
-    const pastille = document.createElement("label");
-    pastille.classList.add("pastille");
-    const bouton = document.createElement("input");
-    bouton.type = "radio";
-    bouton.name = "depense-bocal";
-    bouton.value = bocal.id;
-    bouton.required = true;
-    bouton.checked = bocal.id === bocalChoisi;
-    pastille.append(bouton, bocal.nom);
-    choixBocaux.appendChild(pastille);
-  });
+  depenseBocal.replaceChildren();
+
+  function ajouterOption(parent, bocal) {
+    const option = document.createElement("option");
+    option.value = bocal.id;
+    option.textContent = bocal.nom;
+    parent.appendChild(option);
+  }
+
+  if (budget.reglages.aDeux) {
+    [
+      ["commun", "Commun"],
+      ["perso", "Perso"],
+    ].forEach(([compte, titre]) => {
+      // <optgroup> : un petit titre dans le menu déroulant
+      const groupe = document.createElement("optgroup");
+      groupe.label = titre;
+      budget.bocaux.filter((b) => b.compte === compte).forEach((b) => ajouterOption(groupe, b));
+      depenseBocal.appendChild(groupe);
+    });
+  } else {
+    budget.bocaux.forEach((b) => ajouterOption(depenseBocal, b));
+  }
+
+  // Le bocal proposé : celui de la dépense, ou le dernier utilisé
+  const existe = budget.bocaux.some((b) => b.id === bocalChoisi);
+  if (existe) depenseBocal.value = bocalChoisi;
 }
 
 // Le menu « payé par » (à deux seulement)
@@ -415,7 +785,7 @@ function ouvrirFeuilleDepense(depense) {
     ? "Enregistrer"
     : "Noter";
 
-  afficherChoixBocaux(depense ? depense.bocalId : null);
+  afficherChoixBocaux(depense ? depense.bocalId : budget.reglages.dernierBocal);
   afficherChoixPayePar(depense ? depense.payePar : budget.reglages.aDeux ? "commun" : "moi");
   document.getElementById("depense-options-a-deux").hidden = !budget.reglages.aDeux;
 
@@ -466,8 +836,8 @@ formDepense.addEventListener("submit", (evenement) => {
   evenement.preventDefault();
 
   const montant = Number(depenseMontant.value);
-  const bocalCoche = formDepense.querySelector('input[name="depense-bocal"]:checked');
-  if (montant <= 0 || !bocalCoche) return;
+  const bocalId = Number(depenseBocal.value);
+  if (montant <= 0 || !bocalId) return;
 
   // La date choisie
   const quand = formDepense.querySelector('input[name="depense-quand"]:checked').value;
@@ -477,7 +847,7 @@ formDepense.addEventListener("submit", (evenement) => {
 
   const valeurs = {
     montant: montant,
-    bocalId: Number(bocalCoche.value),
+    bocalId: bocalId,
     date: date,
     note: depenseNote.value.trim(),
     payePar: budget.reglages.aDeux
@@ -492,11 +862,14 @@ formDepense.addEventListener("submit", (evenement) => {
     // auteurId : qui a noté la dépense (utile le jour où le foyer sera partagé)
     budget.depenses.push({ id: Date.now(), ...valeurs, auteurId: "moi" });
   }
+  // On retient le bocal, pour le proposer la prochaine fois
+  budget.reglages.dernierBocal = bocalId;
 
+  const etaitUneModification = Boolean(depenseEnModification);
   sauvegarderBudget();
   fermerFeuilleDepense();
   afficherMois();
-  montrerPetitMessage("Dépense notée 🌱");
+  montrerPetitMessage(etaitUneModification ? "Dépense modifiée 🌱" : "Dépense notée 🌱");
 });
 
 // Un petit message qui apparaît puis disparaît tout seul

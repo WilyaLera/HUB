@@ -833,3 +833,279 @@
   font-weight: 700;
   z-index: 30;
 }
+
+/* =====================================================
+   Les boutons ⓘ
+   ===================================================== */
+
+.titre-carte {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.titre-carte h2 {
+  margin: 0 !important;
+}
+
+.bouton-info {
+  -webkit-tap-highlight-color: transparent;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1.5px solid var(--texte-doux);
+  border-radius: 50%;
+  background: transparent;
+  font-family: var(--police-titre);
+  font-size: 13px;
+  font-style: italic;
+  font-weight: 700;
+  color: var(--texte-doux);
+  cursor: pointer;
+}
+
+.bouton-info.ouvert {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+/* L'explication qui s'ouvre */
+.info {
+  margin: 0 0 12px !important;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--fond);
+  font-size: 14px;
+  color: var(--texte-doux);
+}
+
+/* =====================================================
+   Mon mois, version plus claire
+   ===================================================== */
+
+.mois-entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.mois-entete h2 {
+  margin: 0 !important;
+}
+
+.pastille-info {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--fond);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texte-doux);
+  white-space: nowrap;
+}
+
+.carte-mois {
+  text-align: center;
+}
+
+.carte-mois .mois-entete {
+  text-align: left;
+}
+
+.montant-grand {
+  margin-top: 14px !important;
+  font-size: 40px;
+  line-height: 1.1;
+}
+
+.pastille-douce {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--fond);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--sauge);
+}
+
+.carte-mois .barre-mois {
+  margin-top: 18px;
+}
+
+.legende {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: var(--texte-doux);
+  text-align: left;
+}
+
+.puce {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.puce-depense {
+  background: var(--sauge);
+}
+
+.puce-repere {
+  width: 3px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--texte);
+}
+
+.rythme {
+  margin: 12px 0 0 !important;
+  font-size: 14px;
+  color: var(--texte-doux);
+}
+
+/* ---------- Mes comptes ---------- */
+
+.compte {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--fond);
+}
+
+.compte:first-child {
+  margin-top: 0;
+}
+
+.compte-haut {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.compte-haut .lien-petit {
+  margin: 0;
+}
+
+.compte-solde {
+  margin: 6px 0 0 !important;
+  font-family: var(--police-titre);
+  font-size: 26px;
+}
+
+.message-compte {
+  margin: 10px 0 0 !important;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--sauge);
+}
+
+/* Le petit formulaire « montant + Valider + Annuler » */
+.form-paiement {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.form-paiement input {
+  flex: 1;
+  min-width: 110px;
+  padding: 8px 10px;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  background: var(--carte);
+  font-family: var(--police-texte);
+  font-size: 16px;
+  color: var(--texte);
+}
+
+/* ---------- Les bocaux dessinés ---------- */
+
+.bocal-mois {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.bocal-dessin {
+  position: relative;
+  flex-shrink: 0;
+  width: 38px;
+  height: 46px;
+  margin-top: 6px;
+  border: 3px solid var(--trait);
+  border-top-width: 2px;
+  border-radius: 8px 8px 14px 14px;
+  background: var(--carte);
+  overflow: hidden;
+}
+
+/* Le couvercle */
+.bocal-mois .bocal-dessin::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: var(--trait);
+  z-index: 1;
+}
+
+/* Ce qu'il y a dedans : sa hauteur baisse au fil des dépenses */
+.bocal-contenu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--sauge);
+  transition: height 0.4s;
+}
+
+.bocal-contenu.bocal-presque-vide {
+  background: var(--miel);
+}
+
+.bocal-reste {
+  font-weight: 700;
+}
+
+/* ---------- Les charges du mois ---------- */
+
+.charge-mois {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--trait);
+}
+
+.charge-mois:last-child {
+  border-bottom: none;
+}
+
+.charge-mois .sous-titre {
+  font-size: 13px;
+}
+
+/* Une charge payée : plus discrète */
+.charge-payee {
+  opacity: 0.6;
+}
+
+.charge-payee strong {
+  text-decoration: line-through;
+}

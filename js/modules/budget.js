@@ -35,12 +35,16 @@ const budgetParDefaut = {
     partage: "salaires", // "salaires" ou "moitie"
     virementAjuste: { moi: null, partenaire: null }, // null = calculé
     argentPerso: { moi: 0, partenaire: 0 }, // pour « Tout en commun »
+    reserve: "courant", // l'argent des grosses échéances : "courant" ou "livret"
+    dernierBocal: null, // le dernier bocal utilisé (proposé en premier)
   },
   revenus: [], // { id, nom, montant, personne: "moi" | "partenaire" }
   chargesFixes: [], // { id, nom, montant, frequence, prochaineEcheance, compte }
   bocaux: bocauxDeDepart, // { id, nom, montant, compte }
   epargneMensuelle: 0,
   depenses: [], // { id, montant, bocalId, date, note, payePar, auteurId }
+  paiements: [], // charges payées : { id, chargeId, montant, date, periode, echeanceAvant }
+  soldes: {}, // soldes réels notés : { commun: { montant, quand }, perso: { … } }
 };
 
 const budget = charger("budget", budgetParDefaut);
@@ -53,6 +57,8 @@ budget.reglages = { ...budgetParDefaut.reglages, ...budget.reglages };
 if (!budget.bocaux) budget.bocaux = bocauxDeDepart;
 if (budget.epargneMensuelle === undefined) budget.epargneMensuelle = 0;
 if (!budget.depenses) budget.depenses = [];
+if (!budget.paiements) budget.paiements = [];
+if (!budget.soldes) budget.soldes = {};
 
 function sauvegarderBudget() {
   sauvegarder("budget", budget);
@@ -274,7 +280,17 @@ function afficherReglages() {
     element.hidden = !reglages.aDeux;
   });
   blocJourSalaire.hidden = reglages.debutMois !== "salaire";
+  document.querySelector(`input[name="reserve"][value="${reglages.reserve}"]`).checked = true;
 }
+
+// Où est gardé l'argent des grosses échéances
+document.querySelectorAll('input[name="reserve"]').forEach((bouton) => {
+  bouton.addEventListener("change", () => {
+    budget.reglages.reserve = bouton.value;
+    sauvegarderBudget();
+    afficherMois();
+  });
+});
 
 // Seul·e / À deux
 document.querySelectorAll('input[name="mode"]').forEach((bouton) => {

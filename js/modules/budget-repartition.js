@@ -219,12 +219,10 @@ function ouvrirExplication(part, montant) {
   document.getElementById("explication-texte").textContent = explication.texte;
   explicationBarre.className = `explication explication-${part}`;
   explicationBarre.hidden = false;
-  document.getElementById("indice-barre").hidden = true;
 }
 
 document.getElementById("fermer-explication").addEventListener("click", () => {
   explicationBarre.hidden = true;
-  document.getElementById("indice-barre").hidden = false;
 });
 
 // ---------- 5. Le « sans rôle » ----------
