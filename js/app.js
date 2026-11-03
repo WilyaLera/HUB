@@ -5,8 +5,22 @@
 // quand TOUS les fichiers sont chargés.
 // =====================================================
 
-// Le Budget est réparti sur 2 fichiers : on le dessine une fois qu'ils sont là
+// L'appli installable : on lance le petit assistant hors ligne
+// (en premier, pour qu'il démarre même si autre chose coince plus bas)
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+
+// On demande au navigateur de ne JAMAIS vider notre tiroir tout seul
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persist();
+}
+
+// Le Budget est réparti sur 3 fichiers : on le dessine une fois qu'ils sont là
 afficherBudget();
 
-// Dessine toutes les icônes Lucide (en dernier, quand tout le HTML est prêt)
-lucide.createIcons();
+// Dessine toutes les icônes Lucide (en dernier, quand tout le HTML est prêt).
+// Le « if » : si Lucide n'a pas pu se charger (pas de réseau), on n'insiste pas
+if (window.lucide) {
+  lucide.createIcons();
+}

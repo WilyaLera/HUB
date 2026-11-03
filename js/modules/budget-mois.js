@@ -764,6 +764,7 @@ function afficherMois() {
   afficherChargesDuMois(periode);
   afficherEcheances(periode);
   afficherDernieresDepenses(depensesPeriode);
+  afficherEtatSauvegarde(); // dans sauvegarde.js : le petit rappel
 }
 
 // =====================================================

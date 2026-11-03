@@ -93,4 +93,5 @@ formTache.addEventListener("submit", (evenement) => {
 
 //Carte Budget//
 // Elle affiche maintenant les VRAIES données du Budget :
-// c'est budget-mois.js qui la remplit (fonction afficherCarteAccueil).
+// c'est budget-mois.js qui la remplit, avec la même fonction que la carte
+// de « Mon mois » : afficherResume("accueil", …).

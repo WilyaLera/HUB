@@ -1168,3 +1168,29 @@
 .resume-detail .ligne-info {
   margin: 2px 0 !important;
 }
+
+/* =====================================================
+   Sauvegarde
+   ===================================================== */
+
+.rappel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  border: 2px dashed var(--miel);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+#moi .bouton-large {
+  margin-top: 12px;
+}
+
+/* Pas de flash gris quand on touche un bouton sur téléphone */
+button {
+  -webkit-tap-highlight-color: transparent;
+}

@@ -2,7 +2,17 @@
 <html lang="fr" data-theme="">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <!-- L'appli installable (PWA) -->
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#f6efe4" />
+    <link rel="icon" href="image/icone-192.png" />
+    <link rel="apple-touch-icon" href="image/icone-apple-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Mon Hub" />
     <title>Mon Hub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -10,9 +20,9 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=10" />
-    <link rel="stylesheet" href="css/navigation.css?v=10" />
-    <link rel="stylesheet" href="css/budget.css?v=10" />
+    <link rel="stylesheet" href="css/base.css?v=11" />
+    <link rel="stylesheet" href="css/navigation.css?v=11" />
+    <link rel="stylesheet" href="css/budget.css?v=11" />
   </head>
 
   <body>
@@ -123,6 +133,14 @@
             <label class="pastille">
               <input type="radio" name="filtre-mois" value="perso" /> Perso
             </label>
+          </div>
+
+          <!-- Petit rappel de sauvegarde (si ça fait longtemps) -->
+          <div id="rappel-sauvegarde" class="rappel" hidden>
+            <span>Pense à sauvegarder tes chiffres 💾</span>
+            <button type="button" id="bouton-rappel-sauvegarder" class="bouton-petit">
+              Sauvegarder
+            </button>
           </div>
 
           <!-- Ce qu'il reste : UN grand chiffre -->
@@ -578,6 +596,40 @@
       <!-- Module Moi -->
       <section id="moi" class="ecran">
         <h1>Moi</h1>
+
+        <!-- Mes données : sauvegarder et restaurer -->
+        <article class="carte">
+          <div class="titre-carte">
+            <h2>Mes données</h2>
+            <button
+              type="button"
+              class="bouton-info"
+              data-info="info-donnees"
+              aria-label="En savoir plus"
+            >
+              i
+            </button>
+          </div>
+          <p id="info-donnees" class="info" hidden>
+            Tes données vivent seulement dans ce téléphone. Une sauvegarde en
+            fait une copie dans un fichier, à garder ailleurs (Drive, mail,
+            Fichiers…). Si tu changes de téléphone ou si le navigateur est
+            vidé, « Restaurer » remet tout comme avant.
+          </p>
+          <p id="etat-sauvegarde" class="sous-titre"></p>
+          <button type="button" id="bouton-sauvegarder" class="bouton bouton-large">
+            Sauvegarder mes données
+          </button>
+          <button type="button" id="bouton-restaurer" class="bouton-ajout">
+            Restaurer une sauvegarde
+          </button>
+          <input
+            id="champ-restaurer"
+            type="file"
+            accept=".json,application/json"
+            hidden
+          />
+        </article>
       </section>
     </main>
 
@@ -675,13 +727,14 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=10"></script>
-    <script src="js/modules/navigation.js?v=10"></script>
-    <script src="js/modules/infos.js?v=10"></script>
-    <script src="js/modules/accueil.js?v=10"></script>
-    <script src="js/modules/budget.js?v=10"></script>
-    <script src="js/modules/budget-repartition.js?v=10"></script>
-    <script src="js/modules/budget-mois.js?v=10"></script>
-    <script src="js/app.js?v=10"></script>
+    <script src="js/donnees/stockage.js?v=11"></script>
+    <script src="js/modules/navigation.js?v=11"></script>
+    <script src="js/modules/infos.js?v=11"></script>
+    <script src="js/modules/accueil.js?v=11"></script>
+    <script src="js/modules/budget.js?v=11"></script>
+    <script src="js/modules/budget-repartition.js?v=11"></script>
+    <script src="js/modules/budget-mois.js?v=11"></script>
+    <script src="js/donnees/sauvegarde.js?v=11"></script>
+    <script src="js/app.js?v=11"></script>
   </body>
 </html>

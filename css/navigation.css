@@ -46,3 +46,14 @@
 .onglet.actif {
   color: var(--accent);
 }
+
+/* Sur iPhone, l'appli installée va jusqu'en bas de l'écran :
+   on laisse la place à la petite barre du téléphone */
+.barre-nav {
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
+}
+
+/* Et en haut, la place de l'heure et de la batterie */
+.ecran {
+  padding-top: calc(20px + env(safe-area-inset-top));
+}
