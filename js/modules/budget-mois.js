@@ -223,8 +223,11 @@ function afficherResume(prefixe, periode, depensesPeriode, avecFiltre) {
     rentreesEnPlus,
   } = calculerRecap(periode, depensesPeriode, avecFiltre);
 
-  // Le même titre partout : « Budget de novembre »
-  element("titre").textContent = titreDuMois(periode);
+  // Accueil : « Budget » (la date est déjà tout en haut de l'Accueil)
+  // Mon mois : le nom du mois, « Novembre »
+  const nomMois = nomDuMoisDe(periode);
+  element("titre").textContent =
+    prefixe === "accueil" ? "Budget" : nomMois[0].toUpperCase() + nomMois.slice(1);
   element("jours").textContent = texteJoursRestants(periode.joursRestants);
 
   // LE grand chiffre : tout ce qu'il reste à dépenser ce mois-ci
