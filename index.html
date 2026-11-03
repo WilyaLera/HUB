@@ -20,9 +20,9 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=13" />
-    <link rel="stylesheet" href="css/navigation.css?v=13" />
-    <link rel="stylesheet" href="css/budget.css?v=13" />
+    <link rel="stylesheet" href="css/base.css?v=14" />
+    <link rel="stylesheet" href="css/navigation.css?v=14" />
+    <link rel="stylesheet" href="css/budget.css?v=14" />
   </head>
 
   <body>
@@ -260,7 +260,7 @@
 
           <!-- Les dépenses du mois -->
           <article class="carte">
-            <h2>Dépenses du mois</h2>
+            <h2>Mouvements du mois</h2>
             <div id="mois-depenses" class="liste-budget"></div>
           </article>
         </div>
@@ -547,6 +547,54 @@
             </form>
           </article>
 
+          <!-- Mes raccourcis de saisie -->
+          <article class="carte">
+            <div class="titre-carte">
+              <h2>Mes raccourcis</h2>
+              <button
+                type="button"
+                class="bouton-info"
+                data-info="info-raccourcis"
+                aria-label="En savoir plus"
+              >
+                i
+              </button>
+            </div>
+            <p id="info-raccourcis" class="info" hidden>
+              Tes dépenses habituelles (« Courses du samedi », « Plein
+              d'essence »…). Quand tu notes une dépense, un toucher sur un
+              raccourci remplit le montant et le bocal. Le petit point de la
+              semaine te les propose aussi.
+            </p>
+            <div id="liste-raccourcis" class="liste-budget"></div>
+            <button type="button" class="bouton-ajout" data-formulaire="form-raccourci">
+              <span class="plus-rond">+</span> Ajouter un raccourci
+            </button>
+            <form id="form-raccourci" class="formulaire" hidden>
+              <p class="formulaire-titre" data-titre-ajout="Ajouter un raccourci">
+                Ajouter un raccourci
+              </p>
+              <input
+                id="raccourci-nom"
+                type="text"
+                placeholder="Ex. : Courses du samedi"
+                required
+              />
+              <input
+                id="raccourci-montant"
+                type="number"
+                min="1"
+                inputmode="numeric"
+                placeholder="Montant habituel"
+                required
+              />
+              <select id="raccourci-bocal"></select>
+              <select id="raccourci-paye-par" class="si-a-deux"></select>
+              <button type="submit" class="bouton">Ajouter</button>
+              <button type="button" class="bouton-annuler">Annuler</button>
+            </form>
+          </article>
+
           <!-- Épargne -->
           <article class="carte">
             <div class="titre-carte">
@@ -787,6 +835,19 @@
           </button>
         </div>
 
+        <!-- Dépense ou rentrée d'argent ? -->
+        <div class="choix-vue choix-type">
+          <label>
+            <input type="radio" name="depense-type" value="depense" /> Dépense
+          </label>
+          <label>
+            <input type="radio" name="depense-type" value="rentree" /> Rentrée
+          </label>
+        </div>
+
+        <!-- Les raccourcis : un toucher remplit le montant et le bocal -->
+        <div id="zone-raccourcis" class="choix raccourcis"></div>
+
         <label class="montant-saisie">
           <input
             id="depense-montant"
@@ -799,7 +860,9 @@
           <span>F</span>
         </label>
 
-        <label class="etiquette" for="depense-bocal">Dans quel bocal ?</label>
+        <label id="etiquette-bocal" class="etiquette" for="depense-bocal">
+          Dans quel bocal ?
+        </label>
         <select id="depense-bocal" class="champ-note"></select>
 
         <details id="depense-options" class="options">
@@ -830,9 +893,14 @@
           />
 
           <div id="depense-options-a-deux">
-            <p class="etiquette">Payé par</p>
+            <p id="etiquette-paye-par" class="etiquette">Payé par</p>
             <select id="depense-paye-par" class="champ-note"></select>
           </div>
+
+          <label id="bloc-garder-raccourci" class="point-oubli">
+            <input type="checkbox" id="garder-raccourci" />
+            Garder comme raccourci (la note sert de nom)
+          </label>
         </details>
 
         <button type="submit" class="bouton bouton-large">Noter</button>
@@ -890,16 +958,17 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=13"></script>
-    <script src="js/modules/navigation.js?v=13"></script>
-    <script src="js/modules/infos.js?v=13"></script>
-    <script src="js/modules/accueil.js?v=13"></script>
-    <script src="js/modules/budget.js?v=13"></script>
-    <script src="js/modules/budget-repartition.js?v=13"></script>
-    <script src="js/modules/budget-mois.js?v=13"></script>
-    <script src="js/modules/budget-epargne.js?v=13"></script>
-    <script src="js/modules/budget-point.js?v=13"></script>
-    <script src="js/donnees/sauvegarde.js?v=13"></script>
-    <script src="js/app.js?v=13"></script>
+    <script src="js/donnees/stockage.js?v=14"></script>
+    <script src="js/modules/navigation.js?v=14"></script>
+    <script src="js/modules/infos.js?v=14"></script>
+    <script src="js/modules/accueil.js?v=14"></script>
+    <script src="js/modules/budget.js?v=14"></script>
+    <script src="js/modules/budget-repartition.js?v=14"></script>
+    <script src="js/modules/budget-mois.js?v=14"></script>
+    <script src="js/modules/budget-raccourcis.js?v=14"></script>
+    <script src="js/modules/budget-epargne.js?v=14"></script>
+    <script src="js/modules/budget-point.js?v=14"></script>
+    <script src="js/donnees/sauvegarde.js?v=14"></script>
+    <script src="js/app.js?v=14"></script>
   </body>
 </html>

@@ -139,16 +139,65 @@ function afficherEtapeCharges() {
     ligne.append(caseACocher, nom, montant);
     contenuPoint.appendChild(ligne);
   });
+
+  // Tes habitudes (les raccourcis) : celles de la semaine qu'on a oublié de noter
+  if (budget.raccourcis.length > 0) {
+    const titre = document.createElement("p");
+    titre.classList.add("etiquette");
+    titre.textContent = "Tes habitudes : as-tu oublié d'en noter une cette semaine ?";
+    contenuPoint.appendChild(titre);
+
+    budget.raccourcis.forEach((raccourci) => {
+      const ligne = document.createElement("label");
+      ligne.classList.add("point-charge", "point-habitude");
+
+      const caseACocher = document.createElement("input");
+      caseACocher.type = "checkbox";
+      caseACocher.dataset.raccourciId = raccourci.id;
+
+      const nom = document.createElement("span");
+      nom.classList.add("point-charge-nom");
+      nom.textContent = raccourci.nom;
+
+      const montant = document.createElement("input");
+      montant.type = "number";
+      montant.inputMode = "numeric";
+      montant.value = raccourci.montant;
+      montant.classList.add("point-montant");
+      montant.setAttribute("aria-label", `Montant pour ${raccourci.nom}`);
+
+      ligne.append(caseACocher, nom, montant);
+      contenuPoint.appendChild(ligne);
+    });
+  }
 }
 
 function enregistrerEtapeCharges() {
   const periode = periodeEnCours();
-  contenuPoint.querySelectorAll(".point-charge").forEach((ligne) => {
+  contenuPoint.querySelectorAll(".point-charge:not(.point-habitude)").forEach((ligne) => {
     const caseACocher = ligne.querySelector('input[type="checkbox"]');
     if (!caseACocher.checked) return;
     const charge = budget.chargesFixes.find((c) => c.id === Number(caseACocher.dataset.chargeId));
     const montant = Number(ligne.querySelector(".point-montant").value);
     enregistrerPaiement(charge, montant, periode);
+  });
+
+  // Les habitudes cochées deviennent des dépenses d'aujourd'hui
+  contenuPoint.querySelectorAll(".point-habitude").forEach((ligne) => {
+    const caseACocher = ligne.querySelector('input[type="checkbox"]');
+    if (!caseACocher.checked) return;
+    const raccourci = budget.raccourcis.find(
+      (r) => r.id === Number(caseACocher.dataset.raccourciId),
+    );
+    budget.depenses.push({
+      id: nouvelId(),
+      montant: Number(ligne.querySelector(".point-montant").value),
+      bocalId: raccourci.bocalId,
+      date: dateEnTexte(aujourdhuiAMinuit()),
+      note: raccourci.nom,
+      payePar: raccourci.payePar || "moi",
+      auteurId: "moi",
+    });
   });
 }
 
@@ -264,7 +313,7 @@ function afficherEtapeBilan() {
   // Les dépenses des 7 derniers jours
   const ilYA7Jours = dateEnTexte(new Date(aujourdhuiAMinuit() - 6 * UN_JOUR));
   const semaine = sommer(
-    budget.depenses.filter((d) => d.date >= ilYA7Jours),
+    budget.depenses.filter((d) => d.date >= ilYA7Jours && !estRentree(d)),
     (d) => d.montant,
   );
 

@@ -1315,3 +1315,46 @@ button {
 .message-compte.montant-attention {
   color: var(--miel);
 }
+
+/* =====================================================
+   Raccourcis et rentrées
+   ===================================================== */
+
+/* L'interrupteur Dépense / Rentrée, en haut de la feuille */
+.choix-type {
+  display: inline-flex;
+  margin-top: 12px;
+}
+
+/* Les raccourcis : une rangée de pastilles qui défile sur le côté */
+.raccourcis {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  margin-top: 12px;
+  padding-bottom: 4px;
+}
+
+.pastille-raccourci {
+  flex-shrink: 0;
+  background: var(--fond);
+  font-family: var(--police-texte);
+  font-size: 14px;
+  color: var(--texte);
+  white-space: nowrap;
+}
+
+.pastille-raccourci.choisi {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* Une rentrée dans la liste du mois : le montant en sauge, avec son « + » */
+.ligne-rentree .ligne-budget-montant {
+  color: var(--sauge);
+}
+
+summary {
+  -webkit-tap-highlight-color: transparent;
+}

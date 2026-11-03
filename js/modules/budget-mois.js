@@ -127,10 +127,21 @@ function depensesDeLaPeriode(periode) {
   );
 }
 
-// Ce qui a été dépensé dans un bocal pendant la période
+// Une rentrée d'argent (remboursement, vente…) ou une dépense ?
+function estRentree(mouvement) {
+  return mouvement.type === "rentree";
+}
+
+// Une dépense compte en « + » dans ce qui sort, une rentrée en « − »
+function montantQuiSort(mouvement) {
+  return estRentree(mouvement) ? -mouvement.montant : mouvement.montant;
+}
+
+// Ce qui a été dépensé dans un bocal pendant la période.
+// Une rentrée remise dans le bocal (un remboursement) le remplit à nouveau.
 function depenseDansBocal(bocal, depensesPeriode) {
   const lesSiennes = depensesPeriode.filter((d) => d.bocalId === bocal.id);
-  return sommer(lesSiennes, (d) => d.montant);
+  return sommer(lesSiennes, montantQuiSort);
 }
 
 // Le filtre Tout / Commun / Perso (à deux seulement)
@@ -174,8 +185,17 @@ function calculerRecap(periode, depensesPeriode, avecFiltre) {
     (c) => c.montant,
   );
 
+  // Les rentrées « en plus » (pas remises dans un bocal) : de l'argent bonus
+  const rentreesEnPlus = sommer(
+    depensesPeriode.filter(
+      (d) => estRentree(d) && !d.bocalId && garder(compteDeDepense(d)),
+    ),
+    (d) => d.montant,
+  );
+
   // Le récap global
   return {
+    rentreesEnPlus,
     prevuVie,
     depenseVie,
     resteVie,
@@ -191,8 +211,17 @@ function afficherResume(prefixe, periode, depensesPeriode, avecFiltre) {
   // Petit raccourci : trouver un élément de CETTE carte
   const element = (nom) => document.getElementById(`${prefixe}-${nom}`);
   // Sur l'Accueil, pas de filtre : on montre toujours tout
-  const { prevuVie, depenseVie, resteVie, prevuCharges, resteCharges, prevu, depense, resteTotal } =
-    calculerRecap(periode, depensesPeriode, avecFiltre);
+  const {
+    prevuVie,
+    depenseVie,
+    resteVie,
+    prevuCharges,
+    resteCharges,
+    prevu,
+    depense,
+    resteTotal,
+    rentreesEnPlus,
+  } = calculerRecap(periode, depensesPeriode, avecFiltre);
 
   // Le même titre partout : « Budget de novembre »
   element("titre").textContent = titreDuMois(periode);
@@ -215,6 +244,10 @@ function afficherResume(prefixe, periode, depensesPeriode, avecFiltre) {
       `${formaterMontant(resteCharges)} sur ${formaterMontant(prevuCharges)}`,
     ),
   );
+  // Les rentrées en plus : montrées à part, sans gonfler « reste à dépenser »
+  if (rentreesEnPlus > 0) {
+    detail.appendChild(creerLigneInfo("Rentrées en plus", `+ ${formaterMontant(rentreesEnPlus)}`));
+  }
 
   // Par jour : seulement pour la vie courante (les charges ne se paient pas chaque jour)
   element("par-jour").hidden = resteVie <= 0;
@@ -296,8 +329,9 @@ function afficherBocauxDuMois(depensesPeriode) {
       if (bocal.montant === 0 && depense === 0) return;
 
       const resteBocal = bocal.montant - depense;
+      // Entre 0 (vide) et 1 (plein), même après un gros remboursement
       const partRestante =
-        bocal.montant > 0 ? Math.max(resteBocal / bocal.montant, 0) : 0;
+        bocal.montant > 0 ? Math.min(Math.max(resteBocal / bocal.montant, 0), 1) : 0;
 
       const ligne = document.createElement("div");
       ligne.classList.add("bocal-mois");
@@ -319,7 +353,10 @@ function afficherBocauxDuMois(depensesPeriode) {
       }
       const detail = document.createElement("span");
       detail.classList.add("sous-titre");
-      detail.textContent = `${formaterMontant(depense)} dépensés sur ${formaterMontant(bocal.montant)}`;
+      detail.textContent =
+        depense >= 0
+          ? `${formaterMontant(depense)} dépensés sur ${formaterMontant(bocal.montant)}`
+          : `${formaterMontant(-depense)} remboursés · prévu ${formaterMontant(bocal.montant)}`;
       if (vue === "barres") {
         // Vue « barres » : le nom et le reste sur une ligne, la jauge dessous
         const haut = document.createElement("div");
@@ -562,7 +599,7 @@ function soldeEstime(compte) {
   );
   return (
     solde.montant -
-    sommer(depensesApres, (d) => d.montant) -
+    sommer(depensesApres, montantQuiSort) -
     sommer(paiementsApres, (p) => p.montant)
   );
 }
@@ -631,10 +668,21 @@ function afficherDernieresDepenses(depensesPeriode) {
       detail = `${detail} · ${depense.payePar === "commun" ? "compte commun" : nomPersonne(depense.payePar)}`;
     }
 
+    // Une rentrée : « + 5 000 F », avec sa note comme titre
+    let titre = nomBocal(depense.bocalId);
+    let montant = formaterMontant(depense.montant);
+    if (estRentree(depense)) {
+      titre = depense.note || "Rentrée";
+      montant = `+ ${formaterMontant(depense.montant)}`;
+      detail = depense.bocalId
+        ? `${formaterDate(depense.date, false)} · remise dans ${nomBocal(depense.bocalId)}`
+        : `${formaterDate(depense.date, false)} · en plus`;
+    }
+
     const ligne = creerLigneBudget(
-      nomBocal(depense.bocalId),
+      titre,
       detail,
-      formaterMontant(depense.montant),
+      montant,
       () => ouvrirFeuilleDepense(depense),
       () => {
         budget.depenses = budget.depenses.filter((d) => d.id !== depense.id);
@@ -642,13 +690,14 @@ function afficherDernieresDepenses(depensesPeriode) {
         afficherMois();
       },
     );
+    ligne.classList.toggle("ligne-rentree", estRentree(depense));
     liste.appendChild(ligne);
   });
 
   if (triees.length === 0) {
     const vide = document.createElement("p");
     vide.classList.add("sous-titre");
-    vide.textContent = "Pas encore de dépense notée ce mois-ci.";
+    vide.textContent = "Pas encore de mouvement ce mois-ci.";
     liste.appendChild(vide);
   }
 }
@@ -675,7 +724,7 @@ function afficherMois() {
 }
 
 // =====================================================
-// 11. Noter une dépense : la « feuille » qui monte du bas
+// 11. Noter une dépense (ou une rentrée) : la « feuille » qui monte du bas
 // =====================================================
 
 const feuille = document.getElementById("feuille-depense");
@@ -685,12 +734,26 @@ const depenseMontant = document.getElementById("depense-montant");
 const depenseBocal = document.getElementById("depense-bocal");
 const depenseNote = document.getElementById("depense-note");
 const depenseDateAutre = document.getElementById("depense-date-autre");
+const depensePayePar = document.getElementById("depense-paye-par");
 
 let depenseEnModification = null;
 
-// Le menu déroulant des bocaux (rangés en Commun / Perso quand on est deux)
-function afficherChoixBocaux(bocalChoisi) {
-  depenseBocal.replaceChildren();
+// Le type choisi dans la feuille : "depense" ou "rentree"
+function typeChoisi() {
+  return formDepense.querySelector('input[name="depense-type"]:checked').value;
+}
+
+// Remplit un menu déroulant avec les bocaux (rangés en Commun / Perso à deux).
+// premiereOption : une option en plus, tout en haut (ex. « Non, c'est en plus »)
+function remplirMenuBocaux(menu, bocalChoisi, premiereOption) {
+  menu.replaceChildren();
+
+  if (premiereOption) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = premiereOption;
+    menu.appendChild(option);
+  }
 
   function ajouterOption(parent, bocal) {
     const option = document.createElement("option");
@@ -708,48 +771,80 @@ function afficherChoixBocaux(bocalChoisi) {
       const groupe = document.createElement("optgroup");
       groupe.label = titre;
       budget.bocaux.filter((b) => b.compte === compte).forEach((b) => ajouterOption(groupe, b));
-      depenseBocal.appendChild(groupe);
+      menu.appendChild(groupe);
     });
   } else {
-    budget.bocaux.forEach((b) => ajouterOption(depenseBocal, b));
+    budget.bocaux.forEach((b) => ajouterOption(menu, b));
   }
 
-  // Le bocal proposé : celui de la dépense, ou le dernier utilisé
   const existe = budget.bocaux.some((b) => b.id === bocalChoisi);
-  if (existe) depenseBocal.value = bocalChoisi;
+  if (existe) menu.value = bocalChoisi;
+  else if (premiereOption) menu.value = "";
 }
 
-// Le menu « payé par » (à deux seulement)
-function afficherChoixPayePar(valeur) {
-  const menu = document.getElementById("depense-paye-par");
+// Remplit le menu « payé par » (dépense) ou « reçue sur » (rentrée)
+function remplirMenuPayePar(menu, valeur, pourUneRentree) {
   menu.replaceChildren();
-  [
-    ["moi", "Moi"],
-    ["partenaire", nomPersonne("partenaire")],
-    ["commun", "Compte commun"],
-  ].forEach(([code, texte]) => {
+  const choix = pourUneRentree
+    ? [
+        ["moi", "Mon compte perso"],
+        ["commun", "Compte commun"],
+      ]
+    : [
+        ["moi", "Moi"],
+        ["partenaire", nomPersonne("partenaire")],
+        ["commun", "Compte commun"],
+      ];
+  choix.forEach(([code, texte]) => {
     const option = document.createElement("option");
     option.value = code;
     option.textContent = texte;
     menu.appendChild(option);
   });
-  menu.value = valeur;
+  if (valeur) menu.value = valeur;
 }
+
+// Adapte la feuille au type choisi : les mots changent, les raccourcis aussi
+function adapterFeuilleAuType(depense) {
+  const rentree = typeChoisi() === "rentree";
+
+  let titre = rentree ? "Nouvelle rentrée" : "Nouvelle dépense";
+  if (depense) titre = rentree ? "Modifier la rentrée" : "Modifier la dépense";
+  document.getElementById("feuille-titre").textContent = titre;
+  formDepense.querySelector('button[type="submit"]').textContent = depense ? "Enregistrer" : "Noter";
+
+  document.getElementById("etiquette-bocal").textContent = rentree
+    ? "Remettre dans un bocal ? (un remboursement, par exemple)"
+    : "Dans quel bocal ?";
+  const bocalChoisi = depense ? depense.bocalId : rentree ? null : budget.reglages.dernierBocal;
+  remplirMenuBocaux(depenseBocal, bocalChoisi, rentree ? "Non, c'est de l'argent en plus" : null);
+
+  document.getElementById("etiquette-paye-par").textContent = rentree ? "Reçue sur" : "Payé par";
+  const parDefaut = budget.reglages.aDeux ? "commun" : "moi";
+  remplirMenuPayePar(depensePayePar, depense ? depense.payePar : parDefaut, rentree);
+
+  depenseNote.placeholder = rentree ? "Ex. : remboursement mutuelle" : "Ex. : marché du samedi";
+
+  // Les raccourcis ne servent qu'aux dépenses, et pas en modification
+  afficherRaccourcisDansFeuille(!rentree && !depense);
+  document.getElementById("bloc-garder-raccourci").hidden = rentree || Boolean(depense);
+}
+
+document.querySelectorAll('input[name="depense-type"]').forEach((bouton) => {
+  bouton.addEventListener("change", () => {
+    const depense = budget.depenses.find((d) => d.id === depenseEnModification);
+    adapterFeuilleAuType(depense);
+  });
+});
 
 // Ouvre la feuille. Sans dépense : on en note une nouvelle. Avec : on la modifie.
 function ouvrirFeuilleDepense(depense) {
   formDepense.reset();
   depenseEnModification = depense ? depense.id : null;
 
-  document.getElementById("feuille-titre").textContent = depense
-    ? "Modifier la dépense"
-    : "Nouvelle dépense";
-  formDepense.querySelector('button[type="submit"]').textContent = depense
-    ? "Enregistrer"
-    : "Noter";
-
-  afficherChoixBocaux(depense ? depense.bocalId : budget.reglages.dernierBocal);
-  afficherChoixPayePar(depense ? depense.payePar : budget.reglages.aDeux ? "commun" : "moi");
+  const type = depense && estRentree(depense) ? "rentree" : "depense";
+  document.querySelector(`input[name="depense-type"][value="${type}"]`).checked = true;
+  adapterFeuilleAuType(depense);
   document.getElementById("depense-options-a-deux").hidden = !budget.reglages.aDeux;
 
   // La date : aujourd'hui par défaut
@@ -798,9 +893,11 @@ voile.addEventListener("click", fermerFeuilleDepense);
 formDepense.addEventListener("submit", (evenement) => {
   evenement.preventDefault();
 
+  const rentree = typeChoisi() === "rentree";
   const montant = Number(depenseMontant.value);
-  const bocalId = Number(depenseBocal.value);
-  if (montant <= 0 || !bocalId) return;
+  // Pour une rentrée, le bocal est facultatif ("" = en plus)
+  const bocalId = depenseBocal.value ? Number(depenseBocal.value) : null;
+  if (montant <= 0 || (!rentree && !bocalId)) return;
 
   // La date choisie
   const quand = formDepense.querySelector('input[name="depense-quand"]:checked').value;
@@ -813,26 +910,40 @@ formDepense.addEventListener("submit", (evenement) => {
     bocalId: bocalId,
     date: date,
     note: depenseNote.value.trim(),
-    payePar: budget.reglages.aDeux
-      ? document.getElementById("depense-paye-par").value
-      : "moi",
+    payePar: budget.reglages.aDeux ? depensePayePar.value : "moi",
+    type: rentree ? "rentree" : undefined,
   };
 
+  const etaitUneModification = Boolean(depenseEnModification);
   if (depenseEnModification) {
     const depense = budget.depenses.find((d) => d.id === depenseEnModification);
     Object.assign(depense, valeurs);
   } else {
     // auteurId : qui a noté la dépense (utile le jour où le foyer sera partagé)
-    budget.depenses.push({ id: Date.now(), ...valeurs, auteurId: "moi" });
+    budget.depenses.push({ id: nouvelId(), ...valeurs, auteurId: "moi" });
   }
-  // On retient le bocal, pour le proposer la prochaine fois
-  budget.reglages.dernierBocal = bocalId;
 
-  const etaitUneModification = Boolean(depenseEnModification);
+  if (!rentree) {
+    // On retient le bocal, pour le proposer la prochaine fois
+    budget.reglages.dernierBocal = bocalId;
+    // « Garder comme raccourci » : la note sert de nom (sinon, le nom du bocal)
+    if (document.getElementById("garder-raccourci").checked) {
+      budget.raccourcis.push({
+        id: nouvelId(),
+        nom: valeurs.note || nomBocal(bocalId),
+        montant: montant,
+        bocalId: bocalId,
+        payePar: valeurs.payePar,
+      });
+    }
+  }
+
   sauvegarderBudget();
   fermerFeuilleDepense();
-  afficherMois();
-  montrerPetitMessage(etaitUneModification ? "Dépense modifiée 🌱" : "Dépense notée 🌱");
+  afficherBudget();
+  let message = rentree ? "Rentrée notée 🌱" : "Dépense notée 🌱";
+  if (etaitUneModification) message = "C'est modifié 🌱";
+  montrerPetitMessage(message);
 });
 
 // Un petit message qui apparaît puis disparaît tout seul

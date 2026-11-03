@@ -43,7 +43,9 @@ const budgetParDefaut = {
   chargesFixes: [], // { id, nom, montant, frequence, prochaineEcheance, compte }
   bocaux: bocauxDeDepart, // { id, nom, montant, compte }
   epargneMensuelle: 0,
-  depenses: [], // { id, montant, bocalId, date, note, payePar, auteurId }
+  depenses: [], // { id, montant, bocalId, date, note, payePar, auteurId, type }
+  // type : absent = une dépense ; "rentree" = de l'argent qui arrive
+  raccourcis: [], // { id, nom, montant, bocalId, payePar }
   paiements: [], // charges payées : { id, chargeId, montant, date, periode, echeanceAvant }
   soldes: {}, // soldes réels notés : { commun: { montant, quand }, perso: { … } }
   epargne: {
@@ -63,6 +65,7 @@ budget.reglages = { ...budgetParDefaut.reglages, ...budget.reglages };
 if (!budget.bocaux) budget.bocaux = bocauxDeDepart;
 if (budget.epargneMensuelle === undefined) budget.epargneMensuelle = 0;
 if (!budget.depenses) budget.depenses = [];
+if (!budget.raccourcis) budget.raccourcis = [];
 if (!budget.paiements) budget.paiements = [];
 if (!budget.soldes) budget.soldes = {};
 if (!budget.epargne) budget.epargne = { securite: 0, projets: [] };
@@ -604,5 +607,6 @@ function afficherBudget() {
   afficherRevenus();
   afficherCharges();
   afficherBocaux(); // dans budget-repartition.js
+  afficherRaccourcis(); // dans budget-raccourcis.js
   afficherTotaux(); // dans budget-repartition.js (qui redessine aussi Mon mois)
 }
