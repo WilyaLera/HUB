@@ -181,12 +181,8 @@ function afficherResume(prefixe, periode, depensesPeriode, avecFiltre) {
   const depense = depenseVie + payeCharges;
   const resteTotal = resteVie + resteCharges;
 
-  // Mon mois : « Novembre » ; Accueil : « Budget de novembre »
-  const nomMois = nomDuMoisDe(periode);
-  element("titre").textContent =
-    prefixe === "accueil"
-      ? titreDuMois(periode)
-      : nomMois[0].toUpperCase() + nomMois.slice(1);
+  // Le même titre partout : « Budget de novembre »
+  element("titre").textContent = titreDuMois(periode);
   element("jours").textContent = texteJoursRestants(periode.joursRestants);
 
   // LE grand chiffre : tout ce qu'il reste à dépenser ce mois-ci
@@ -202,7 +198,7 @@ function afficherResume(prefixe, periode, depensesPeriode, avecFiltre) {
       resteVie < 0,
     ),
     creerLigneInfo(
-      "Charges à payer",
+      "Charges",
       `${formaterMontant(resteCharges)} sur ${formaterMontant(prevuCharges)}`,
     ),
   );
