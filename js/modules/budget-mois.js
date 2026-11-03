@@ -152,10 +152,8 @@ document.querySelectorAll('input[name="filtre-mois"]').forEach((bouton) => {
 // La même carte sert deux fois : dans « Mon mois » (ids "mois-…")
 // et sur l'Accueil (ids "accueil-…"). Le « prefixe » dit laquelle remplir.
 
-function afficherResume(prefixe, periode, depensesPeriode, avecFiltre) {
-  // Petit raccourci : trouver un élément de CETTE carte
-  const element = (nom) => document.getElementById(`${prefixe}-${nom}`);
-  // Sur l'Accueil, pas de filtre : on montre toujours tout
+// Les chiffres du récap (sans rien afficher) : réutilisés par le point de la semaine
+function calculerRecap(periode, depensesPeriode, avecFiltre) {
   const garder = (compte) => !avecFiltre || passeLeFiltre(compte);
 
   // La vie courante : les bocaux
@@ -177,9 +175,24 @@ function afficherResume(prefixe, periode, depensesPeriode, avecFiltre) {
   );
 
   // Le récap global
-  const prevu = prevuVie + prevuCharges;
-  const depense = depenseVie + payeCharges;
-  const resteTotal = resteVie + resteCharges;
+  return {
+    prevuVie,
+    depenseVie,
+    resteVie,
+    prevuCharges,
+    resteCharges,
+    prevu: prevuVie + prevuCharges,
+    depense: depenseVie + payeCharges,
+    resteTotal: resteVie + resteCharges,
+  };
+}
+
+function afficherResume(prefixe, periode, depensesPeriode, avecFiltre) {
+  // Petit raccourci : trouver un élément de CETTE carte
+  const element = (nom) => document.getElementById(`${prefixe}-${nom}`);
+  // Sur l'Accueil, pas de filtre : on montre toujours tout
+  const { prevuVie, depenseVie, resteVie, prevuCharges, resteCharges, prevu, depense, resteTotal } =
+    calculerRecap(periode, depensesPeriode, avecFiltre);
 
   // Le même titre partout : « Budget de novembre »
   element("titre").textContent = titreDuMois(periode);
@@ -462,27 +475,7 @@ function creerFormulairePaiement(charge, periode) {
     const montant = Number(champ.value);
     if (montant < 0) return;
 
-    const paiement = {
-      id: Date.now(),
-      chargeId: charge.id,
-      montant: montant,
-      date: dateEnTexte(aujourdhuiAMinuit()),
-      periode: periode.debutTexte,
-      compte: compteDeCharge(charge),
-      echeanceAvant: null,
-    };
-
-    // Une grosse échéance passe à la suivante (on garde l'ancienne date au cas où)
-    if (charge.frequence > 1 && charge.prochaineEcheance) {
-      paiement.echeanceAvant = charge.prochaineEcheance;
-      let prochaine = ajouterMois(charge.prochaineEcheance, charge.frequence);
-      while (prochaine < periode.suivantTexte) {
-        prochaine = ajouterMois(prochaine, charge.frequence);
-      }
-      charge.prochaineEcheance = prochaine;
-    }
-
-    budget.paiements.push(paiement);
+    enregistrerPaiement(charge, montant, periode);
     chargeEnPaiement = null;
     sauvegarderBudget();
     afficherBudget();
@@ -493,6 +486,31 @@ function creerFormulairePaiement(charge, periode) {
   // On place le curseur dans le champ, prêt à corriger
   setTimeout(() => champ.focus(), 0);
   return formulaire;
+}
+
+// Note qu'une charge est payée (aussi utilisé par le point de la semaine)
+function enregistrerPaiement(charge, montant, periode) {
+  const paiement = {
+    id: nouvelId(),
+    chargeId: charge.id,
+    montant: montant,
+    date: dateEnTexte(aujourdhuiAMinuit()),
+    periode: periode.debutTexte,
+    compte: compteDeCharge(charge),
+    echeanceAvant: null,
+  };
+
+  // Une grosse échéance passe à la suivante (on garde l'ancienne date au cas où)
+  if (charge.frequence > 1 && charge.prochaineEcheance) {
+    paiement.echeanceAvant = charge.prochaineEcheance;
+    let prochaine = ajouterMois(charge.prochaineEcheance, charge.frequence);
+    while (prochaine < periode.suivantTexte) {
+      prochaine = ajouterMois(prochaine, charge.frequence);
+    }
+    charge.prochaineEcheance = prochaine;
+  }
+
+  budget.paiements.push(paiement);
 }
 
 // ---------- 6. Les prochaines échéances (après ce mois-ci) ----------
@@ -528,7 +546,8 @@ function afficherEcheances(periode) {
   });
 }
 
-// ---------- 7. Mes comptes : solde réel, solde estimé, surplus ----------
+// ---------- 7. Mes comptes : solde estimé et besoin d'ici la fin du mois ----------
+// (ils s'affichent dans le petit point de la semaine : budget-point.js)
 
 // Le solde estimé : le solde noté, moins tout ce qui a été noté APRÈS
 function soldeEstime(compte) {
@@ -586,118 +605,6 @@ function besoinJusquaFinDuMois(compte, periode, depensesPeriode) {
     besoin = besoin + reserveGardee(compte, periode);
   }
   return besoin;
-}
-
-// Le compte dont on est en train de noter le solde
-let compteEnMiseAJour = null;
-
-function afficherComptes(periode, depensesPeriode) {
-  const liste = document.getElementById("mois-comptes");
-  liste.replaceChildren();
-
-  comptesSuivis()
-    .filter((compte) => passeLeFiltre(compte))
-    .forEach((compte) => {
-      const bloc = document.createElement("div");
-      bloc.classList.add("compte");
-
-      // 1re ligne : le nom du compte, et « Mettre à jour »
-      const haut = document.createElement("div");
-      haut.classList.add("compte-haut");
-      const nom = document.createElement("strong");
-      nom.textContent = nomCompte(compte);
-      const lien = document.createElement("button");
-      lien.type = "button";
-      lien.classList.add("lien", "lien-petit");
-      lien.textContent = budget.soldes[compte] ? "Mettre à jour" : "Noter mon solde";
-      lien.addEventListener("click", () => {
-        compteEnMiseAJour = compte;
-        afficherComptes(periode, depensesPeriode);
-      });
-      haut.append(nom, lien);
-      bloc.appendChild(haut);
-
-      // Le petit formulaire pour noter le solde réel
-      if (compteEnMiseAJour === compte) {
-        bloc.appendChild(creerFormulaireSolde(compte));
-      }
-
-      const estime = soldeEstime(compte);
-      if (estime === null) {
-        const vide = document.createElement("p");
-        vide.classList.add("sous-titre");
-        vide.textContent = "Pas encore noté.";
-        bloc.appendChild(vide);
-      } else {
-        const montant = document.createElement("p");
-        montant.classList.add("compte-solde");
-        montant.textContent = formaterMontant(estime);
-        const quand = document.createElement("p");
-        quand.classList.add("sous-titre", "petit");
-        const solde = budget.soldes[compte];
-        quand.textContent = `Estimé · noté le ${formaterDate(dateEnTexte(new Date(solde.quand)), false)} : ${formaterMontant(solde.montant)}`;
-        bloc.append(montant, quand);
-
-        // Ce qu'il faut encore, et ce qui est en trop
-        const besoin = besoinJusquaFinDuMois(compte, periode, depensesPeriode);
-        bloc.appendChild(creerLigneInfo("Il faut encore d'ici la fin du mois", formaterMontant(besoin)));
-
-        const ecart = estime - besoin;
-        const message = document.createElement("p");
-        message.classList.add("message-compte");
-        if (ecart > 5000) {
-          message.textContent = `Environ ${formaterMontant(ecart)} ne servent pas ce mois-ci. Pourquoi ne pas les mettre de côté ? 🌱`;
-        } else if (ecart < -5000) {
-          message.textContent = `Il pourrait manquer environ ${formaterMontant(-ecart)} d'ici la fin du mois.`;
-          message.classList.add("montant-attention");
-        } else {
-          message.textContent = "Ton compte couvre juste ce qu'il faut 🌱";
-        }
-        bloc.appendChild(message);
-      }
-
-      liste.appendChild(bloc);
-    });
-}
-
-function creerFormulaireSolde(compte) {
-  const formulaire = document.createElement("form");
-  formulaire.classList.add("form-paiement");
-
-  const champ = document.createElement("input");
-  champ.type = "number";
-  champ.inputMode = "numeric";
-  champ.placeholder = "Ce qu'il y a vraiment";
-  champ.setAttribute("aria-label", `Solde réel de ${nomCompte(compte)}`);
-
-  const valider = document.createElement("button");
-  valider.type = "submit";
-  valider.classList.add("bouton-petit");
-  valider.textContent = "Valider";
-
-  const annuler = document.createElement("button");
-  annuler.type = "button";
-  annuler.classList.add("bouton-annuler");
-  annuler.textContent = "Annuler";
-  annuler.addEventListener("click", () => {
-    compteEnMiseAJour = null;
-    afficherMois();
-  });
-
-  formulaire.addEventListener("submit", (evenement) => {
-    evenement.preventDefault();
-    if (champ.value === "") return;
-    // quand : l'heure exacte. Tout ce qui sera noté APRÈS sera retiré du solde.
-    budget.soldes[compte] = { montant: Number(champ.value), quand: Date.now() };
-    compteEnMiseAJour = null;
-    sauvegarderBudget();
-    afficherMois();
-    montrerPetitMessage("Solde noté 🌱");
-  });
-
-  formulaire.append(champ, valider, annuler);
-  setTimeout(() => champ.focus(), 0);
-  return formulaire;
 }
 
 // ---------- 8. Les dépenses du mois ----------
@@ -759,7 +666,7 @@ function afficherMois() {
 
   afficherResume("mois", periode, depensesPeriode, true);
   afficherResume("accueil", periode, depensesPeriode, false);
-  afficherComptes(periode, depensesPeriode);
+  afficherCartePoint(); // dans budget-point.js
   afficherBocauxDuMois(depensesPeriode);
   afficherChargesDuMois(periode);
   afficherEcheances(periode);

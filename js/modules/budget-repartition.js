@@ -521,4 +521,5 @@ function afficherTotaux() {
   afficherSansRole(montants.sansRole);
   afficherVirements();
   afficherMois(); // dans budget-mois.js : le suivi dépend aussi du plan
+  afficherEpargne(); // dans budget-epargne.js
 }

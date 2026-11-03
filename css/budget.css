@@ -1202,3 +1202,116 @@ button {
 .explication-perso {
   border-left-color: color-mix(in srgb, var(--accent) 40%, var(--carte));
 }
+
+/* =====================================================
+   Épargne & projets
+   ===================================================== */
+
+.projet {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--trait);
+}
+
+.projet:last-child {
+  border-bottom: none;
+}
+
+.projet-zone {
+  width: 100%;
+}
+
+.projet .bocal-mois-haut {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.projet .bocal-mois-haut span {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.projet .sous-titre {
+  font-size: 13px;
+}
+
+.projet.en-cours {
+  border-bottom: none;
+}
+
+#securite-mois {
+  margin: 0 !important;
+}
+
+/* =====================================================
+   Le petit point de la semaine
+   ===================================================== */
+
+#feuille-point h3 {
+  margin: 16px 0 4px;
+  font-size: 20px;
+}
+
+.point-charge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--trait);
+  cursor: pointer;
+}
+
+.point-charge-nom {
+  flex: 1;
+  font-weight: 700;
+}
+
+.point-montant {
+  width: 100px;
+  padding: 8px;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  background: var(--fond);
+  font-family: var(--police-texte);
+  font-size: 16px;
+  text-align: right;
+}
+
+.point-compte {
+  margin-top: 12px;
+}
+
+.point-oubli {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.point-surplus {
+  margin-top: 12px;
+}
+
+.point-surplus .champ-note,
+.point-surplus .bouton-petit {
+  margin-top: 8px;
+}
+
+.point-boutons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.point-boutons .bouton {
+  flex: 1;
+}
+
+/* Un message « attention » reste en miel, même dans un compte */
+.message-compte.montant-attention {
+  color: var(--miel);
+}

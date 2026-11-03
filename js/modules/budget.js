@@ -46,6 +46,11 @@ const budgetParDefaut = {
   depenses: [], // { id, montant, bocalId, date, note, payePar, auteurId }
   paiements: [], // charges payées : { id, chargeId, montant, date, periode, echeanceAvant }
   soldes: {}, // soldes réels notés : { commun: { montant, quand }, perso: { … } }
+  epargne: {
+    securite: 0, // ce qu'il y a dans l'épargne de sécurité
+    projets: [], // { id, nom, objectif, dejaDeCote, parMois, date }
+  },
+  dernierPoint: null, // la date (Date.now()) du dernier petit point de la semaine
 };
 
 const budget = charger("budget", budgetParDefaut);
@@ -60,6 +65,8 @@ if (budget.epargneMensuelle === undefined) budget.epargneMensuelle = 0;
 if (!budget.depenses) budget.depenses = [];
 if (!budget.paiements) budget.paiements = [];
 if (!budget.soldes) budget.soldes = {};
+if (!budget.epargne) budget.epargne = { securite: 0, projets: [] };
+if (budget.dernierPoint === undefined) budget.dernierPoint = null;
 
 function sauvegarderBudget() {
   sauvegarder("budget", budget);
@@ -102,6 +109,15 @@ function miseDeCoteMensuelle(charge) {
 function nomPersonne(code) {
   if (code === "moi") return "Moi";
   return budget.reglages.prenomPartenaire || "L'autre personne";
+}
+
+// Un id unique, même si on en crée plusieurs dans la même milliseconde
+let dernierId = 0;
+function nouvelId() {
+  let id = Date.now();
+  if (id <= dernierId) id = dernierId + 1;
+  dernierId = id;
+  return id;
 }
 
 // Additionne une propriété dans une liste.

@@ -7,7 +7,7 @@
 // (comme les ?v= dans index.html) : l'assistant saura qu'il doit se mettre à jour.
 // =====================================================
 
-const VERSION = "mon-hub-v12";
+const VERSION = "mon-hub-v13";
 
 // Installation : rien à préparer, on prendra les fichiers au fil de l'eau
 self.addEventListener("install", () => {

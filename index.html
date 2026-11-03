@@ -20,9 +20,9 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=12" />
-    <link rel="stylesheet" href="css/navigation.css?v=12" />
-    <link rel="stylesheet" href="css/budget.css?v=12" />
+    <link rel="stylesheet" href="css/base.css?v=13" />
+    <link rel="stylesheet" href="css/navigation.css?v=13" />
+    <link rel="stylesheet" href="css/budget.css?v=13" />
   </head>
 
   <body>
@@ -171,26 +171,30 @@
             </button>
           </article>
 
-          <!-- Mes comptes : le solde réel -->
+          <!-- Le petit point de la semaine -->
           <article class="carte">
             <div class="titre-carte">
-              <h2>Mes comptes</h2>
+              <h2>Petit point de la semaine</h2>
               <button
                 type="button"
                 class="bouton-info"
-                data-info="info-comptes"
+                data-info="info-point"
                 aria-label="En savoir plus"
               >
                 i
               </button>
             </div>
-            <p id="info-comptes" class="info" hidden>
-              Quand tu veux, note ce qu'il y a vraiment sur ton compte.
-              Ensuite, chaque dépense et chaque charge notée comme payée est
-              retirée toute seule : tu vois un solde estimé, sans ouvrir l'appli
-              de ta banque. Quand ton salaire arrive, remets ton solde à jour.
+            <p id="info-point" class="info" hidden>
+              Une fois par semaine, 3 petites étapes : valider les charges
+              passées, comparer ton vrai solde avec celui de l'appli (et
+              rattraper un oubli), puis faire le bilan et mettre le surplus de
+              côté. Environ 3 minutes.
             </p>
-            <div id="mois-comptes"></div>
+            <p id="point-dernier" class="sous-titre"></p>
+            <div id="point-soldes"></div>
+            <button type="button" id="bouton-point" class="bouton bouton-large">
+              Faire mon petit point
+            </button>
           </article>
 
           <!-- Les bocaux -->
@@ -602,11 +606,127 @@
 
         <!-- Onglet 3 : Épargne & projets -->
         <div id="panneau-epargne" class="panneau-budget">
-          <article class="carte carte-bientot">
-            <h2>Bientôt ici 🌱</h2>
-            <p class="sous-titre">
-              Ton épargne de sécurité et tes projets arriveront plus tard.
+          <!-- Le total -->
+          <article class="carte carte-mois">
+            <div class="mois-entete">
+              <h2>Mon épargne</h2>
+            </div>
+            <p id="epargne-total" class="montant montant-grand"></p>
+            <p class="sous-titre">épargnés en tout</p>
+            <span id="epargne-projection" class="pastille-douce"></span>
+            <div id="epargne-repartition" class="resume-detail"></div>
+            <p id="epargne-message" class="rythme"></p>
+          </article>
+
+          <!-- L'épargne de sécurité -->
+          <article class="carte">
+            <div class="titre-carte">
+              <h2>Épargne de sécurité</h2>
+              <button
+                type="button"
+                class="bouton-info"
+                data-info="info-securite"
+                aria-label="En savoir plus"
+              >
+                i
+              </button>
+            </div>
+            <p id="info-securite" class="info" hidden>
+              Un coussin pour les coups durs (voiture en panne, perte de
+              travail…). L'objectif conseillé : 3 mois de dépenses, charges et
+              bocaux compris. Note ici ce qu'il y a vraiment sur ton livret.
             </p>
+            <p id="securite-mois" class="bocal-reste"></p>
+            <div id="securite-jauge"></div>
+            <div id="securite-detail"></div>
+            <button type="button" id="lien-securite" class="lien lien-petit">
+              Mettre à jour le montant
+            </button>
+            <div id="securite-formulaire"></div>
+          </article>
+
+          <!-- Les projets -->
+          <article class="carte">
+            <div class="titre-carte">
+              <h2>Mes projets</h2>
+              <button
+                type="button"
+                class="bouton-info"
+                data-info="info-projets"
+                aria-label="En savoir plus"
+              >
+                i
+              </button>
+            </div>
+            <p id="info-projets" class="info" hidden>
+              Un objectif, ce que tu as déjà, combien tu mets chaque mois, et
+              une date si tu en as une. L'appli te dit si tu es dans les temps,
+              ou quand tu y seras. Touche un projet pour le modifier.
+            </p>
+            <div id="liste-projets" class="liste-budget"></div>
+            <button type="button" class="bouton-ajout" data-formulaire="form-projet">
+              <span class="plus-rond">+</span> Ajouter un projet
+            </button>
+            <form id="form-projet" class="formulaire" hidden>
+              <p class="formulaire-titre" data-titre-ajout="Ajouter un projet">
+                Ajouter un projet
+              </p>
+              <input id="projet-nom" type="text" placeholder="Ex. : Voyage au Japon" required />
+              <input
+                id="projet-objectif"
+                type="number"
+                min="1"
+                inputmode="numeric"
+                placeholder="Objectif (en F)"
+                required
+              />
+              <input
+                id="projet-deja"
+                type="number"
+                min="0"
+                inputmode="numeric"
+                placeholder="Déjà de côté (facultatif)"
+              />
+              <input
+                id="projet-par-mois"
+                type="number"
+                min="0"
+                inputmode="numeric"
+                placeholder="Combien par mois"
+              />
+              <label class="champ">
+                Pour quand ? (facultatif)
+                <input id="projet-date" type="date" />
+              </label>
+              <button type="submit" class="bouton">Ajouter</button>
+              <button type="button" class="bouton-annuler">Annuler</button>
+              <button type="button" id="supprimer-projet" class="bouton-annuler" hidden>
+                Supprimer ce projet
+              </button>
+            </form>
+          </article>
+
+          <!-- L'argent des grosses échéances -->
+          <article id="carte-reserve" class="carte">
+            <div class="titre-carte">
+              <h2>Réservé aux grosses échéances</h2>
+              <button
+                type="button"
+                class="bouton-info"
+                data-info="info-reserve"
+                aria-label="En savoir plus"
+              >
+                i
+              </button>
+            </div>
+            <p id="info-reserve" class="info" hidden>
+              L'argent mis de côté chaque mois pour les charges à 3, 6 ou 12
+              mois. Ce n'est pas de l'épargne : il a déjà un rôle, et il partira
+              le jour de l'échéance.
+            </p>
+            <p id="reserve-total" class="compte-solde"></p>
+            <p id="reserve-ou" class="sous-titre petit"></p>
+            <div id="liste-reserve" class="resume-detail"></div>
           </article>
         </div>
       </section>
@@ -719,6 +839,31 @@
       </form>
     </div>
 
+    <!-- Le petit point de la semaine : une feuille en 3 étapes -->
+    <div id="feuille-point" class="feuille" hidden>
+      <div class="feuille-haut">
+        <div>
+          <h2>Petit point</h2>
+          <p id="point-etape" class="sous-titre petit"></p>
+        </div>
+        <button
+          type="button"
+          id="fermer-point"
+          class="bouton-supprimer"
+          aria-label="Fermer"
+        >
+          ✕
+        </button>
+      </div>
+      <div id="point-contenu"></div>
+      <div class="point-boutons">
+        <button type="button" id="point-retour" class="bouton-annuler">
+          Retour
+        </button>
+        <button type="button" id="point-suivant" class="bouton">Suivant</button>
+      </div>
+    </div>
+
     <!-- Petit message qui apparaît puis disparaît -->
     <p id="petit-message" class="petit-message" hidden></p>
 
@@ -745,14 +890,16 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=12"></script>
-    <script src="js/modules/navigation.js?v=12"></script>
-    <script src="js/modules/infos.js?v=12"></script>
-    <script src="js/modules/accueil.js?v=12"></script>
-    <script src="js/modules/budget.js?v=12"></script>
-    <script src="js/modules/budget-repartition.js?v=12"></script>
-    <script src="js/modules/budget-mois.js?v=12"></script>
-    <script src="js/donnees/sauvegarde.js?v=12"></script>
-    <script src="js/app.js?v=12"></script>
+    <script src="js/donnees/stockage.js?v=13"></script>
+    <script src="js/modules/navigation.js?v=13"></script>
+    <script src="js/modules/infos.js?v=13"></script>
+    <script src="js/modules/accueil.js?v=13"></script>
+    <script src="js/modules/budget.js?v=13"></script>
+    <script src="js/modules/budget-repartition.js?v=13"></script>
+    <script src="js/modules/budget-mois.js?v=13"></script>
+    <script src="js/modules/budget-epargne.js?v=13"></script>
+    <script src="js/modules/budget-point.js?v=13"></script>
+    <script src="js/donnees/sauvegarde.js?v=13"></script>
+    <script src="js/app.js?v=13"></script>
   </body>
 </html>
