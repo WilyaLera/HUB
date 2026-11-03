@@ -10,9 +10,9 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=7" />
-    <link rel="stylesheet" href="css/navigation.css?v=7" />
-    <link rel="stylesheet" href="css/budget.css?v=7" />
+    <link rel="stylesheet" href="css/base.css?v=9" />
+    <link rel="stylesheet" href="css/navigation.css?v=9" />
+    <link rel="stylesheet" href="css/budget.css?v=9" />
   </head>
 
   <body>
@@ -44,12 +44,28 @@
           <div id="liste-menu"></div>
         </article>
 
-        <!-- carte budget : la toucher ouvre le Budget -->
-        <article class="carte carte-touchable" data-ecran="budget">
-          <h2 id="titre-budget">Budget du mois</h2>
-          <p id="jours-restants" class="sous-titre"></p>
-          <p class="sous-titre">Il te reste</p>
-          <p id="montant-reste" class="montant"></p>
+        <!-- carte budget : la même que dans « Mon mois ». La toucher ouvre le Budget -->
+        <article class="carte carte-mois carte-touchable" data-ecran="budget">
+          <div class="mois-entete">
+            <h2 id="accueil-titre"></h2>
+            <span id="accueil-jours" class="pastille-info"></span>
+          </div>
+
+          <p id="accueil-reste" class="montant montant-grand"></p>
+          <p class="sous-titre">restent à dépenser ce mois-ci</p>
+          <div id="accueil-detail" class="resume-detail"></div>
+          <span id="accueil-par-jour" class="pastille-douce"></span>
+
+          <div class="barre-mois">
+            <div id="accueil-barre-remplie" class="barre-mois-remplie"></div>
+            <div id="accueil-repere" class="barre-mois-repere"></div>
+          </div>
+          <div class="legende">
+            <span><span class="puce puce-depense"></span>
+              <span id="accueil-legende-depense"></span></span>
+            <span><span class="puce puce-repere"></span> aujourd'hui</span>
+          </div>
+          <p id="accueil-rythme" class="rythme"></p>
         </article>
       </section>
 
@@ -117,7 +133,8 @@
             </div>
 
             <p id="mois-reste" class="montant montant-grand"></p>
-            <p class="sous-titre">restent pour ta vie courante</p>
+          <p class="sous-titre">restent à dépenser ce mois-ci</p>
+          <div id="mois-detail" class="resume-detail"></div>
             <span id="mois-par-jour" class="pastille-douce"></span>
 
             <div class="barre-mois">
@@ -160,7 +177,20 @@
 
           <!-- Les bocaux -->
           <article class="carte">
-            <h2>Mes bocaux</h2>
+            <div class="titre-carte titre-carte-entre">
+              <h2>Mes bocaux</h2>
+              <!-- Choisir la vue : bocaux dessinés ou barres -->
+              <div class="choix-vue">
+                <label>
+                  <input type="radio" name="vue-bocaux" value="bocaux" />
+                  Bocaux
+                </label>
+                <label>
+                  <input type="radio" name="vue-bocaux" value="barres" />
+                  Barres
+                </label>
+              </div>
+            </div>
             <div id="mois-bocaux"></div>
           </article>
 
@@ -645,13 +675,13 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=7"></script>
-    <script src="js/modules/navigation.js?v=7"></script>
-    <script src="js/modules/infos.js?v=7"></script>
-    <script src="js/modules/accueil.js?v=7"></script>
-    <script src="js/modules/budget.js?v=7"></script>
-    <script src="js/modules/budget-repartition.js?v=7"></script>
-    <script src="js/modules/budget-mois.js?v=7"></script>
-    <script src="js/app.js?v=7"></script>
+    <script src="js/donnees/stockage.js?v=9"></script>
+    <script src="js/modules/navigation.js?v=9"></script>
+    <script src="js/modules/infos.js?v=9"></script>
+    <script src="js/modules/accueil.js?v=9"></script>
+    <script src="js/modules/budget.js?v=9"></script>
+    <script src="js/modules/budget-repartition.js?v=9"></script>
+    <script src="js/modules/budget-mois.js?v=9"></script>
+    <script src="js/app.js?v=9"></script>
   </body>
 </html>

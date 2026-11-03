@@ -149,51 +149,90 @@ document.querySelectorAll('input[name="filtre-mois"]').forEach((bouton) => {
 });
 
 // ---------- 3. Le résumé du mois ----------
+// La même carte sert deux fois : dans « Mon mois » (ids "mois-…")
+// et sur l'Accueil (ids "accueil-…"). Le « prefixe » dit laquelle remplir.
 
-function afficherResumeMois(periode, depensesPeriode) {
-  const bocaux = budget.bocaux.filter((b) => passeLeFiltre(compteDeBocal(b)));
-  const prevu = sommer(bocaux, (b) => b.montant);
-  const depense = sommer(bocaux, (b) => depenseDansBocal(b, depensesPeriode));
-  const resteMois = prevu - depense;
+function afficherResume(prefixe, periode, depensesPeriode, avecFiltre) {
+  // Petit raccourci : trouver un élément de CETTE carte
+  const element = (nom) => document.getElementById(`${prefixe}-${nom}`);
+  // Sur l'Accueil, pas de filtre : on montre toujours tout
+  const garder = (compte) => !avecFiltre || passeLeFiltre(compte);
 
-  // « Novembre » avec une majuscule
-  const nomMois = nomDuMoisDe(periode);
-  document.getElementById("mois-titre").textContent =
-    nomMois[0].toUpperCase() + nomMois.slice(1);
-  document.getElementById("mois-jours").textContent = texteJoursRestants(
-    periode.joursRestants,
+  // La vie courante : les bocaux
+  const bocaux = budget.bocaux.filter((b) => garder(compteDeBocal(b)));
+  const prevuVie = sommer(bocaux, (b) => b.montant);
+  const depenseVie = sommer(bocaux, (b) => depenseDansBocal(b, depensesPeriode));
+  const resteVie = prevuVie - depenseVie;
+
+  // Les charges du mois : ce qui est prévu, ce qui est payé, ce qui reste à payer
+  const charges = chargesDuMois(periode).filter((c) => garder(compteDeCharge(c)));
+  const prevuCharges = sommer(charges, (c) => c.montant);
+  const payeCharges = sommer(charges, (c) => {
+    const paiement = paiementDuMois(c, periode);
+    return paiement ? paiement.montant : 0;
+  });
+  const resteCharges = sommer(
+    charges.filter((c) => !paiementDuMois(c, periode)),
+    (c) => c.montant,
   );
 
-  const elementReste = document.getElementById("mois-reste");
-  elementReste.textContent = formaterMontant(resteMois);
-  elementReste.classList.toggle("montant-attention", resteMois < 0);
+  // Le récap global
+  const prevu = prevuVie + prevuCharges;
+  const depense = depenseVie + payeCharges;
+  const resteTotal = resteVie + resteCharges;
 
-  // Combien par jour, pour se repérer
-  const parJour = document.getElementById("mois-par-jour");
-  parJour.hidden = resteMois <= 0;
-  parJour.textContent = `≈ ${formaterMontant(resteMois / periode.joursRestants)} par jour`;
+  // Mon mois : « Novembre » ; Accueil : « Budget de novembre »
+  const nomMois = nomDuMoisDe(periode);
+  element("titre").textContent =
+    prefixe === "accueil"
+      ? titreDuMois(periode)
+      : nomMois[0].toUpperCase() + nomMois.slice(1);
+  element("jours").textContent = texteJoursRestants(periode.joursRestants);
 
-  // La barre : ce qui est dépensé, et un petit trait pour « aujourd'hui »
+  // LE grand chiffre : tout ce qu'il reste à dépenser ce mois-ci
+  element("reste").textContent = formaterMontant(resteTotal);
+  element("reste").classList.toggle("montant-attention", resteTotal < 0);
+
+  // Le détail, en deux lignes « étiquette …… valeur »
+  const detail = element("detail");
+  detail.replaceChildren(
+    creerLigneInfo(
+      "Bocaux",
+      `${formaterMontant(resteVie)} sur ${formaterMontant(prevuVie)}`,
+      resteVie < 0,
+    ),
+    creerLigneInfo(
+      "Charges à payer",
+      `${formaterMontant(resteCharges)} sur ${formaterMontant(prevuCharges)}`,
+    ),
+  );
+
+  // Par jour : seulement pour la vie courante (les charges ne se paient pas chaque jour)
+  element("par-jour").hidden = resteVie <= 0;
+  element("par-jour").textContent =
+    `≈ ${formaterMontant(resteVie / periode.joursRestants)} par jour pour la vie courante`;
+
+  // La barre : tout ce qui est dépensé (bocaux + charges payées), et « aujourd'hui »
   const partDepensee = prevu > 0 ? Math.min(depense / prevu, 1) : 0;
   const partEcoulee = (periode.joursTotal - periode.joursRestants) / periode.joursTotal;
-  const remplie = document.getElementById("mois-barre-remplie");
-  remplie.style.width = `${partDepensee * 100}%`;
-  remplie.classList.toggle("remplie-attention", depense > prevu);
-  document.getElementById("mois-repere").style.left = `${partEcoulee * 100}%`;
-  document.getElementById("mois-legende-depense").textContent =
+  element("barre-remplie").style.width = `${partDepensee * 100}%`;
+  element("barre-remplie").classList.toggle("remplie-attention", depense > prevu);
+  element("repere").style.left = `${partEcoulee * 100}%`;
+  element("legende-depense").textContent =
     `${formaterMontant(depense)} dépensés sur ${formaterMontant(prevu)}`;
 
-  // La phrase douce sur le rythme
-  const rythme = document.getElementById("mois-rythme");
+  // La phrase douce sur le rythme (on regarde la vie courante)
+  const partVie = prevuVie > 0 ? depenseVie / prevuVie : 0;
+  const rythme = element("rythme");
   if (prevu === 0) {
-    rythme.textContent = "Remplis tes bocaux dans « Mon budget » pour suivre ton mois.";
-  } else if (resteMois < 0) {
-    rythme.textContent = `${formaterMontant(-resteMois)} de plus que prévu : pas de panique, on ajustera le mois prochain.`;
-  } else if (partDepensee <= partEcoulee + 0.05) {
+    rythme.textContent = "Remplis « Mon budget » pour suivre ton mois.";
+  } else if (resteVie < 0) {
+    rythme.textContent = `Vie courante : ${formaterMontant(-resteVie)} de plus que prévu. Pas de panique, on ajustera le mois prochain.`;
+  } else if (partVie <= partEcoulee + 0.05) {
     rythme.textContent = "Tu es dans le rythme du mois 🌱";
   } else {
     rythme.textContent =
-      "Un peu plus vite que le mois : rien de grave, garde juste un œil dessus.";
+      "La vie courante va un peu plus vite que le mois : rien de grave, garde juste un œil dessus.";
   }
 }
 
@@ -211,9 +250,34 @@ function creerBocalDessine(part, presqueVide) {
   return bocal;
 }
 
+// Fabrique une jauge horizontale (la vue « barres »)
+function creerJauge(part, presqueVide) {
+  const jauge = document.createElement("div");
+  jauge.classList.add("jauge");
+  const remplissage = document.createElement("div");
+  remplissage.classList.add("jauge-remplie");
+  remplissage.classList.toggle("jauge-presque-vide", presqueVide);
+  remplissage.style.width = `${part * 100}%`;
+  jauge.appendChild(remplissage);
+  return jauge;
+}
+
+// Le choix de la vue : "bocaux" (dessinés) ou "barres"
+document.querySelectorAll('input[name="vue-bocaux"]').forEach((bouton) => {
+  bouton.addEventListener("change", () => {
+    budget.reglages.vueBocaux = bouton.value;
+    sauvegarderBudget();
+    afficherMois();
+  });
+});
+
 function afficherBocauxDuMois(depensesPeriode) {
   const liste = document.getElementById("mois-bocaux");
   liste.replaceChildren();
+  // Si le réglage n'existe pas encore, on prend les bocaux dessinés
+  const vue = budget.reglages.vueBocaux || "bocaux";
+  document.querySelector(`input[name="vue-bocaux"][value="${vue}"]`).checked = true;
+  liste.classList.toggle("vue-barres", vue === "barres");
 
   budget.bocaux
     .filter((b) => passeLeFiltre(compteDeBocal(b)))
@@ -230,7 +294,7 @@ function afficherBocauxDuMois(depensesPeriode) {
       ligne.classList.add("bocal-mois");
 
       // Miel quand il reste moins d'un cinquième (jamais de rouge)
-      const dessin = creerBocalDessine(partRestante, partRestante < 0.2);
+      const presqueVide = partRestante < 0.2;
 
       const textes = document.createElement("div");
       textes.classList.add("ligne-budget-textes");
@@ -247,9 +311,18 @@ function afficherBocauxDuMois(depensesPeriode) {
       const detail = document.createElement("span");
       detail.classList.add("sous-titre");
       detail.textContent = `${formaterMontant(depense)} dépensés sur ${formaterMontant(bocal.montant)}`;
-      textes.append(nom, reste, detail);
-
-      ligne.append(dessin, textes);
+      if (vue === "barres") {
+        // Vue « barres » : le nom et le reste sur une ligne, la jauge dessous
+        const haut = document.createElement("div");
+        haut.classList.add("bocal-mois-haut");
+        haut.append(nom, reste);
+        textes.append(haut, creerJauge(partRestante, presqueVide), detail);
+        ligne.appendChild(textes);
+      } else {
+        // Vue « bocaux » : le petit bocal dessiné à gauche
+        textes.append(nom, reste, detail);
+        ligne.append(creerBocalDessine(partRestante, presqueVide), textes);
+      }
       liste.appendChild(ligne);
     });
 
@@ -337,7 +410,7 @@ function afficherChargesDuMois(periode) {
         const payer = document.createElement("button");
         payer.type = "button";
         payer.classList.add("bouton-petit");
-        payer.textContent = "C'est payé";
+        payer.textContent = "C'est payé ?";
         payer.addEventListener("click", () => {
           chargeEnPaiement = charge.id;
           afficherChargesDuMois(periode);
@@ -678,21 +751,7 @@ function afficherDernieresDepenses(depensesPeriode) {
 }
 
 // ---------- 9. La carte Budget de l'Accueil ----------
-
-function afficherCarteAccueil(periode, depensesPeriode) {
-  // L'Accueil montre toujours le total de TOUS les bocaux (sans filtre)
-  const resteTotal =
-    sommer(budget.bocaux, (b) => b.montant) -
-    sommer(budget.bocaux, (b) => depenseDansBocal(b, depensesPeriode));
-
-  document.getElementById("titre-budget").textContent = titreDuMois(periode);
-  document.getElementById("jours-restants").textContent = texteJoursRestants(
-    periode.joursRestants,
-  );
-  const elementReste = document.getElementById("montant-reste");
-  elementReste.textContent = formaterMontant(resteTotal);
-  elementReste.classList.toggle("montant-attention", resteTotal < 0);
-}
+// Elle utilise la même fonction que Mon mois : afficherResume("accueil", …)
 
 // ---------- 10. Tout « Mon mois » ----------
 
@@ -702,13 +761,13 @@ function afficherMois() {
   const periode = periodeEnCours();
   const depensesPeriode = depensesDeLaPeriode(periode);
 
-  afficherResumeMois(periode, depensesPeriode);
+  afficherResume("mois", periode, depensesPeriode, true);
+  afficherResume("accueil", periode, depensesPeriode, false);
   afficherComptes(periode, depensesPeriode);
   afficherBocauxDuMois(depensesPeriode);
   afficherChargesDuMois(periode);
   afficherEcheances(periode);
   afficherDernieresDepenses(depensesPeriode);
-  afficherCarteAccueil(periode, depensesPeriode);
 }
 
 // =====================================================

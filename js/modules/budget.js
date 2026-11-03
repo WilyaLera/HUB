@@ -37,6 +37,7 @@ const budgetParDefaut = {
     argentPerso: { moi: 0, partenaire: 0 }, // pour « Tout en commun »
     reserve: "courant", // l'argent des grosses échéances : "courant" ou "livret"
     dernierBocal: null, // le dernier bocal utilisé (proposé en premier)
+    vueBocaux: "bocaux", // "bocaux" (dessinés) ou "barres"
   },
   revenus: [], // { id, nom, montant, personne: "moi" | "partenaire" }
   chargesFixes: [], // { id, nom, montant, frequence, prochaineEcheance, compte }

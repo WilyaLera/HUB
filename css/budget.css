@@ -1109,3 +1109,62 @@
 .charge-payee strong {
   text-decoration: line-through;
 }
+
+/* =====================================================
+   Choix de la vue des bocaux (Bocaux / Barres)
+   ===================================================== */
+
+.titre-carte-entre {
+  justify-content: space-between;
+}
+
+/* Un petit interrupteur à deux positions */
+.choix-vue {
+  display: flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--fond);
+}
+
+.choix-vue label {
+  -webkit-tap-highlight-color: transparent;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texte-doux);
+  cursor: pointer;
+}
+
+.choix-vue input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.choix-vue label:has(input:checked) {
+  background: var(--carte);
+  color: var(--accent);
+  box-shadow: 0 1px 4px rgba(58, 46, 40, 0.12);
+}
+
+/* Vue « barres » : pas de bocal dessiné, le texte prend toute la place */
+.vue-barres .bocal-mois-haut {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Le détail du récap : vie courante et charges, une ligne chacune */
+.resume-detail {
+  margin: 12px 0 4px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--fond);
+  text-align: left;
+  font-size: 14px;
+}
+
+.resume-detail .ligne-info {
+  margin: 2px 0 !important;
+}
