@@ -53,6 +53,13 @@ const tachesParDefaut = [
 
 const taches = charger("taches", tachesParDefaut);
 
+const aujourdhuiTexte = dateEnTexte(aujourdhuiAMinuit());
+taches.forEach((tache) => {
+  if (!tache.date) {
+    tache.date = aujourdhuiTexte;
+  }
+});
+
 const listeTaches = document.getElementById("liste-taches");
 
 function afficherTache(tache) {
@@ -72,7 +79,7 @@ function afficherTache(tache) {
   ligne.append(tache.titre);
   listeTaches.appendChild(ligne);
 }
-taches.forEach(afficherTache);
+taches.filter((tache) => tache.date === aujourdhuiTexte).forEach(afficherTache);
 
 const formTache = document.getElementById("form-tache");
 const champTache = document.getElementById("champ-tache");
@@ -83,7 +90,12 @@ formTache.addEventListener("submit", (evenement) => {
   const titre = champTache.value.trim();
   if (!titre) return;
 
-  const nouvelle = { id: Date.now(), titre: titre, fait: false };
+  const nouvelle = {
+    id: Date.now(),
+    titre: titre,
+    fait: false,
+    date: aujourdhuiTexte,
+  };
   taches.push(nouvelle);
   sauvegarder("taches", taches);
   afficherTache(nouvelle);
