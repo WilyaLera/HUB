@@ -71,8 +71,10 @@
             <div id="accueil-repere" class="barre-mois-repere"></div>
           </div>
           <div class="legende">
-            <span><span class="puce puce-depense"></span>
-              <span id="accueil-legende-depense"></span></span>
+            <span
+              ><span class="puce puce-depense"></span>
+              <span id="accueil-legende-depense"></span
+            ></span>
             <span><span class="puce puce-repere"></span> aujourd'hui</span>
           </div>
           <p id="accueil-rythme" class="rythme"></p>
@@ -138,7 +140,11 @@
           <!-- Petit rappel de sauvegarde (si ça fait longtemps) -->
           <div id="rappel-sauvegarde" class="rappel" hidden>
             <span>Pense à sauvegarder tes chiffres 💾</span>
-            <button type="button" id="bouton-rappel-sauvegarder" class="bouton-petit">
+            <button
+              type="button"
+              id="bouton-rappel-sauvegarder"
+              class="bouton-petit"
+            >
               Sauvegarder
             </button>
           </div>
@@ -151,8 +157,8 @@
             </div>
 
             <p id="mois-reste" class="montant montant-grand"></p>
-          <p class="sous-titre">restent à dépenser ce mois-ci</p>
-          <div id="mois-detail" class="resume-detail"></div>
+            <p class="sous-titre">restent à dépenser ce mois-ci</p>
+            <div id="mois-detail" class="resume-detail"></div>
             <span id="mois-par-jour" class="pastille-douce"></span>
 
             <div class="barre-mois">
@@ -160,8 +166,10 @@
               <div id="mois-repere" class="barre-mois-repere"></div>
             </div>
             <div class="legende">
-              <span><span class="puce puce-depense"></span>
-                <span id="mois-legende-depense"></span></span>
+              <span
+                ><span class="puce puce-depense"></span>
+                <span id="mois-legende-depense"></span
+              ></span>
               <span><span class="puce puce-repere"></span> aujourd'hui</span>
             </div>
             <p id="mois-rythme" class="rythme"></p>
@@ -252,8 +260,8 @@
               </button>
             </div>
             <p id="info-echeances" class="info" hidden>
-              Les charges à 3, 6 ou 12 mois des prochains mois. L'argent est
-              mis de côté chaque mois pour elles : le jour venu, il est là.
+              Les charges à 3, 6 ou 12 mois des prochains mois. L'argent est mis
+              de côté chaque mois pour elles : le jour venu, il est là.
             </p>
             <div id="mois-echeances"></div>
           </article>
@@ -402,7 +410,11 @@
               Total par mois : <strong id="total-revenus"></strong>
             </p>
 
-            <button type="button" class="bouton-ajout" data-formulaire="form-revenu">
+            <button
+              type="button"
+              class="bouton-ajout"
+              data-formulaire="form-revenu"
+            >
               <span class="plus-rond">+</span> Ajouter un revenu
             </button>
             <form id="form-revenu" class="formulaire" hidden>
@@ -425,9 +437,7 @@
               />
               <select id="revenu-personne" class="si-a-deux"></select>
               <button type="submit" class="bouton">Ajouter</button>
-              <button type="button" class="bouton-annuler">
-                Annuler
-              </button>
+              <button type="button" class="bouton-annuler">Annuler</button>
             </form>
           </article>
 
@@ -445,17 +455,21 @@
               </button>
             </div>
             <p id="info-charges" class="info" hidden>
-              Tout ce qui revient : loyer, électricité, assurances,
-              abonnements… Pour celles qui tombent tous les 3, 6 ou 12 mois,
-              l'appli calcule combien mettre de côté chaque mois. Touche une
-              ligne pour la modifier.
+              Tout ce qui revient : loyer, électricité, assurances, abonnements…
+              Pour celles qui tombent tous les 3, 6 ou 12 mois, l'appli calcule
+              combien mettre de côté chaque mois. Touche une ligne pour la
+              modifier.
             </p>
             <div id="liste-charges" class="liste-budget"></div>
             <p class="total">
               À prévoir chaque mois : <strong id="total-charges"></strong>
             </p>
 
-            <button type="button" class="bouton-ajout" data-formulaire="form-charge">
+            <button
+              type="button"
+              class="bouton-ajout"
+              data-formulaire="form-charge"
+            >
               <span class="plus-rond">+</span> Ajouter une charge fixe
             </button>
             <form id="form-charge" class="formulaire" hidden>
@@ -494,9 +508,7 @@
                 <option value="perso">Mon compte perso</option>
               </select>
               <button type="submit" class="bouton">Ajouter</button>
-              <button type="button" class="bouton-annuler">
-                Annuler
-              </button>
+              <button type="button" class="bouton-annuler">Annuler</button>
             </form>
           </article>
 
@@ -515,15 +527,18 @@
             </div>
             <p id="info-bocaux" class="info" hidden>
               Un bocal par type de dépense : combien tu prévois chaque mois.
-              Règle le montant avec − et +, et touche un nom pour le
-              renommer.
+              Règle le montant avec − et +, et touche un nom pour le renommer.
             </p>
             <div id="liste-bocaux" class="liste-budget"></div>
             <p class="total">
               Total par mois : <strong id="total-bocaux"></strong>
             </p>
 
-            <button type="button" class="bouton-ajout" data-formulaire="form-bocal">
+            <button
+              type="button"
+              class="bouton-ajout"
+              data-formulaire="form-bocal"
+            >
               <span class="plus-rond">+</span> Ajouter un bocal
             </button>
             <form id="form-bocal" class="formulaire" hidden>
@@ -541,9 +556,7 @@
                 <option value="perso">Perso</option>
               </select>
               <button type="submit" class="bouton">Ajouter</button>
-              <button type="button" class="bouton-annuler">
-                Annuler
-              </button>
+              <button type="button" class="bouton-annuler">Annuler</button>
             </form>
           </article>
 
@@ -561,17 +574,24 @@
               </button>
             </div>
             <p id="info-raccourcis" class="info" hidden>
-              Tes dépenses habituelles (« Courses du samedi », « Plein
-              d'essence »…). Quand tu notes une dépense, un toucher sur un
-              raccourci remplit le montant et le bocal. Le petit point de la
-              semaine te les propose aussi.
+              Tes dépenses habituelles (« Courses du samedi », « Plein d'essence
+              »…). Quand tu notes une dépense, un toucher sur un raccourci
+              remplit le montant et le bocal. Le petit point de la semaine te
+              les propose aussi.
             </p>
             <div id="liste-raccourcis" class="liste-budget"></div>
-            <button type="button" class="bouton-ajout" data-formulaire="form-raccourci">
+            <button
+              type="button"
+              class="bouton-ajout"
+              data-formulaire="form-raccourci"
+            >
               <span class="plus-rond">+</span> Ajouter un raccourci
             </button>
             <form id="form-raccourci" class="formulaire" hidden>
-              <p class="formulaire-titre" data-titre-ajout="Ajouter un raccourci">
+              <p
+                class="formulaire-titre"
+                data-titre-ajout="Ajouter un raccourci"
+              >
                 Ajouter un raccourci
               </p>
               <input
@@ -609,8 +629,8 @@
               </button>
             </div>
             <p id="info-epargne" class="info" hidden>
-              Le détail (épargne de sécurité, projets) arrivera dans l'onglet
-              « Épargne & projets ».
+              Le détail (épargne de sécurité, projets) arrivera dans l'onglet «
+              Épargne & projets ».
             </p>
             <div class="ligne-budget ligne-epargne">
               <span class="ligne-budget-textes">
@@ -634,19 +654,23 @@
               </button>
             </div>
             <p id="info-virements" class="info" hidden>
-              Les charges fixes et les charges + vie courante + épargne :
-              chacun vire sa part sur le compte commun, calculée selon vos
-              salaires ou à 50 / 50. Tu peux l'ajuster avec − et +.
-              « Tout » : vos revenus arrivent tous sur le compte commun, qui
-              reverse à chacun son argent perso. Tes bocaux et tes charges
-              perso se paient avec le tien.
+              Les charges fixes et les charges + vie courante + épargne : chacun
+              vire sa part sur le compte commun, calculée selon vos salaires ou
+              à 50 / 50. Tu peux l'ajuster avec − et +. « Tout » : vos revenus
+              arrivent tous sur le compte commun, qui reverse à chacun son
+              argent perso. Tes bocaux et tes charges perso se paient avec le
+              tien.
             </p>
             <p id="intro-virements" class="sous-titre"></p>
             <p id="besoin-commun" class="montant"></p>
 
             <div id="liste-virements"></div>
             <p id="message-virements" class="sous-titre message-doux"></p>
-            <button type="button" id="lien-reglages-commun" class="lien lien-centre">
+            <button
+              type="button"
+              id="lien-reglages-commun"
+              class="lien lien-centre"
+            >
               Changer l'organisation
             </button>
           </article>
@@ -712,14 +736,23 @@
               ou quand tu y seras. Touche un projet pour le modifier.
             </p>
             <div id="liste-projets" class="liste-budget"></div>
-            <button type="button" class="bouton-ajout" data-formulaire="form-projet">
+            <button
+              type="button"
+              class="bouton-ajout"
+              data-formulaire="form-projet"
+            >
               <span class="plus-rond">+</span> Ajouter un projet
             </button>
             <form id="form-projet" class="formulaire" hidden>
               <p class="formulaire-titre" data-titre-ajout="Ajouter un projet">
                 Ajouter un projet
               </p>
-              <input id="projet-nom" type="text" placeholder="Ex. : Voyage au Japon" required />
+              <input
+                id="projet-nom"
+                type="text"
+                placeholder="Ex. : Voyage au Japon"
+                required
+              />
               <input
                 id="projet-objectif"
                 type="number"
@@ -748,7 +781,12 @@
               </label>
               <button type="submit" class="bouton">Ajouter</button>
               <button type="button" class="bouton-annuler">Annuler</button>
-              <button type="button" id="supprimer-projet" class="bouton-annuler" hidden>
+              <button
+                type="button"
+                id="supprimer-projet"
+                class="bouton-annuler"
+                hidden
+              >
                 Supprimer ce projet
               </button>
             </form>
@@ -799,11 +837,15 @@
           <p id="info-donnees" class="info" hidden>
             Tes données vivent seulement dans ce téléphone. Une sauvegarde en
             fait une copie dans un fichier, à garder ailleurs (Drive, mail,
-            Fichiers…). Si tu changes de téléphone ou si le navigateur est
-            vidé, « Restaurer » remet tout comme avant.
+            Fichiers…). Si tu changes de téléphone ou si le navigateur est vidé,
+            « Restaurer » remet tout comme avant.
           </p>
           <p id="etat-sauvegarde" class="sous-titre"></p>
-          <button type="button" id="bouton-sauvegarder" class="bouton bouton-large">
+          <button
+            type="button"
+            id="bouton-sauvegarder"
+            class="bouton bouton-large"
+          >
             Sauvegarder mes données
           </button>
           <button type="button" id="bouton-restaurer" class="bouton-ajout">
@@ -882,7 +924,12 @@
               jour
             </label>
           </div>
-          <input id="depense-date-autre" class="champ-date" type="date" hidden />
+          <input
+            id="depense-date-autre"
+            class="champ-date"
+            type="date"
+            hidden
+          />
 
           <p class="etiquette">Une petite note ?</p>
           <input
@@ -959,6 +1006,7 @@
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="js/donnees/stockage.js?v=15"></script>
+    <script src="js/outils/dates.js?v=15"></script>
     <script src="js/modules/navigation.js?v=15"></script>
     <script src="js/modules/infos.js?v=15"></script>
     <script src="js/modules/accueil.js?v=15"></script>
