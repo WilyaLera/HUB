@@ -179,6 +179,11 @@ const explicationsBarre = {
     texte:
       "Ce que tu mets de côté pour toi : ta sécurité et tes projets. Le détail arrivera dans l'onglet « Épargne & projets ».",
   },
+  perso: {
+    titre: "Argent perso",
+    texte:
+      "L'argent de chacun pour ses dépenses perso. En « Tout en commun », c'est ce que le compte commun vous reverse ; tes bocaux et charges perso se paient avec le tien. Sinon, c'est ce qui reste à l'autre personne après son virement.",
+  },
   sansRole: {
     titre: "Sans rôle",
     texte:
@@ -193,11 +198,11 @@ function afficherBarre(montants) {
   barre.replaceChildren();
 
   // La barre représente les revenus… ou plus, si on a prévu trop
-  const totalPrevu = montants.charges + montants.vie + montants.epargne;
+  const totalPrevu = montants.charges + montants.vie + montants.epargne + montants.perso;
   const base = Math.max(totalRevenus(), totalPrevu);
   if (base === 0) return;
 
-  ["charges", "vie", "epargne", "sansRole"].forEach((part) => {
+  ["charges", "vie", "epargne", "perso", "sansRole"].forEach((part) => {
     const montant = montants[part];
     if (montant <= 0) return;
 
@@ -352,13 +357,13 @@ function afficherVirements() {
       compteur = creerCompteur(reglages.argentPerso[personne], (montant) => {
         reglages.argentPerso[personne] = montant;
         sauvegarderBudget();
-        afficherVirements();
+        afficherTotaux(); // la barre et le « sans rôle » changent aussi
       });
     } else {
       compteur = creerCompteur(virementDe(personne), (montant) => {
         reglages.virementAjuste[personne] = montant;
         sauvegarderBudget();
-        afficherVirements();
+        afficherTotaux();
       });
     }
     haut.append(nom, compteur);
@@ -373,7 +378,7 @@ function afficherVirements() {
       remettre.addEventListener("click", () => {
         reglages.virementAjuste[personne] = null;
         sauvegarderBudget();
-        afficherVirements();
+        afficherTotaux();
       });
       bloc.appendChild(remettre);
     }
@@ -406,7 +411,18 @@ function afficherMessageVirements() {
   const reglages = budget.reglages;
 
   if (reglages.organisation === "tout") {
-    message.textContent = "Le compte commun reverse à chacun son argent perso. Tes bocaux perso se paient avec le tien.";
+    // Ce qui reste sur le compte commun une fois l'argent perso reversé
+    // et les charges, bocaux communs et épargne prévus
+    const montants = calculerRepartition();
+    const reste =
+      totalRevenus() - montants.charges - montants.vie - montants.epargne - montants.perso;
+    if (reste > 0) {
+      message.textContent = `Il reste ${formaterMontant(reste)} sans rôle sur le compte commun.`;
+    } else if (reste === 0) {
+      message.textContent = "Chaque franc a son rôle 🌱";
+    } else {
+      message.textContent = `Il manque ${formaterMontant(-reste)} : baisse un peu l'argent perso, un bocal commun ou l'épargne.`;
+    }
     return;
   }
 
@@ -455,16 +471,52 @@ document.querySelectorAll('input[name="partage"]').forEach((bouton) => {
 // ---------- 7. Tous les totaux ----------
 // Appelée dès qu'un montant change : elle recalcule tout ce qui en dépend.
 
-function afficherTotaux() {
-  const montants = {
+// Où va l'argent du foyer ? Ça dépend de l'organisation choisie.
+function calculerRepartition() {
+  const reglages = budget.reglages;
+  const chargesDu = (compte) =>
+    sommer(budget.chargesFixes.filter((c) => c.compte === compte), miseDeCoteMensuelle);
+
+  // Seul·e : tout est à toi, on compte tout
+  if (!reglages.aDeux) {
+    return {
+      charges: totalMiseDeCote(),
+      vie: totalBocaux(),
+      epargne: budget.epargneMensuelle,
+      perso: 0,
+    };
+  }
+
+  // « Tout en commun » : le compte commun paie les charges communes,
+  // les bocaux communs et l'épargne, puis reverse l'argent perso de chacun.
+  // Tes charges et bocaux perso se paient AVEC ton argent perso :
+  // on ne les compte donc pas une deuxième fois.
+  if (reglages.organisation === "tout") {
+    return {
+      charges: chargesDu("commun"),
+      vie: totalBocauxDu("commun"),
+      epargne: budget.epargneMensuelle,
+      perso: reglages.argentPerso.moi + reglages.argentPerso.partenaire,
+    };
+  }
+
+  // Les autres organisations : chacun garde le reste de son salaire.
+  // Tes dépenses perso sont comptées ; ce qui reste à l'autre personne
+  // après son virement, c'est son argent perso (on ne le détaille pas).
+  return {
     charges: totalMiseDeCote(),
     vie: totalBocaux(),
     epargne: budget.epargneMensuelle,
+    perso: Math.max(revenusDe("partenaire") - virementDe("partenaire"), 0),
   };
-  montants.sansRole =
-    totalRevenus() - montants.charges - montants.vie - montants.epargne;
+}
 
-  document.getElementById("total-bocaux").textContent = formaterMontant(montants.vie);
+function afficherTotaux() {
+  const montants = calculerRepartition();
+  montants.sansRole =
+    totalRevenus() - montants.charges - montants.vie - montants.epargne - montants.perso;
+
+  document.getElementById("total-bocaux").textContent = formaterMontant(totalBocaux());
   afficherBarre(montants);
   afficherSansRole(montants.sansRole);
   afficherVirements();

@@ -20,9 +20,9 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=11" />
-    <link rel="stylesheet" href="css/navigation.css?v=11" />
-    <link rel="stylesheet" href="css/budget.css?v=11" />
+    <link rel="stylesheet" href="css/base.css?v=12" />
+    <link rel="stylesheet" href="css/navigation.css?v=12" />
+    <link rel="stylesheet" href="css/budget.css?v=12" />
   </head>
 
   <body>
@@ -570,7 +570,25 @@
 
           <!-- Virements vers le compte commun (à deux seulement) -->
           <article class="carte si-a-deux">
-            <h2 id="titre-virements">Ce que chacun verse</h2>
+            <div class="titre-carte">
+              <h2 id="titre-virements">Ce que chacun verse</h2>
+              <button
+                type="button"
+                class="bouton-info"
+                data-info="info-virements"
+                aria-label="En savoir plus"
+              >
+                i
+              </button>
+            </div>
+            <p id="info-virements" class="info" hidden>
+              Les charges fixes et les charges + vie courante + épargne :
+              chacun vire sa part sur le compte commun, calculée selon vos
+              salaires ou à 50 / 50. Tu peux l'ajuster avec − et +.
+              « Tout » : vos revenus arrivent tous sur le compte commun, qui
+              reverse à chacun son argent perso. Tes bocaux et tes charges
+              perso se paient avec le tien.
+            </p>
             <p id="intro-virements" class="sous-titre"></p>
             <p id="besoin-commun" class="montant"></p>
 
@@ -727,14 +745,14 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=11"></script>
-    <script src="js/modules/navigation.js?v=11"></script>
-    <script src="js/modules/infos.js?v=11"></script>
-    <script src="js/modules/accueil.js?v=11"></script>
-    <script src="js/modules/budget.js?v=11"></script>
-    <script src="js/modules/budget-repartition.js?v=11"></script>
-    <script src="js/modules/budget-mois.js?v=11"></script>
-    <script src="js/donnees/sauvegarde.js?v=11"></script>
-    <script src="js/app.js?v=11"></script>
+    <script src="js/donnees/stockage.js?v=12"></script>
+    <script src="js/modules/navigation.js?v=12"></script>
+    <script src="js/modules/infos.js?v=12"></script>
+    <script src="js/modules/accueil.js?v=12"></script>
+    <script src="js/modules/budget.js?v=12"></script>
+    <script src="js/modules/budget-repartition.js?v=12"></script>
+    <script src="js/modules/budget-mois.js?v=12"></script>
+    <script src="js/donnees/sauvegarde.js?v=12"></script>
+    <script src="js/app.js?v=12"></script>
   </body>
 </html>

@@ -1194,3 +1194,11 @@
 button {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* La part « argent perso » dans la barre : un rose sable, doux */
+.morceau-perso {
+  background: color-mix(in srgb, var(--accent) 40%, var(--carte));
+}
+.explication-perso {
+  border-left-color: color-mix(in srgb, var(--accent) 40%, var(--carte));
+}
