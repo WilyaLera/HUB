@@ -28,7 +28,9 @@ function deplacer(sens) {
   if (vueAgenda === "mois") {
     const date = texteEnDate(jourChoisi);
     // Le 1er du mois d'à côté (pour ne pas sauter de mois avec les 31)
-    jourChoisi = dateEnTexte(new Date(date.getFullYear(), date.getMonth() + sens, 1));
+    jourChoisi = dateEnTexte(
+      new Date(date.getFullYear(), date.getMonth() + sens, 1),
+    );
   } else if (vueAgenda === "semaine") {
     jourChoisi = ajouterJours(jourChoisi, 7 * sens);
   } else {
@@ -37,8 +39,12 @@ function deplacer(sens) {
   afficherAgenda();
 }
 
-document.getElementById("agenda-precedent").addEventListener("click", () => deplacer(-1));
-document.getElementById("agenda-suivant").addEventListener("click", () => deplacer(1));
+document
+  .getElementById("agenda-precedent")
+  .addEventListener("click", () => deplacer(-1));
+document
+  .getElementById("agenda-suivant")
+  .addEventListener("click", () => deplacer(1));
 document.getElementById("agenda-aujourdhui").addEventListener("click", () => {
   jourChoisi = aujourdhuiEnTexte();
   afficherAgenda();
@@ -52,7 +58,10 @@ function ouvrirJour(dateTexte) {
 }
 
 // « mercredi 12 novembre »
-function jourEnLettres(dateTexte, options = { weekday: "long", day: "numeric", month: "long" }) {
+function jourEnLettres(
+  dateTexte,
+  options = { weekday: "long", day: "numeric", month: "long" },
+) {
   return texteEnDate(dateTexte).toLocaleDateString("fr-FR", options);
 }
 
@@ -171,7 +180,9 @@ function afficherVueMois() {
 
   if (elementsDuJour(jourChoisi).length === 0) {
     carteJour.appendChild(
-      creerMessageVide("Rien de prévu ce jour-là. Un peu d'air, c'est bien aussi."),
+      creerMessageVide(
+        "Rien de prévu ce jour-là. Un peu d'air, c'est bien aussi.",
+      ),
     );
   } else {
     carteJour.appendChild(creerListeDuJour(jourChoisi, false));
@@ -201,12 +212,17 @@ function afficherVueSemaine() {
     jour.classList.add("bande-jour");
     jour.classList.toggle("est-aujourdhui", dateTexte === aujourdhui);
     const initiale = document.createElement("span");
-    initiale.textContent = jourEnLettres(dateTexte, { weekday: "short" }).slice(0, 3);
+    initiale.textContent = jourEnLettres(dateTexte, { weekday: "short" }).slice(
+      0,
+      3,
+    );
     const numero = document.createElement("strong");
     numero.textContent = texteEnDate(dateTexte).getDate();
     const pastilles = document.createElement("span");
     pastilles.classList.add("calendrier-pastilles");
-    categoriesDuJour(dateTexte).forEach((code) => pastilles.appendChild(creerPastilleCategorie(code)));
+    categoriesDuJour(dateTexte).forEach((code) =>
+      pastilles.appendChild(creerPastilleCategorie(code)),
+    );
     jour.append(initiale, numero, pastilles);
     jour.addEventListener("click", () => ouvrirJour(dateTexte));
     bande.appendChild(jour);
@@ -223,8 +239,11 @@ function afficherVueSemaine() {
     const titre = document.createElement("button");
     titre.type = "button";
     titre.classList.add("titre-lien");
-    titre.textContent = majuscule(jourEnLettres(dateTexte, { weekday: "long", day: "numeric" }));
-    if (dateTexte === aujourdhui) titre.textContent = `${titre.textContent} · aujourd'hui`;
+    titre.textContent = majuscule(
+      jourEnLettres(dateTexte, { weekday: "long", day: "numeric" }),
+    );
+    if (dateTexte === aujourdhui)
+      titre.textContent = `${titre.textContent} · aujourd'hui`;
     titre.addEventListener("click", () => ouvrirJour(dateTexte));
     carte.appendChild(titre);
 
@@ -241,22 +260,39 @@ function afficherVueSemaine() {
 
 function afficherVueJour() {
   const aujourdhui = aujourdhuiEnTexte();
-  document.getElementById("agenda-titre").textContent = majuscule(jourEnLettres(jourChoisi));
+  document.getElementById("agenda-titre").textContent = majuscule(
+    jourEnLettres(jourChoisi),
+  );
 
   // Les tâches du jour
   const carteTaches = document.createElement("article");
   carteTaches.classList.add("carte");
-  const titreTaches = document.createElement("h2");
-  titreTaches.textContent = "Tâches du jour";
-  carteTaches.appendChild(titreTaches);
 
+  // On prend d'abord les tâches du jour (on en a besoin pour le titre)
   const taches = tachesDuJour(jourChoisi);
+
+  // Combien ne sont pas encore faites ?
+  const restantes = taches.filter((tache) => !tache.fait).length;
+
+  // Le titre, avec un petit compteur
+  let texteTitre = `Tâches du jour · ${restantes} restantes`;
+  if (restantes === 0) {
+    texteTitre = "Tâches du jour · tout est fait 🌸";
+  } else if (restantes === 1) {
+    texteTitre = "Tâches du jour · 1 restante";
+  }
+
+  const titreTaches = document.createElement("h2");
+  titreTaches.textContent = texteTitre;
+  carteTaches.appendChild(titreTaches);
   if (taches.length === 0) {
     carteTaches.appendChild(creerMessageVide("Aucune tâche ce jour-là."));
   }
   // « Demain » n'a de sens que pour aujourd'hui (ou un jour passé)
   const avecDemain = jourChoisi <= aujourdhui;
-  taches.forEach((tache) => carteTaches.appendChild(creerLigneElement(tache, { avecDemain })));
+  taches.forEach((tache) =>
+    carteTaches.appendChild(creerLigneElement(tache, { avecDemain })),
+  );
   if (avecDemain) {
     const lien = creerLienToutGlisser(taches);
     if (lien) carteTaches.appendChild(lien);
@@ -277,7 +313,9 @@ function afficherVueJour() {
 
   const evenements = evenementsDuJour(jourChoisi);
   if (evenements.length === 0) {
-    carteJournee.appendChild(creerMessageVide("Rien de prévu. Un peu d'air, c'est bien aussi."));
+    carteJournee.appendChild(
+      creerMessageVide("Rien de prévu. Un peu d'air, c'est bien aussi."),
+    );
   }
   evenements.forEach((ev) => carteJournee.appendChild(creerLigneElement(ev)));
   carteJournee.appendChild(
@@ -300,7 +338,9 @@ function afficherPenseBete() {
   idees.forEach((tache) => liste.appendChild(creerLigneElement(tache)));
   if (idees.length === 0) {
     liste.appendChild(
-      creerMessageVide("Rien dans le pense-bête. Les idées sans date viendront ici."),
+      creerMessageVide(
+        "Rien dans le pense-bête. Les idées sans date viendront ici.",
+      ),
     );
   }
 
@@ -321,10 +361,12 @@ function afficherPenseBete() {
     zone.appendChild(bouton);
     return;
   }
-  zone.appendChild(creerPioche(ideePiochee, () => {
-    ideePiochee = piocherIdee(ideePiochee.id);
-    afficherPenseBete();
-  }));
+  zone.appendChild(
+    creerPioche(ideePiochee, () => {
+      ideePiochee = piocherIdee(ideePiochee.id);
+      afficherPenseBete();
+    }),
+  );
 }
 
 // La petite carte de la pioche (aussi utilisée par l'Accueil)
@@ -372,7 +414,8 @@ function afficherAgenda() {
     onglet.classList.toggle("actif", onglet.dataset.vue === vueAgenda);
   });
   // Le bouton « Aujourd'hui » n'apparaît que si on s'est éloigné d'aujourd'hui
-  document.getElementById("agenda-aujourdhui").hidden = jourChoisi === aujourdhuiEnTexte();
+  document.getElementById("agenda-aujourdhui").hidden =
+    jourChoisi === aujourdhuiEnTexte();
 
   contenuAgenda.replaceChildren();
   if (vueAgenda === "mois") afficherVueMois();

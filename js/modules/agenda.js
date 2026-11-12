@@ -12,7 +12,7 @@
 //   { id, type: "tache" | "evenement", titre,
 //     date: "2026-11-12" (ou "" pour une tâche du pense-bête),
 //     heure: "14:30" (ou "" = sans heure / toute la journée),
-//     categorie: "perso" | "maison" | "travail" | "sorties" | "sante",
+//     categorie: "perso" | "maison" | "travail" | "sorties" | "sante" | "anniversaire" | "admin",
 //     fait, urgent, dateLimite (tâches seulement) }
 // =====================================================
 
@@ -21,9 +21,11 @@
 const CATEGORIES = [
   { code: "perso", nom: "Perso", couleur: "#C4704F" },
   { code: "maison", nom: "Maison", couleur: "#7E9C80" },
-  { code: "travail", nom: "Travail & admin", couleur: "#5E7FA3" },
+  { code: "travail", nom: "Travail", couleur: "#5E7FA3" },
   { code: "sorties", nom: "Sorties", couleur: "#C98B8B" },
   { code: "sante", nom: "Santé & soin", couleur: "#C99A3E" },
+  { code: "anniversaire", nom: "Anniversaire", couleur: "#B06A9C" },
+  { code: "admin", nom: "Administratif", couleur: "#7abfd4" },
 ];
 
 // "maison" → { code, nom, couleur } (Perso si on ne trouve pas)
@@ -146,7 +148,9 @@ function cocherTache(tache, fait) {
 
 // Les tâches sans date, pas encore faites
 function penseBete() {
-  return agenda.elements.filter((el) => estUneTache(el) && el.date === "" && !el.fait);
+  return agenda.elements.filter(
+    (el) => estUneTache(el) && el.date === "" && !el.fait,
+  );
 }
 
 // Pioche une idée au hasard (différente de la précédente si possible)
@@ -180,7 +184,9 @@ function creerLigneElement(element, options = {}) {
     caseACocher.type = "checkbox";
     caseACocher.checked = element.fait;
     caseACocher.setAttribute("aria-label", `Fait : ${element.titre}`);
-    caseACocher.addEventListener("change", () => cocherTache(element, caseACocher.checked));
+    caseACocher.addEventListener("change", () =>
+      cocherTache(element, caseACocher.checked),
+    );
     ligne.appendChild(caseACocher);
     ligne.classList.toggle("ligne-faite", element.fait);
   } else {
@@ -206,7 +212,12 @@ function creerLigneElement(element, options = {}) {
   const details = [];
   if (element.urgent && !element.fait) details.push("Urgent");
   const aujourdhui = aujourdhuiEnTexte();
-  if (estUneTache(element) && element.date && element.date < aujourdhui && !element.fait) {
+  if (
+    estUneTache(element) &&
+    element.date &&
+    element.date < aujourdhui &&
+    !element.fait
+  ) {
     details.push(`du ${formaterDate(element.date, false)}`);
   }
   if (element.dateLimite && !element.fait) {
