@@ -1,0 +1,182 @@
+/* =====================================================
+   Sur ordinateur (écran large)
+   Le téléphone ne change pas : tout ce qui suit ne s'applique
+   qu'à partir de 900 px de large.
+   ===================================================== */
+
+@media (min-width: 900px) {
+  /* ---------- La barre devient un menu à gauche ---------- */
+  .barre-nav {
+    top: 24px;
+    bottom: 24px;
+    left: 24px;
+    right: auto;
+    width: 210px;
+    height: auto;
+    max-width: none;
+    margin: 0;
+    padding: 20px 12px;
+    border-radius: 28px;
+    grid-template-columns: 1fr;
+    grid-auto-rows: min-content;
+    align-content: start;
+    gap: 6px;
+  }
+
+  .onglet {
+    height: 48px;
+    padding: 0 16px;
+    justify-content: flex-start;
+    gap: 12px;
+    font-family: var(--police-texte);
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  /* Ici, on a la place : les noms des onglets se voient */
+  .onglet span {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+
+  /* Le + devient un grand bouton « Ajouter », tout en haut */
+  .bouton-plus {
+    order: -1;
+    width: 100%;
+    height: 48px;
+    margin: 0 0 14px;
+    border-radius: 999px;
+    gap: 8px;
+    font-family: var(--police-texte);
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  .bouton-plus::after {
+    content: "Ajouter";
+  }
+
+  /* ---------- Le contenu, à droite du menu ---------- */
+  main {
+    margin-left: 234px;
+    max-width: 1160px;
+  }
+
+  .ecran {
+    padding: 32px 32px 48px;
+  }
+
+  .carte {
+    margin-top: 0;
+  }
+
+  /* L'Accueil : les cartes en deux colonnes */
+  #accueil.actif {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    align-items: start;
+  }
+
+  #accueil > :not(.carte) {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+
+  #accueil > .carte:first-of-type {
+    grid-row: span 2;
+  }
+
+  /* L'Agenda : le calendrier à gauche, le reste à droite */
+  #agenda.actif {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .agenda-cote {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 24px;
+  }
+
+  .agenda-principal .carte {
+    margin-top: 16px;
+  }
+
+  /* Le Budget : les cartes en deux colonnes, qui se suivent de haut en bas */
+  .panneau-budget.actif {
+    column-count: 2;
+    column-gap: 20px;
+  }
+
+  .panneau-budget > .carte {
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0 0 20px;
+    break-inside: avoid;
+  }
+
+  /* Le grand résumé du mois prend toute la largeur */
+  .panneau-budget > .carte-mois {
+    column-span: all;
+    display: block;
+  }
+
+  /* Foyer et Moi : une colonne raisonnable */
+  #foyer.actif,
+  #moi.actif {
+    max-width: 640px;
+  }
+
+  #foyer .carte,
+  #moi .carte {
+    margin-top: 16px;
+  }
+
+  /* ---------- Les feuilles s'ouvrent au milieu, comme une fenêtre ---------- */
+  .feuille {
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    top: 50%;
+    width: 520px;
+    max-height: 84vh;
+    border-radius: 28px;
+    transform: translate(-50%, -50%);
+    animation: apparaitre 0.2s ease-out;
+  }
+
+  @keyframes apparaitre {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -46%);
+    }
+  }
+
+  /* Le petit message, centré sous le contenu */
+  .petit-message {
+    bottom: 28px;
+    left: 234px;
+  }
+}
+
+/* Très grand écran : l'Accueil passe à trois colonnes */
+@media (min-width: 1300px) {
+  #accueil.actif {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  #budget .onglets-budget {
+    margin-bottom: 20px;
+  }
+}

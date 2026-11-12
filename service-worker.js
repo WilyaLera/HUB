@@ -8,7 +8,8 @@
 // Comme ça, une mise à jour ne mélange jamais l'ancien et le nouveau code.
 // =====================================================
 
-const VERSION = "mon-hub-v19";
+const VERSION = "mon-hub-v20";
+const CACHE_RESUME = "hub-resume"; // le résumé préparé par l'appli (agenda-notifs.js)
 
 // Installation : la nouvelle version prend la main tout de suite
 self.addEventListener("install", () => {
@@ -22,7 +23,9 @@ self.addEventListener("activate", (evenement) => {
       .keys()
       .then((noms) =>
         Promise.all(
-          noms.filter((nom) => nom !== VERSION).map((nom) => caches.delete(nom)),
+          noms
+            .filter((nom) => nom !== VERSION && nom !== CACHE_RESUME)
+            .map((nom) => caches.delete(nom)),
         ),
       ),
   );
@@ -50,5 +53,76 @@ self.addEventListener("fetch", (evenement) => {
           .match(requete)
           .then((copie) => copie || caches.match("./")),
       ),
+  );
+});
+
+// =====================================================
+// Le petit résumé du jour
+// Chrome réveille le service worker de temps en temps (« periodicsync »).
+// Une fois par jour au plus, on envoie un résumé doux.
+// =====================================================
+
+function dateEnTexteSW(date) {
+  const mois = String(date.getMonth() + 1).padStart(2, "0");
+  const jour = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${mois}-${jour}`;
+}
+
+function texteResumeSW(jour) {
+  const morceaux = jour.evenements
+    .slice(0, 3)
+    .map((ev) => (ev.heure ? `${ev.heure} ${ev.titre}` : ev.titre));
+  if (jour.taches === 1) morceaux.push("1 tâche");
+  if (jour.taches > 1) morceaux.push(`${jour.taches} tâches`);
+  return morceaux.length ? morceaux.join(" · ") : "Rien de prévu. Profite 🌸";
+}
+
+async function envoyerResume() {
+  const maintenant = new Date();
+  const heure = maintenant.getHours();
+  // Pas la nuit : on ne réveille personne
+  if (heure < 6 || heure >= 21) return;
+
+  const cache = await caches.open(CACHE_RESUME);
+  const aujourdhui = dateEnTexteSW(maintenant);
+  const deja = await cache.match("dernier.txt");
+  if (deja && (await deja.text()) === aujourdhui) return; // déjà fait aujourd'hui
+
+  const reponse = await cache.match("resume.json");
+  if (!reponse) return;
+  const jours = await reponse.json();
+
+  // Avant 17 h : la journée en cours. Après : demain.
+  let titre = "Aujourd'hui";
+  let date = aujourdhui;
+  if (heure >= 17) {
+    const demain = new Date(maintenant);
+    demain.setDate(demain.getDate() + 1);
+    titre = "Demain";
+    date = dateEnTexteSW(demain);
+  }
+  const jour = jours[date];
+  if (!jour) return;
+
+  await self.registration.showNotification(titre, {
+    body: texteResumeSW(jour),
+    icon: "image/icone-192.png",
+    tag: "resume-du-jour",
+  });
+  await cache.put("dernier.txt", new Response(aujourdhui));
+}
+
+self.addEventListener("periodicsync", (evenement) => {
+  if (evenement.tag === "resume-du-jour") evenement.waitUntil(envoyerResume());
+});
+
+// Toucher la notification ouvre l'appli
+self.addEventListener("notificationclick", (evenement) => {
+  evenement.notification.close();
+  evenement.waitUntil(
+    self.clients.matchAll({ type: "window" }).then((fenetres) => {
+      if (fenetres.length > 0) return fenetres[0].focus();
+      return self.clients.openWindow("./");
+    }),
   );
 });

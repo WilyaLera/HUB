@@ -96,6 +96,7 @@ function rafraichirAgenda() {
   afficherAgenda(); // dans agenda-vues.js
   afficherCarteAujourdhui(); // dans accueil.js
   afficherReglagesAgenda(); // dans agenda-reglages.js
+  if (typeof preparerResume === "function") preparerResume(); // agenda-notifs.js
 }
 
 // ---------- 3. Les éléments d'un jour ----------

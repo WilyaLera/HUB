@@ -20,10 +20,11 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=19" />
-    <link rel="stylesheet" href="css/navigation.css?v=19" />
-    <link rel="stylesheet" href="css/budget.css?v=19" />
-    <link rel="stylesheet" href="css/agenda.css?v=19" />
+    <link rel="stylesheet" href="css/base.css?v=20" />
+    <link rel="stylesheet" href="css/navigation.css?v=20" />
+    <link rel="stylesheet" href="css/budget.css?v=20" />
+    <link rel="stylesheet" href="css/agenda.css?v=20" />
+    <link rel="stylesheet" href="css/ordinateur.css?v=20" />
   </head>
 
   <body>
@@ -88,6 +89,8 @@
 
       <!-- Module Agenda -->
       <section id="agenda" class="ecran">
+        <!-- Sur ordinateur : l'agenda à gauche, le pense-bête et les réglages à droite -->
+        <div class="agenda-principal">
         <h1>Agenda</h1>
 
         <!-- Les 3 vues -->
@@ -109,6 +112,9 @@
 
         <!-- Ici s'affiche la vue choisie -->
         <div id="agenda-contenu"></div>
+        </div>
+
+        <aside class="agenda-cote">
 
         <!-- Le pense-bête : les tâches sans date -->
         <article class="carte">
@@ -168,6 +174,13 @@
             </button>
           </details>
 
+          <p class="etiquette etiquette-espacee">Petit résumé du jour</p>
+          <label class="reglage-case">
+            <input type="checkbox" id="reglage-resume" />
+            Recevoir une notification douce avec ma journée
+          </label>
+          <p id="etat-resume" class="sous-titre petit" role="status"></p>
+
           <p class="etiquette etiquette-espacee">Mes catégories</p>
           <p class="sous-titre petit">
             Touche une catégorie pour la renommer ou changer sa couleur.
@@ -194,6 +207,7 @@
             <span class="plus-rond">+</span> Ajouter une catégorie
           </button>
         </details>
+        </aside>
       </section>
 
       <!-- Module Foyer -->
@@ -1235,23 +1249,24 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=19"></script>
-    <script src="js/outils/dates.js?v=19"></script>
-    <script src="js/outils/annuler.js?v=19"></script>
-    <script src="js/modules/navigation.js?v=19"></script>
-    <script src="js/modules/infos.js?v=19"></script>
-    <script src="js/modules/accueil.js?v=19"></script>
-    <script src="js/modules/budget.js?v=19"></script>
-    <script src="js/modules/budget-repartition.js?v=19"></script>
-    <script src="js/modules/budget-mois.js?v=19"></script>
-    <script src="js/modules/budget-raccourcis.js?v=19"></script>
-    <script src="js/modules/budget-epargne.js?v=19"></script>
-    <script src="js/modules/budget-point.js?v=19"></script>
-    <script src="js/donnees/sauvegarde.js?v=19"></script>
-    <script src="js/modules/agenda.js?v=19"></script>
-    <script src="js/modules/agenda-vues.js?v=19"></script>
-    <script src="js/modules/agenda-feuille.js?v=19"></script>
-    <script src="js/modules/agenda-reglages.js?v=19"></script>
-    <script src="js/app.js?v=19"></script>
+    <script src="js/donnees/stockage.js?v=20"></script>
+    <script src="js/outils/dates.js?v=20"></script>
+    <script src="js/outils/annuler.js?v=20"></script>
+    <script src="js/modules/navigation.js?v=20"></script>
+    <script src="js/modules/infos.js?v=20"></script>
+    <script src="js/modules/accueil.js?v=20"></script>
+    <script src="js/modules/budget.js?v=20"></script>
+    <script src="js/modules/budget-repartition.js?v=20"></script>
+    <script src="js/modules/budget-mois.js?v=20"></script>
+    <script src="js/modules/budget-raccourcis.js?v=20"></script>
+    <script src="js/modules/budget-epargne.js?v=20"></script>
+    <script src="js/modules/budget-point.js?v=20"></script>
+    <script src="js/donnees/sauvegarde.js?v=20"></script>
+    <script src="js/modules/agenda.js?v=20"></script>
+    <script src="js/modules/agenda-vues.js?v=20"></script>
+    <script src="js/modules/agenda-feuille.js?v=20"></script>
+    <script src="js/modules/agenda-reglages.js?v=20"></script>
+    <script src="js/modules/agenda-notifs.js?v=20"></script>
+    <script src="js/app.js?v=20"></script>
   </body>
 </html>
