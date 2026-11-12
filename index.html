@@ -20,12 +20,12 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=24" />
-    <link rel="stylesheet" href="css/navigation.css?v=24" />
-    <link rel="stylesheet" href="css/budget.css?v=24" />
-    <link rel="stylesheet" href="css/agenda.css?v=24" />
-    <link rel="stylesheet" href="css/confort.css?v=24" />
-    <link rel="stylesheet" href="css/ordinateur.css?v=24" />
+    <link rel="stylesheet" href="css/base.css?v=25" />
+    <link rel="stylesheet" href="css/navigation.css?v=25" />
+    <link rel="stylesheet" href="css/budget.css?v=25" />
+    <link rel="stylesheet" href="css/agenda.css?v=25" />
+    <link rel="stylesheet" href="css/confort.css?v=25" />
+    <link rel="stylesheet" href="css/ordinateur.css?v=25" />
   </head>
 
   <body>
@@ -217,8 +217,25 @@
             required
           />
           <datalist id="articles-connus"></datalist>
+          <!-- La quantité : un nombre (clavier de chiffres) et une unité -->
+          <div class="form-article-quantite">
+            <input id="article-quantite" class="champ-note" type="text" inputmode="decimal" placeholder="Qté" maxlength="6" aria-label="Quantité" />
+            <select id="article-unite" class="champ-note" aria-label="Unité">
+              <option value="">—</option>
+              <option value="pièce">pièce</option>
+              <option value="kg">kg</option>
+              <option value="g">g</option>
+              <option value="L">L</option>
+              <option value="cl">cl</option>
+              <option value="ml">ml</option>
+              <option value="paquet">paquet</option>
+              <option value="boîte">boîte</option>
+              <option value="bouteille">bouteille</option>
+              <option value="autre">autre…</option>
+            </select>
+            <input id="article-unite-autre" class="champ-note" type="text" placeholder="Unité (ex. botte)" maxlength="15" hidden />
+          </div>
           <div class="form-article-ligne">
-            <input id="article-quantite" class="champ-note" type="text" placeholder="Quantité" maxlength="20" />
             <select id="article-rayon" class="champ-note" aria-label="Rayon"></select>
             <button type="submit" class="bouton-rond bouton-rond-plein" aria-label="Ajouter">
               <i data-lucide="plus"></i>
@@ -1263,7 +1280,24 @@
       </div>
       <form id="form-modif-article">
         <label class="champ">Article<input id="modif-article-nom" class="champ-note" type="text" required /></label>
-        <label class="champ">Quantité<input id="modif-article-quantite" class="champ-note" type="text" maxlength="20" /></label>
+        <p class="etiquette">Quantité</p>
+        <div class="form-article-quantite">
+          <input id="modif-article-quantite" class="champ-note" type="text" inputmode="decimal" placeholder="Qté" maxlength="6" aria-label="Quantité" />
+          <select id="modif-article-unite" class="champ-note" aria-label="Unité">
+            <option value="">—</option>
+            <option value="pièce">pièce</option>
+            <option value="kg">kg</option>
+            <option value="g">g</option>
+            <option value="L">L</option>
+            <option value="cl">cl</option>
+            <option value="ml">ml</option>
+            <option value="paquet">paquet</option>
+            <option value="boîte">boîte</option>
+            <option value="bouteille">bouteille</option>
+            <option value="autre">autre…</option>
+          </select>
+          <input id="modif-article-unite-autre" class="champ-note" type="text" placeholder="Unité (ex. botte)" maxlength="15" hidden />
+        </div>
         <label class="champ">Rayon<select id="modif-article-rayon" class="champ-note"></select></label>
         <button type="submit" class="bouton bouton-large">Enregistrer</button>
         <button type="button" id="supprimer-article" class="lien lien-danger">Retirer de la liste</button>
@@ -1412,28 +1446,28 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=24"></script>
-    <script src="js/outils/dates.js?v=24"></script>
-    <script src="js/outils/annuler.js?v=24"></script>
-    <script src="js/outils/icones.js?v=24"></script>
-    <script src="js/modules/navigation.js?v=24"></script>
-    <script src="js/modules/infos.js?v=24"></script>
-    <script src="js/modules/accueil.js?v=24"></script>
-    <script src="js/modules/budget.js?v=24"></script>
-    <script src="js/modules/budget-repartition.js?v=24"></script>
-    <script src="js/modules/budget-mois.js?v=24"></script>
-    <script src="js/modules/budget-raccourcis.js?v=24"></script>
-    <script src="js/modules/budget-epargne.js?v=24"></script>
-    <script src="js/modules/budget-point.js?v=24"></script>
-    <script src="js/donnees/sauvegarde.js?v=24"></script>
-    <script src="js/modules/agenda.js?v=24"></script>
-    <script src="js/modules/agenda-vues.js?v=24"></script>
-    <script src="js/modules/agenda-feuille.js?v=24"></script>
-    <script src="js/modules/agenda-reglages.js?v=24"></script>
-    <script src="js/modules/agenda-notifs.js?v=24"></script>
-    <script src="js/modules/accueil-cartes.js?v=24"></script>
-    <script src="js/modules/courses.js?v=24"></script>
-    <script src="js/modules/moi.js?v=24"></script>
-    <script src="js/app.js?v=24"></script>
+    <script src="js/donnees/stockage.js?v=25"></script>
+    <script src="js/outils/dates.js?v=25"></script>
+    <script src="js/outils/annuler.js?v=25"></script>
+    <script src="js/outils/icones.js?v=25"></script>
+    <script src="js/modules/navigation.js?v=25"></script>
+    <script src="js/modules/infos.js?v=25"></script>
+    <script src="js/modules/accueil.js?v=25"></script>
+    <script src="js/modules/budget.js?v=25"></script>
+    <script src="js/modules/budget-repartition.js?v=25"></script>
+    <script src="js/modules/budget-mois.js?v=25"></script>
+    <script src="js/modules/budget-raccourcis.js?v=25"></script>
+    <script src="js/modules/budget-epargne.js?v=25"></script>
+    <script src="js/modules/budget-point.js?v=25"></script>
+    <script src="js/donnees/sauvegarde.js?v=25"></script>
+    <script src="js/modules/agenda.js?v=25"></script>
+    <script src="js/modules/agenda-vues.js?v=25"></script>
+    <script src="js/modules/agenda-feuille.js?v=25"></script>
+    <script src="js/modules/agenda-reglages.js?v=25"></script>
+    <script src="js/modules/agenda-notifs.js?v=25"></script>
+    <script src="js/modules/accueil-cartes.js?v=25"></script>
+    <script src="js/modules/courses.js?v=25"></script>
+    <script src="js/modules/moi.js?v=25"></script>
+    <script src="js/app.js?v=25"></script>
   </body>
 </html>

@@ -11,9 +11,11 @@
 
 // ---------- 1. Le tiroir « courses » ----------
 // rayons   : [{ id, nom }], dans l'ordre du magasin
-// articles : [{ id, nom, quantite, rayonId, coche, source }]
+// articles : [{ id, nom, quantite, unite, rayonId, coche, source }]
+//            (quantite : un nombre en texte, ex. "1,5" ; unite : "kg", "pièce"… ou "")
 //            (source : "manuel" pour l'instant ; plus tard "repas" ou "placard")
 // memoire  : { "lait": idDuRayon } : le rayon choisi la dernière fois pour un article
+// unites   : { "lait": "L" } : l'unité choisie la dernière fois
 
 const RAYONS_DE_DEPART = [
   "Fruits & légumes",
@@ -38,6 +40,8 @@ if (!courses) {
     memoire: {},
   };
 }
+
+if (!courses.unites) courses.unites = {};
 
 function sauvegarderCourses() {
   sauvegarder("courses", courses);
@@ -85,6 +89,48 @@ const listeCourses = document.getElementById("liste-courses");
 const articleNom = document.getElementById("article-nom");
 const articleQuantite = document.getElementById("article-quantite");
 const articleRayon = document.getElementById("article-rayon");
+const articleUnite = document.getElementById("article-unite");
+const articleUniteAutre = document.getElementById("article-unite-autre");
+
+// ---------- La quantité et l'unité ----------
+
+// Les unités qui prennent un « s » au pluriel
+const UNITES_AU_PLURIEL = ["pièce", "paquet", "boîte", "bouteille"];
+
+// "2" + "pièce" → "2 pièces" ; "500" + "g" → "500 g" ; "" → ""
+function texteQuantite(article) {
+  if (!article.quantite) return "";
+  const nombre = Number(String(article.quantite).replace(",", "."));
+  let unite = article.unite || "";
+  if (UNITES_AU_PLURIEL.includes(unite) && nombre > 1) unite += "s";
+  return `${article.quantite} ${unite}`.trim();
+}
+
+// L'unité choisie (le menu, ou le petit champ « autre… »)
+function uniteChoisie(menu, champAutre) {
+  return menu.value === "autre" ? champAutre.value.trim() : menu.value;
+}
+
+// Met une unité dans le menu (une unité perso passe par « autre… »)
+function placerUnite(menu, champAutre, unite) {
+  const connue = [...menu.options].some((o) => o.value === unite && unite !== "autre");
+  menu.value = connue ? unite : "autre";
+  champAutre.value = connue ? "" : unite;
+  champAutre.hidden = menu.value !== "autre";
+}
+
+// « autre… » fait apparaître le petit champ
+function activerMenuUnite(menu, champAutre) {
+  menu.addEventListener("change", () => {
+    champAutre.hidden = menu.value !== "autre";
+    if (!champAutre.hidden) champAutre.focus();
+  });
+}
+activerMenuUnite(articleUnite, articleUniteAutre);
+activerMenuUnite(
+  document.getElementById("modif-article-unite"),
+  document.getElementById("modif-article-unite-autre"),
+);
 
 function remplirChoixRayons(select, choisi) {
   select.replaceChildren();
@@ -120,7 +166,7 @@ function creerLigneArticle(article) {
   if (article.quantite) {
     const quantite = document.createElement("span");
     quantite.classList.add("ligne-article-quantite");
-    quantite.textContent = article.quantite;
+    quantite.textContent = texteQuantite(article);
     zone.appendChild(quantite);
   }
   zone.addEventListener("click", () => ouvrirFeuilleArticle(article));
@@ -195,9 +241,24 @@ function afficherCourses() {
 
 // ---------- 4. Ajouter, cocher, modifier, retirer ----------
 
-// En tapant le nom, le rayon se devine tout seul (tu peux le changer)
+// En tapant le nom, le rayon se devine tout seul (tu peux le changer),
+// et l'unité utilisée la dernière fois revient
+let uniteMiseToutSeule = false; // true : c'est l'appli qui a choisi l'unité, pas toi
+
 articleNom.addEventListener("input", () => {
   articleRayon.value = devinerRayon(articleNom.value);
+  const unite = courses.unites[articleNom.value.trim().toLowerCase()];
+  if (unite !== undefined) {
+    placerUnite(articleUnite, articleUniteAutre, unite);
+    uniteMiseToutSeule = true;
+  } else if (uniteMiseToutSeule) {
+    // Le nom ne correspond plus : on retire l'unité qu'on avait mise
+    placerUnite(articleUnite, articleUniteAutre, "");
+    uniteMiseToutSeule = false;
+  }
+});
+articleUnite.addEventListener("change", () => {
+  uniteMiseToutSeule = false; // tu as choisi toi-même : on n'y touche plus
 });
 
 document.getElementById("form-article").addEventListener("submit", (evenement) => {
@@ -205,19 +266,24 @@ document.getElementById("form-article").addEventListener("submit", (evenement) =
   const nom = articleNom.value.trim();
   if (!nom) return;
   const rayonId = articleRayon.value;
+  const quantite = articleQuantite.value.trim();
+  const unite = quantite ? uniteChoisie(articleUnite, articleUniteAutre) : "";
   courses.articles.push({
     id: nouvelId(),
     nom: nom,
-    quantite: articleQuantite.value.trim(),
+    quantite: quantite,
+    unite: unite,
     rayonId: rayonId,
     coche: false,
     source: "manuel",
   });
-  // On retient le rayon pour la prochaine fois
+  // On retient le rayon (et l'unité) pour la prochaine fois
   courses.memoire[nom.toLowerCase()] = rayonId;
+  if (unite) courses.unites[nom.toLowerCase()] = unite;
   sauvegarderCourses();
   articleNom.value = "";
   articleQuantite.value = "";
+  placerUnite(articleUnite, articleUniteAutre, "");
   afficherCourses();
   articleNom.focus(); // on enchaîne facilement plusieurs articles
 });
@@ -229,6 +295,11 @@ function ouvrirFeuilleArticle(article) {
   articleEnModification = article.id;
   document.getElementById("modif-article-nom").value = article.nom;
   document.getElementById("modif-article-quantite").value = article.quantite;
+  placerUnite(
+    document.getElementById("modif-article-unite"),
+    document.getElementById("modif-article-unite-autre"),
+    article.unite || "",
+  );
   remplirChoixRayons(document.getElementById("modif-article-rayon"), rayonDe(article.rayonId).id);
   feuilleArticle.hidden = false;
   voile.hidden = false;
@@ -251,6 +322,13 @@ document.getElementById("form-modif-article").addEventListener("submit", (evenem
   if (!article) return;
   article.nom = document.getElementById("modif-article-nom").value.trim() || article.nom;
   article.quantite = document.getElementById("modif-article-quantite").value.trim();
+  article.unite = article.quantite
+    ? uniteChoisie(
+        document.getElementById("modif-article-unite"),
+        document.getElementById("modif-article-unite-autre"),
+      )
+    : "";
+  if (article.unite) courses.unites[article.nom.toLowerCase()] = article.unite;
   article.rayonId = document.getElementById("modif-article-rayon").value;
   courses.memoire[article.nom.toLowerCase()] = article.rayonId;
   sauvegarderCourses();
