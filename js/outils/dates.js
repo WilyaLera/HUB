@@ -19,3 +19,20 @@ function aujourdhuiAMinuit() {
     maintenant.getDate(),
   );
 }
+
+// Aujourd'hui, directement en texte : "2026-11-12"
+function aujourdhuiEnTexte() {
+  return dateEnTexte(aujourdhuiAMinuit());
+}
+
+// "2026-11-12" → la date, à minuit
+function texteEnDate(texte) {
+  return new Date(`${texte}T00:00`);
+}
+
+// Ajoute (ou retire, avec un nombre négatif) des jours à une date "AAAA-MM-JJ"
+function ajouterJours(texte, nombre) {
+  const date = texteEnDate(texte);
+  date.setDate(date.getDate() + nombre);
+  return dateEnTexte(date);
+}

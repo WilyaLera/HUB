@@ -1,0 +1,380 @@
+/* =====================================================
+   Module Agenda
+   ===================================================== */
+
+/* ---------- Les onglets Mois / Semaine / Jour ---------- */
+/* (même allure que les onglets du Budget) */
+
+.onglet-agenda {
+  flex: 1;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 6px;
+  background: transparent;
+  font-family: var(--police-texte);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--texte-doux);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.onglet-agenda.actif {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+/* ---------- Le titre avec ses flèches ---------- */
+
+.agenda-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.agenda-navigation h2 {
+  margin: 0;
+  font-size: 20px;
+  text-align: center;
+}
+
+.fleche {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--carte);
+  box-shadow: 0 2px 8px rgba(58, 46, 40, 0.08);
+  font-size: 24px;
+  line-height: 1;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+/* Un titre qu'on peut toucher (« Mercredi 12 novembre › ») */
+.titre-lien {
+  display: block;
+  margin: 0 0 8px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: var(--police-titre);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--texte);
+  text-align: left;
+  cursor: pointer;
+}
+
+.agenda-vide {
+  margin: 6px 0 !important;
+  font-size: 14px;
+}
+
+/* ---------- Le calendrier du mois ---------- */
+
+.carte-calendrier {
+  padding: 12px;
+}
+
+.calendrier {
+  display: grid;
+  /* 7 colonnes de même largeur : une par jour de la semaine */
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendrier-entete {
+  padding: 4px 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texte-doux);
+  text-align: center;
+}
+
+.calendrier-jour {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-height: 44px;
+  padding: 6px 0 4px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  font-family: var(--police-texte);
+  font-size: 15px;
+  color: var(--texte);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.calendrier-jour.est-aujourdhui {
+  box-shadow: inset 0 0 0 2px var(--accent);
+  font-weight: 700;
+}
+
+.calendrier-jour.est-choisi {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.calendrier-pastilles {
+  display: flex;
+  gap: 2px;
+  min-height: 6px;
+}
+
+.calendrier-pastilles .puce-categorie {
+  width: 6px;
+  height: 6px;
+  margin: 0;
+}
+
+/* Sur un jour choisi (fond terracotta), les pastilles gardent un contour */
+.est-choisi .puce-categorie {
+  box-shadow: 0 0 0 1px #ffffff;
+}
+
+/* ---------- La semaine ---------- */
+
+.bande-semaine {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: 16px;
+  padding: 8px;
+  border-radius: 20px;
+  background: var(--carte);
+  box-shadow: 0 4px 12px rgba(58, 46, 40, 0.06);
+}
+
+.bande-jour {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 0;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  font-family: var(--police-texte);
+  font-size: 12px;
+  color: var(--texte-doux);
+  cursor: pointer;
+}
+
+.bande-jour strong {
+  font-size: 16px;
+  color: var(--texte);
+}
+
+.bande-jour.est-aujourdhui {
+  background: var(--fond);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.carte-jour-semaine.est-aujourdhui {
+  box-shadow: inset 4px 0 0 var(--accent), 0 4px 12px rgba(58, 46, 40, 0.06);
+}
+
+/* ---------- Une ligne d'agenda ---------- */
+
+.ligne-agenda {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--trait);
+}
+
+.ligne-agenda:last-of-type {
+  border-bottom: none;
+}
+
+.ligne-agenda input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  accent-color: var(--sauge);
+}
+
+.agenda-heure {
+  flex-shrink: 0;
+  min-width: 52px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texte-doux);
+}
+
+.ligne-agenda-ouvrir {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: var(--police-texte);
+  font-size: 16px;
+  color: var(--texte);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ligne-agenda-titre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ligne-agenda-details {
+  padding-left: 16px;
+  font-size: 13px;
+  color: var(--texte-doux);
+}
+
+.ligne-agenda-details.est-urgent {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Une tâche faite : barrée, plus discrète */
+.ligne-faite .ligne-agenda-titre {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+
+.puce-categorie {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.bouton-demain {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  background: transparent;
+  font-family: var(--police-texte);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texte-doux);
+  cursor: pointer;
+}
+
+.lien-glisser {
+  margin-top: 6px !important;
+}
+
+/* ---------- Le pense-bête et sa pioche ---------- */
+
+.pioche {
+  margin: 8px 0;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--fond);
+}
+
+.pioche p {
+  margin: 0 0 8px !important;
+  font-weight: 700;
+}
+
+.pioche-boutons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---------- La carte « Aujourd'hui » de l'Accueil ---------- */
+
+.champ-rapide {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px dashed var(--trait);
+  border-radius: 12px;
+  background: transparent;
+  font-family: var(--police-texte);
+  font-size: 16px;
+  color: var(--texte);
+}
+
+/* ---------- Le menu du + ---------- */
+
+.menu-plus {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.menu-plus-choix {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 18px;
+  background: var(--fond);
+  font-family: var(--police-texte);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--texte);
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-plus-icone {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #ffffff;
+  font-family: var(--police-titre);
+}
+
+/* ---------- La feuille tâche / événement ---------- */
+
+.champ-titre {
+  margin-top: 14px;
+  font-size: 18px;
+}
+
+#form-element .champ-date {
+  margin-top: 0;
+}
+
+/* Les pastilles de catégorie : la couleur vient de --couleur-categorie */
+.pastille-categorie {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.pastille-categorie:has(input:checked) {
+  background: var(--couleur-categorie);
+  border-color: var(--couleur-categorie);
+  color: #ffffff;
+}
+
+.pastille-categorie:has(input:checked) .puce-categorie {
+  box-shadow: 0 0 0 1.5px #ffffff;
+}
+
+#supprimer-element {
+  display: block;
+  margin: 8px auto 0;
+}

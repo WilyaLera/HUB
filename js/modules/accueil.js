@@ -45,42 +45,49 @@ menu.forEach((repas) => {
 });
 
 //Carte Aujourd'hui //
-const tachesParDefaut = [
-  { id: 1, titre: "Arroser la plante", fait: false },
-  { id: 2, titre: "Appeler le garage", fait: false },
-  { id: 3, titre: "Lancer une machine", fait: true },
-];
-
-const taches = charger("taches", tachesParDefaut);
-
-const aujourdhuiTexte = dateEnTexte(aujourdhuiAMinuit());
-taches.forEach((tache) => {
-  if (!tache.date) {
-    tache.date = aujourdhuiTexte;
-  }
-});
+// Elle montre les tâches et les événements du jour, tirés de l'Agenda
+// (le tiroir « agenda » : voir agenda.js).
+// Les tâches pas faites des jours d'avant reviennent ici, doucement.
 
 const listeTaches = document.getElementById("liste-taches");
+let ideeAccueil = null; // l'idée du pense-bête proposée quand la journée est vide
 
-function afficherTache(tache) {
-  const ligne = document.createElement("label");
-  ligne.classList.add("tache");
+function afficherCarteAujourdhui() {
+  const aujourdhui = aujourdhuiEnTexte();
+  listeTaches.replaceChildren();
 
-  const caseACocher = document.createElement("input");
-  caseACocher.type = "checkbox";
-  caseACocher.checked = tache.fait;
+  const evenements = evenementsDuJour(aujourdhui);
+  const taches = tachesDuJour(aujourdhui);
 
-  caseACocher.addEventListener("change", () => {
-    tache.fait = caseACocher.checked;
-    sauvegarder("taches", taches);
+  // D'abord les rendez-vous du jour, puis les tâches (avec « Demain »)
+  evenements.forEach((ev) => listeTaches.appendChild(creerLigneElement(ev)));
+  taches.forEach((tache) => {
+    listeTaches.appendChild(creerLigneElement(tache, { avecDemain: true }));
   });
 
-  ligne.appendChild(caseACocher);
-  ligne.append(tache.titre);
-  listeTaches.appendChild(ligne);
-}
-taches.filter((tache) => tache.date === aujourdhuiTexte).forEach(afficherTache);
+  const lien = creerLienToutGlisser(taches);
+  if (lien) listeTaches.appendChild(lien);
 
+  // Journée vide : on pioche une idée dans le pense-bête
+  if (taches.length === 0 && evenements.length === 0) {
+    const idees = penseBete();
+    if (idees.length > 0) {
+      if (!ideeAccueil || !idees.includes(ideeAccueil)) {
+        ideeAccueil = piocherIdee(null);
+      }
+      listeTaches.appendChild(
+        creerPioche(ideeAccueil, () => {
+          ideeAccueil = piocherIdee(ideeAccueil.id);
+          afficherCarteAujourdhui();
+        }),
+      );
+    } else {
+      listeTaches.appendChild(creerMessageVide("Rien de prévu aujourd'hui. Profite 🌸"));
+    }
+  }
+}
+
+// Ajouter vite une tâche pour aujourd'hui
 const formTache = document.getElementById("form-tache");
 const champTache = document.getElementById("champ-tache");
 
@@ -90,15 +97,19 @@ formTache.addEventListener("submit", (evenement) => {
   const titre = champTache.value.trim();
   if (!titre) return;
 
-  const nouvelle = {
-    id: Date.now(),
+  agenda.elements.push({
+    id: nouvelId(),
+    type: "tache",
     titre: titre,
+    date: aujourdhuiEnTexte(),
+    heure: "",
+    categorie: "perso",
     fait: false,
-    date: aujourdhuiTexte,
-  };
-  taches.push(nouvelle);
-  sauvegarder("taches", taches);
-  afficherTache(nouvelle);
+    urgent: false,
+    dateLimite: "",
+  });
+  sauvegarderAgenda();
+  rafraichirAgenda();
 
   champTache.value = "";
 });

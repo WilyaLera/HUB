@@ -20,9 +20,10 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=15" />
-    <link rel="stylesheet" href="css/navigation.css?v=15" />
-    <link rel="stylesheet" href="css/budget.css?v=15" />
+    <link rel="stylesheet" href="css/base.css?v=16" />
+    <link rel="stylesheet" href="css/navigation.css?v=16" />
+    <link rel="stylesheet" href="css/budget.css?v=16" />
+    <link rel="stylesheet" href="css/agenda.css?v=16" />
   </head>
 
   <body>
@@ -37,13 +38,17 @@
 
         <!-- Carte Aujourd'hui -->
         <article class="carte">
-          <h2>Aujourd'hui</h2>
+          <!-- Le titre ouvre l'Agenda, sur la vue du jour -->
+          <button type="button" id="lien-aujourdhui" class="titre-lien" data-ecran="agenda">
+            Aujourd'hui ›
+          </button>
           <div id="liste-taches"></div>
           <form id="form-tache">
             <input
               id="champ-tache"
+              class="champ-rapide"
               type="text"
-              placeholder="Ajouter une tâche..."
+              placeholder="+ Ajouter une tâche pour aujourd'hui…"
             />
           </form>
         </article>
@@ -84,6 +89,51 @@
       <!-- Module Agenda -->
       <section id="agenda" class="ecran">
         <h1>Agenda</h1>
+
+        <!-- Les 3 vues -->
+        <div class="onglets-budget onglets-agenda">
+          <button type="button" class="onglet-agenda" data-vue="mois">Mois</button>
+          <button type="button" class="onglet-agenda" data-vue="semaine">Semaine</button>
+          <button type="button" class="onglet-agenda" data-vue="jour">Jour</button>
+        </div>
+
+        <!-- Le titre (mois, semaine ou jour) avec ses flèches -->
+        <div class="agenda-navigation">
+          <button type="button" id="agenda-precedent" class="fleche" aria-label="Précédent">‹</button>
+          <h2 id="agenda-titre"></h2>
+          <button type="button" id="agenda-suivant" class="fleche" aria-label="Suivant">›</button>
+        </div>
+        <button type="button" id="agenda-aujourdhui" class="lien lien-centre" hidden>
+          Revenir à aujourd'hui
+        </button>
+
+        <!-- Ici s'affiche la vue choisie -->
+        <div id="agenda-contenu"></div>
+
+        <!-- Le pense-bête : les tâches sans date -->
+        <article class="carte">
+          <div class="titre-carte">
+            <h2>Pense-bête</h2>
+            <button
+              type="button"
+              class="bouton-info"
+              data-info="info-pense-bete"
+              aria-label="En savoir plus"
+            >
+              i
+            </button>
+          </div>
+          <p id="info-pense-bete" class="info" hidden>
+            Les tâches sans date : ce que tu veux faire « un jour ». Pioche une
+            idée au hasard quand tu as un moment, ou touche-en une pour lui
+            donner une date.
+          </p>
+          <div id="pioche"></div>
+          <div id="liste-pense-bete"></div>
+          <button type="button" id="ajouter-pense-bete" class="bouton-ajout">
+            <span class="plus-rond">+</span> Ajouter au pense-bête
+          </button>
+        </article>
       </section>
 
       <!-- Module Foyer -->
@@ -979,6 +1029,85 @@
       </div>
     </div>
 
+    <!-- Le menu du + : que veux-tu ajouter ? -->
+    <div id="feuille-plus" class="feuille" hidden>
+      <div class="feuille-haut">
+        <h2>Ajouter…</h2>
+        <button type="button" id="fermer-plus" class="bouton-supprimer" aria-label="Fermer">
+          ✕
+        </button>
+      </div>
+      <div class="menu-plus">
+        <button type="button" id="plus-tache" class="menu-plus-choix">
+          <span class="menu-plus-icone">✓</span> Une tâche
+        </button>
+        <button type="button" id="plus-evenement" class="menu-plus-choix">
+          <span class="menu-plus-icone">◷</span> Un événement
+        </button>
+        <button type="button" id="plus-depense" class="menu-plus-choix">
+          <span class="menu-plus-icone">F</span> Une dépense
+        </button>
+      </div>
+    </div>
+
+    <!-- Ajouter ou modifier une tâche / un événement -->
+    <div id="feuille-element" class="feuille" hidden>
+      <form id="form-element">
+        <div class="feuille-haut">
+          <h2 id="element-feuille-titre">Nouvelle tâche</h2>
+          <button type="button" id="fermer-element" class="bouton-supprimer" aria-label="Fermer">
+            ✕
+          </button>
+        </div>
+
+        <!-- Tâche ou événement ? -->
+        <div class="choix-vue choix-type">
+          <label>
+            <input type="radio" name="element-type" value="tache" /> Tâche
+          </label>
+          <label>
+            <input type="radio" name="element-type" value="evenement" /> Événement
+          </label>
+        </div>
+
+        <input id="element-titre" class="champ-note champ-titre" type="text" required />
+
+        <p class="etiquette">Quand ?</p>
+        <input id="element-date" class="champ-date" type="date" />
+        <label id="bloc-sans-date" class="point-oubli">
+          <input type="checkbox" id="element-sans-date" />
+          Pas de date (dans le pense-bête)
+        </label>
+
+        <div id="bloc-element-heure">
+          <input id="element-heure" class="champ-date" type="time" />
+          <label class="point-oubli">
+            <input type="checkbox" id="element-journee" />
+            Toute la journée
+          </label>
+        </div>
+
+        <p class="etiquette">Catégorie</p>
+        <div id="element-categories" class="choix"></div>
+
+        <label id="bloc-element-urgent" class="point-oubli">
+          <input type="checkbox" id="element-urgent" />
+          Urgent (elle ne te proposera pas de la reporter)
+        </label>
+
+        <details id="element-options" class="options">
+          <summary>Plus d'options</summary>
+          <p class="etiquette">À faire au plus tard le… (facultatif)</p>
+          <input id="element-limite" class="champ-date" type="date" />
+        </details>
+
+        <button type="submit" class="bouton bouton-large">Ajouter</button>
+        <button type="button" id="supprimer-element" class="bouton-annuler" hidden>
+          Supprimer
+        </button>
+      </form>
+    </div>
+
     <!-- Petit message qui apparaît puis disparaît -->
     <p id="petit-message" class="petit-message" hidden></p>
 
@@ -991,7 +1120,7 @@
         <i data-lucide="calendar-days"></i>
         <span>Agenda</span>
       </button>
-      <button class="bouton-plus" aria-label="Noter une dépense">
+      <button class="bouton-plus" aria-label="Ajouter">
         <i data-lucide="plus"></i>
       </button>
       <button class="onglet" data-ecran="foyer">
@@ -1005,18 +1134,21 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=15"></script>
-    <script src="js/outils/dates.js?v=15"></script>
-    <script src="js/modules/navigation.js?v=15"></script>
-    <script src="js/modules/infos.js?v=15"></script>
-    <script src="js/modules/accueil.js?v=15"></script>
-    <script src="js/modules/budget.js?v=15"></script>
-    <script src="js/modules/budget-repartition.js?v=15"></script>
-    <script src="js/modules/budget-mois.js?v=15"></script>
-    <script src="js/modules/budget-raccourcis.js?v=15"></script>
-    <script src="js/modules/budget-epargne.js?v=15"></script>
-    <script src="js/modules/budget-point.js?v=15"></script>
-    <script src="js/donnees/sauvegarde.js?v=15"></script>
-    <script src="js/app.js?v=15"></script>
+    <script src="js/donnees/stockage.js?v=16"></script>
+    <script src="js/outils/dates.js?v=16"></script>
+    <script src="js/modules/navigation.js?v=16"></script>
+    <script src="js/modules/infos.js?v=16"></script>
+    <script src="js/modules/accueil.js?v=16"></script>
+    <script src="js/modules/budget.js?v=16"></script>
+    <script src="js/modules/budget-repartition.js?v=16"></script>
+    <script src="js/modules/budget-mois.js?v=16"></script>
+    <script src="js/modules/budget-raccourcis.js?v=16"></script>
+    <script src="js/modules/budget-epargne.js?v=16"></script>
+    <script src="js/modules/budget-point.js?v=16"></script>
+    <script src="js/donnees/sauvegarde.js?v=16"></script>
+    <script src="js/modules/agenda.js?v=16"></script>
+    <script src="js/modules/agenda-vues.js?v=16"></script>
+    <script src="js/modules/agenda-feuille.js?v=16"></script>
+    <script src="js/app.js?v=16"></script>
   </body>
 </html>

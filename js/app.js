@@ -16,8 +16,12 @@ if (navigator.storage && navigator.storage.persist) {
   navigator.storage.persist();
 }
 
-// Le Budget est réparti sur 3 fichiers : on le dessine une fois qu'ils sont là
+// Le Budget est réparti sur plusieurs fichiers : on le dessine une fois qu'ils sont là
 afficherBudget();
+
+// L'Agenda, et la carte « Aujourd'hui » de l'Accueil
+afficherAgenda();
+afficherCarteAujourdhui();
 
 // Dessine toutes les icônes Lucide (en dernier, quand tout le HTML est prêt).
 // Le « if » : si Lucide n'a pas pu se charger (pas de réseau), on n'insiste pas

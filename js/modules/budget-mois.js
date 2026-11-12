@@ -938,10 +938,8 @@ document.querySelectorAll('input[name="depense-quand"]').forEach((bouton) => {
   });
 });
 
-// Les boutons qui ouvrent la feuille : le + de la barre du bas, et celui de Mon mois
-document
-  .querySelector(".bouton-plus")
-  .addEventListener("click", () => ouvrirFeuilleDepense(null));
+// Le bouton qui ouvre la feuille dans Mon mois
+// (le + de la barre ouvre maintenant un petit menu : voir agenda-feuille.js)
 document
   .getElementById("bouton-noter-depense")
   .addEventListener("click", () => ouvrirFeuilleDepense(null));
