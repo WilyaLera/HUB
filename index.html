@@ -20,10 +20,10 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=16" />
-    <link rel="stylesheet" href="css/navigation.css?v=16" />
-    <link rel="stylesheet" href="css/budget.css?v=16" />
-    <link rel="stylesheet" href="css/agenda.css?v=16" />
+    <link rel="stylesheet" href="css/base.css?v=17" />
+    <link rel="stylesheet" href="css/navigation.css?v=17" />
+    <link rel="stylesheet" href="css/budget.css?v=17" />
+    <link rel="stylesheet" href="css/agenda.css?v=17" />
   </head>
 
   <body>
@@ -1070,9 +1070,25 @@
           </label>
         </div>
 
+        <!-- Un anniversaire ? (événements seulement) -->
+        <label id="bloc-anniversaire" class="point-oubli">
+          <input type="checkbox" id="element-anniversaire" />
+          C'est un anniversaire 🎂
+        </label>
+
         <input id="element-titre" class="champ-note champ-titre" type="text" required />
 
-        <p class="etiquette">Quand ?</p>
+        <input
+          id="element-naissance"
+          class="champ-note"
+          type="number"
+          inputmode="numeric"
+          min="1900"
+          max="2100"
+          placeholder="Année de naissance (facultatif)"
+        />
+
+        <p id="etiquette-quand" class="etiquette">Quand ?</p>
         <input id="element-date" class="champ-date" type="date" />
         <label id="bloc-sans-date" class="point-oubli">
           <input type="checkbox" id="element-sans-date" />
@@ -1087,8 +1103,30 @@
           </label>
         </div>
 
-        <p class="etiquette">Catégorie</p>
-        <div id="element-categories" class="choix"></div>
+        <!-- Les répétitions -->
+        <div id="bloc-repetition">
+          <p class="etiquette">Se répète</p>
+          <select id="element-repetition" class="champ-note">
+            <option value="">Ne se répète pas</option>
+            <option value="jour">Chaque jour</option>
+            <option value="semaine">Chaque semaine</option>
+            <option value="mois">Chaque mois</option>
+            <option value="annee">Chaque année</option>
+          </select>
+          <label id="bloc-fin-repetition" class="champ">
+            Jusqu'au (facultatif)
+            <input id="element-fin-repetition" type="date" />
+          </label>
+          <p id="note-repetition" class="sous-titre petit">
+            Modifier ou supprimer un élément qui se répète change toutes ses
+            répétitions.
+          </p>
+        </div>
+
+        <div id="bloc-categories">
+          <p class="etiquette">Catégorie</p>
+          <div id="element-categories" class="choix"></div>
+        </div>
 
         <label id="bloc-element-urgent" class="point-oubli">
           <input type="checkbox" id="element-urgent" />
@@ -1134,21 +1172,21 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=16"></script>
-    <script src="js/outils/dates.js?v=16"></script>
-    <script src="js/modules/navigation.js?v=16"></script>
-    <script src="js/modules/infos.js?v=16"></script>
-    <script src="js/modules/accueil.js?v=16"></script>
-    <script src="js/modules/budget.js?v=16"></script>
-    <script src="js/modules/budget-repartition.js?v=16"></script>
-    <script src="js/modules/budget-mois.js?v=16"></script>
-    <script src="js/modules/budget-raccourcis.js?v=16"></script>
-    <script src="js/modules/budget-epargne.js?v=16"></script>
-    <script src="js/modules/budget-point.js?v=16"></script>
-    <script src="js/donnees/sauvegarde.js?v=16"></script>
-    <script src="js/modules/agenda.js?v=16"></script>
-    <script src="js/modules/agenda-vues.js?v=16"></script>
-    <script src="js/modules/agenda-feuille.js?v=16"></script>
-    <script src="js/app.js?v=16"></script>
+    <script src="js/donnees/stockage.js?v=17"></script>
+    <script src="js/outils/dates.js?v=17"></script>
+    <script src="js/modules/navigation.js?v=17"></script>
+    <script src="js/modules/infos.js?v=17"></script>
+    <script src="js/modules/accueil.js?v=17"></script>
+    <script src="js/modules/budget.js?v=17"></script>
+    <script src="js/modules/budget-repartition.js?v=17"></script>
+    <script src="js/modules/budget-mois.js?v=17"></script>
+    <script src="js/modules/budget-raccourcis.js?v=17"></script>
+    <script src="js/modules/budget-epargne.js?v=17"></script>
+    <script src="js/modules/budget-point.js?v=17"></script>
+    <script src="js/donnees/sauvegarde.js?v=17"></script>
+    <script src="js/modules/agenda.js?v=17"></script>
+    <script src="js/modules/agenda-vues.js?v=17"></script>
+    <script src="js/modules/agenda-feuille.js?v=17"></script>
+    <script src="js/app.js?v=17"></script>
   </body>
 </html>

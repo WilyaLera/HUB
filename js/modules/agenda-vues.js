@@ -103,7 +103,7 @@ function creerBoutonAjouter(texte, quandOnTouche) {
 function creerListeDuJour(dateTexte, avecDemain) {
   const liste = document.createElement("div");
   elementsDuJour(dateTexte).forEach((el) => {
-    liste.appendChild(creerLigneElement(el, { avecDemain }));
+    liste.appendChild(creerLigneElement(el, { avecDemain, date: dateTexte }));
   });
   return liste;
 }
@@ -272,7 +272,8 @@ function afficherVueJour() {
   const taches = tachesDuJour(jourChoisi);
 
   // Combien ne sont pas encore faites ?
-  const restantes = taches.filter((tache) => !tache.fait).length;
+  // (estFait sait aussi gérer les tâches qui se répètent)
+  const restantes = taches.filter((tache) => !estFait(tache, jourChoisi)).length;
 
   // Le titre, avec un petit compteur
   let texteTitre = `Tâches du jour · ${restantes} restantes`;
@@ -291,7 +292,7 @@ function afficherVueJour() {
   // « Demain » n'a de sens que pour aujourd'hui (ou un jour passé)
   const avecDemain = jourChoisi <= aujourdhui;
   taches.forEach((tache) =>
-    carteTaches.appendChild(creerLigneElement(tache, { avecDemain })),
+    carteTaches.appendChild(creerLigneElement(tache, { avecDemain, date: jourChoisi })),
   );
   if (avecDemain) {
     const lien = creerLienToutGlisser(taches);
@@ -317,7 +318,9 @@ function afficherVueJour() {
       creerMessageVide("Rien de prévu. Un peu d'air, c'est bien aussi."),
     );
   }
-  evenements.forEach((ev) => carteJournee.appendChild(creerLigneElement(ev)));
+  evenements.forEach((ev) =>
+    carteJournee.appendChild(creerLigneElement(ev, { date: jourChoisi })),
+  );
   carteJournee.appendChild(
     creerBoutonAjouter("Ajouter un événement", () =>
       ouvrirFeuilleElement(null, { type: "evenement", date: jourChoisi }),

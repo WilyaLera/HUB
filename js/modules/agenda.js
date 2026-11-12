@@ -6,6 +6,7 @@
 //   4. reporter sans culpabilité (« Demain », « Tout glisser à demain »)
 //   5. le pense-bête et sa pioche
 //   6. fabriquer une ligne (tâche ou événement), utilisée partout
+//   7. les répétitions et les anniversaires
 //
 // Un « élément » de l'agenda, c'est soit une TÂCHE (à cocher),
 // soit un ÉVÉNEMENT (un moment, rien à cocher) :
@@ -13,7 +14,10 @@
 //     date: "2026-11-12" (ou "" pour une tâche du pense-bête),
 //     heure: "14:30" (ou "" = sans heure / toute la journée),
 //     categorie: "perso" | "maison" | "travail" | "sorties" | "sante" | "anniversaire" | "admin",
-//     fait, urgent, dateLimite (tâches seulement) }
+//     fait, urgent, dateLimite (tâches seulement),
+//     recurrence: "" | "jour" | "semaine" | "mois" | "annee",
+//     finRepetition: "" ou une date, faitLes: [dates] (tâches répétées),
+//     anniversaire: true/false, anneeNaissance: 1996 ou "" }
 // =====================================================
 
 // ---------- 1. Les catégories ----------
@@ -74,10 +78,12 @@ function estUneTache(element) {
 
 // Les tâches d'un jour. Aujourd'hui, on y ajoute aussi celles des jours
 // passés qui ne sont pas faites : elles reviennent doucement, sans disparaître.
+// (Les tâches qui se répètent, elles, ne reviennent pas : la prochaine arrive déjà.)
 function tachesDuJour(dateTexte) {
   const aujourdhui = aujourdhuiEnTexte();
   return agenda.elements.filter((el) => {
     if (!estUneTache(el) || el.date === "") return false;
+    if (seRepete(el)) return tombeLe(el, dateTexte);
     if (el.date === dateTexte) return true;
     return dateTexte === aujourdhui && el.date < aujourdhui && !el.fait;
   });
@@ -86,7 +92,7 @@ function tachesDuJour(dateTexte) {
 // Les événements d'un jour, ceux « toute la journée » d'abord, puis par heure
 function evenementsDuJour(dateTexte) {
   return agenda.elements
-    .filter((el) => !estUneTache(el) && el.date === dateTexte)
+    .filter((el) => !estUneTache(el) && tombeLe(el, dateTexte))
     .sort((a, b) => a.heure.localeCompare(b.heure));
 }
 
@@ -109,6 +115,7 @@ function categoriesDuJour(dateTexte) {
 // Une tâche peut glisser à demain si : pas faite, pas urgente,
 // et ce n'est pas déjà le jour de son échéance (le jour J, « Demain » disparaît)
 function peutGlisser(tache) {
+  if (seRepete(tache)) return false; // la prochaine arrive toute seule
   if (tache.fait || tache.urgent) return false;
   if (tache.dateLimite && aujourdhuiEnTexte() >= tache.dateLimite) return false;
   return true;
@@ -138,10 +145,24 @@ function creerLienToutGlisser(taches) {
   return lien;
 }
 
-function cocherTache(tache, fait) {
-  tache.fait = fait;
+// Cocher une tâche. Pour une tâche qui se répète, on ne coche
+// QUE le jour concerné : on range ce jour dans sa liste « faitLes ».
+function cocherTache(tache, fait, dateTexte) {
+  if (seRepete(tache)) {
+    if (!tache.faitLes) tache.faitLes = [];
+    tache.faitLes = tache.faitLes.filter((d) => d !== dateTexte);
+    if (fait) tache.faitLes.push(dateTexte);
+  } else {
+    tache.fait = fait;
+  }
   sauvegarderAgenda();
   rafraichirAgenda();
+}
+
+// Une tâche est-elle faite ce jour-là ?
+function estFait(tache, dateTexte) {
+  if (seRepete(tache)) return (tache.faitLes || []).includes(dateTexte);
+  return tache.fait;
 }
 
 // ---------- 5. Le pense-bête ----------
@@ -174,26 +195,29 @@ function creerPastilleCategorie(code) {
 }
 
 // options.avecDemain : afficher le bouton « Demain » (vue du jour, Accueil)
+// options.date : le jour qu'on regarde (utile pour les répétitions et les âges)
 function creerLigneElement(element, options = {}) {
   const ligne = document.createElement("div");
   ligne.classList.add("ligne-agenda");
+  const jour = options.date || element.date || aujourdhuiEnTexte();
+  const fait = estUneTache(element) && estFait(element, jour);
 
   if (estUneTache(element)) {
     // La case à cocher
     const caseACocher = document.createElement("input");
     caseACocher.type = "checkbox";
-    caseACocher.checked = element.fait;
+    caseACocher.checked = fait;
     caseACocher.setAttribute("aria-label", `Fait : ${element.titre}`);
     caseACocher.addEventListener("change", () =>
-      cocherTache(element, caseACocher.checked),
+      cocherTache(element, caseACocher.checked, jour),
     );
     ligne.appendChild(caseACocher);
-    ligne.classList.toggle("ligne-faite", element.fait);
+    ligne.classList.toggle("ligne-faite", fait);
   } else {
     // L'heure de l'événement (ou « Journée »)
     const heure = document.createElement("span");
     heure.classList.add("agenda-heure");
-    heure.textContent = element.heure || "Journée";
+    heure.textContent = element.anniversaire ? "🎂" : element.heure || "Journée";
     ligne.appendChild(heure);
   }
 
@@ -205,22 +229,26 @@ function creerLigneElement(element, options = {}) {
 
   const titre = document.createElement("span");
   titre.classList.add("ligne-agenda-titre");
-  titre.append(creerPastilleCategorie(element.categorie), element.titre);
+  titre.append(creerPastilleCategorie(element.categorie), titreAffiche(element, jour));
   zone.appendChild(titre);
 
-  // Les petites étiquettes : urgent, reportée, échéance
+  // Les petites étiquettes : urgent, reportée, échéance, répétition
   const details = [];
-  if (element.urgent && !element.fait) details.push("Urgent");
+  if (element.urgent && !fait) details.push("Urgent");
   const aujourdhui = aujourdhuiEnTexte();
   if (
     estUneTache(element) &&
+    !seRepete(element) &&
     element.date &&
     element.date < aujourdhui &&
-    !element.fait
+    !fait
   ) {
     details.push(`du ${formaterDate(element.date, false)}`);
   }
-  if (element.dateLimite && !element.fait) {
+  if (seRepete(element) && !element.anniversaire) {
+    details.push(`🔁 ${MOTS_REPETITION[element.recurrence]}`);
+  }
+  if (element.dateLimite && !fait) {
     details.push(
       element.dateLimite === aujourdhui
         ? "à faire aujourd'hui"
@@ -230,7 +258,7 @@ function creerLigneElement(element, options = {}) {
   if (details.length > 0) {
     const petit = document.createElement("span");
     petit.classList.add("ligne-agenda-details");
-    petit.classList.toggle("est-urgent", element.urgent && !element.fait);
+    petit.classList.toggle("est-urgent", element.urgent && !fait);
     petit.textContent = details.join(" · ");
     zone.appendChild(petit);
   }
@@ -252,4 +280,51 @@ function creerLigneElement(element, options = {}) {
   }
 
   return ligne;
+}
+
+// ---------- 7. Les répétitions et les anniversaires ----------
+
+const MOTS_REPETITION = {
+  jour: "chaque jour",
+  semaine: "chaque semaine",
+  mois: "chaque mois",
+  annee: "chaque année",
+};
+
+function seRepete(element) {
+  return Boolean(element.recurrence);
+}
+
+// Un élément tombe-t-il ce jour-là ?
+function tombeLe(element, dateTexte) {
+  if (!seRepete(element)) return element.date === dateTexte;
+
+  // Pas avant son premier jour, et pas après sa date de fin
+  if (dateTexte < element.date) return false;
+  if (element.finRepetition && dateTexte > element.finRepetition) return false;
+
+  const debut = texteEnDate(element.date);
+  const jour = texteEnDate(dateTexte);
+  if (element.recurrence === "jour") return true;
+  if (element.recurrence === "semaine") return jour.getDay() === debut.getDay();
+  if (element.recurrence === "mois") return jour.getDate() === debut.getDate();
+  // Chaque année : même jour, même mois
+  return jour.getDate() === debut.getDate() && jour.getMonth() === debut.getMonth();
+}
+
+// Le titre qu'on affiche : pour un anniversaire, « Anniversaire de Léa · 30 ans »
+function titreAffiche(element, dateTexte) {
+  if (!element.anniversaire) return element.titre;
+  let texte = `Anniversaire de ${element.titre}`;
+  if (element.anneeNaissance) {
+    const age = texteEnDate(dateTexte).getFullYear() - element.anneeNaissance;
+    if (age > 0) texte = `${texte} · ${age} an${age > 1 ? "s" : ""}`;
+  }
+  return texte;
+}
+
+// Les anniversaires de demain (pour le petit rappel de l'Accueil)
+function anniversairesDeDemain() {
+  const demain = ajouterJours(aujourdhuiEnTexte(), 1);
+  return agenda.elements.filter((el) => el.anniversaire && tombeLe(el, demain));
 }

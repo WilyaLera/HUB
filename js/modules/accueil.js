@@ -59,17 +59,27 @@ function afficherCarteAujourdhui() {
   const evenements = evenementsDuJour(aujourdhui);
   const taches = tachesDuJour(aujourdhui);
 
+  // Le petit rappel de la veille : « Demain, c'est l'anniversaire de Léa 🎂 »
+  anniversairesDeDemain().forEach((anniv) => {
+    const rappel = document.createElement("p");
+    rappel.classList.add("rappel-anniversaire");
+    rappel.textContent = `Demain, c'est l'${titreAffiche(anniv, ajouterJours(aujourdhui, 1)).replace("Anniversaire", "anniversaire")} 🎂`;
+    listeTaches.appendChild(rappel);
+  });
+
   // D'abord les rendez-vous du jour, puis les tâches (avec « Demain »)
-  evenements.forEach((ev) => listeTaches.appendChild(creerLigneElement(ev)));
+  evenements.forEach((ev) => {
+    listeTaches.appendChild(creerLigneElement(ev, { date: aujourdhui }));
+  });
   taches.forEach((tache) => {
-    listeTaches.appendChild(creerLigneElement(tache, { avecDemain: true }));
+    listeTaches.appendChild(creerLigneElement(tache, { avecDemain: true, date: aujourdhui }));
   });
 
   const lien = creerLienToutGlisser(taches);
   if (lien) listeTaches.appendChild(lien);
 
   // Journée vide : on pioche une idée dans le pense-bête
-  if (taches.length === 0 && evenements.length === 0) {
+  if (taches.length === 0 && evenements.length === 0 && anniversairesDeDemain().length === 0) {
     const idees = penseBete();
     if (idees.length > 0) {
       if (!ideeAccueil || !idees.includes(ideeAccueil)) {

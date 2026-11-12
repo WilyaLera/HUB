@@ -52,6 +52,10 @@ const elementHeure = document.getElementById("element-heure");
 const elementJournee = document.getElementById("element-journee");
 const elementUrgent = document.getElementById("element-urgent");
 const elementLimite = document.getElementById("element-limite");
+const elementAnniversaire = document.getElementById("element-anniversaire");
+const elementNaissance = document.getElementById("element-naissance");
+const elementRepetition = document.getElementById("element-repetition");
+const elementFinRepetition = document.getElementById("element-fin-repetition");
 
 let elementEnModification = null;
 
@@ -84,20 +88,40 @@ function adapterFeuilleElement() {
   const tache = typeElementChoisi() === "tache";
   const enModification = Boolean(elementEnModification);
 
+  const anniversaire = !tache && elementAnniversaire.checked;
+
   let titre = tache ? "Nouvelle tâche" : "Nouvel événement";
+  if (anniversaire) titre = "Nouvel anniversaire";
   if (enModification) titre = tache ? "Modifier la tâche" : "Modifier l'événement";
   document.getElementById("element-feuille-titre").textContent = titre;
   formElement.querySelector('button[type="submit"]').textContent = enModification
     ? "Enregistrer"
     : "Ajouter";
   elementTitre.placeholder = tache ? "Ex. : Appeler le garage" : "Ex. : Dentiste";
+  if (anniversaire) elementTitre.placeholder = "Son prénom (ex. : Léa)";
+
+  // Un anniversaire : chaque année, toute la journée, sa propre catégorie.
+  // On cache donc l'heure, la répétition et les catégories.
+  document.getElementById("bloc-anniversaire").hidden = tache;
+  elementNaissance.hidden = !anniversaire;
+  document.getElementById("etiquette-quand").textContent = anniversaire
+    ? "Le jour de l'anniversaire"
+    : "Quand ?";
+  document.getElementById("bloc-categories").hidden = anniversaire;
+
+  // La répétition : pas pour le pense-bête ni pour un anniversaire
+  const sansDate = tache && elementSansDate.checked;
+  document.getElementById("bloc-repetition").hidden = anniversaire || sansDate;
+  document.getElementById("bloc-fin-repetition").hidden = elementRepetition.value === "";
+  document.getElementById("note-repetition").hidden =
+    !enModification || elementRepetition.value === "";
 
   // Tâche : « sans date » (pense-bête), urgent, échéance
   document.getElementById("bloc-sans-date").hidden = !tache;
   document.getElementById("bloc-element-urgent").hidden = !tache;
   document.getElementById("element-options").hidden = !tache;
   // Événement : l'heure, ou « toute la journée »
-  document.getElementById("bloc-element-heure").hidden = tache;
+  document.getElementById("bloc-element-heure").hidden = tache || anniversaire;
 
   elementDate.hidden = tache && elementSansDate.checked;
   elementHeure.hidden = elementJournee.checked;
@@ -109,6 +133,8 @@ document.querySelectorAll('input[name="element-type"]').forEach((bouton) => {
 });
 elementSansDate.addEventListener("change", adapterFeuilleElement);
 elementJournee.addEventListener("change", adapterFeuilleElement);
+elementAnniversaire.addEventListener("change", adapterFeuilleElement);
+elementRepetition.addEventListener("change", adapterFeuilleElement);
 
 // Ouvre la feuille. Avec un élément : on le modifie.
 // Sans : on en crée un, avec les valeurs proposées (type, date).
@@ -124,6 +150,10 @@ function ouvrirFeuilleElement(element, propose = {}) {
     categorie: "perso",
     urgent: false,
     dateLimite: "",
+    recurrence: "",
+    finRepetition: "",
+    anniversaire: false,
+    anneeNaissance: "",
   };
 
   document.querySelector(`input[name="element-type"][value="${valeurs.type}"]`).checked = true;
@@ -136,6 +166,10 @@ function ouvrirFeuilleElement(element, propose = {}) {
   elementUrgent.checked = Boolean(valeurs.urgent);
   elementLimite.value = valeurs.dateLimite || "";
   document.getElementById("element-options").open = Boolean(valeurs.dateLimite);
+  elementAnniversaire.checked = Boolean(valeurs.anniversaire);
+  elementNaissance.value = valeurs.anneeNaissance || "";
+  elementRepetition.value = valeurs.recurrence || "";
+  elementFinRepetition.value = valeurs.finRepetition || "";
   afficherChoixCategories(valeurs.categorie);
   adapterFeuilleElement();
 
@@ -176,6 +210,8 @@ formElement.addEventListener("submit", (evenement) => {
 
   const tache = typeElementChoisi() === "tache";
   const categorieCochee = formElement.querySelector('input[name="element-categorie"]:checked');
+  const anniversaire = !tache && elementAnniversaire.checked;
+  const sansDate = tache && elementSansDate.checked;
 
   const valeurs = {
     type: tache ? "tache" : "evenement",
@@ -186,7 +222,20 @@ formElement.addEventListener("submit", (evenement) => {
     categorie: categorieCochee ? categorieCochee.value : "perso",
     urgent: tache && elementUrgent.checked,
     dateLimite: tache ? elementLimite.value : "",
+    recurrence: sansDate ? "" : elementRepetition.value,
+    finRepetition: sansDate || !elementRepetition.value ? "" : elementFinRepetition.value,
+    anniversaire: anniversaire,
+    anneeNaissance: anniversaire && elementNaissance.value ? Number(elementNaissance.value) : "",
   };
+
+  // Un anniversaire : chaque année, toute la journée, catégorie Anniversaire
+  if (anniversaire) {
+    valeurs.recurrence = "annee";
+    valeurs.finRepetition = "";
+    valeurs.heure = "";
+    // Si tu as supprimé la catégorie Anniversaire, on garde celle choisie
+    if (CATEGORIES.some((c) => c.code === "anniversaire")) valeurs.categorie = "anniversaire";
+  }
 
   const etaitUneModification = Boolean(elementEnModification);
   if (elementEnModification) {

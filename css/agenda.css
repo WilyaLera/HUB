@@ -378,3 +378,23 @@
   display: block;
   margin: 8px auto 0;
 }
+
+/* ---------- Répétitions et anniversaires ---------- */
+
+#bloc-fin-repetition {
+  margin-top: 8px;
+  color: var(--texte-doux);
+}
+
+#element-naissance {
+  margin-top: 8px;
+}
+
+/* Le petit rappel de la veille sur l'Accueil */
+.rappel-anniversaire {
+  margin: 4px 0 8px !important;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, #b06a9c 15%, var(--carte));
+  font-weight: 700;
+}
