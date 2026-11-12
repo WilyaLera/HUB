@@ -113,7 +113,7 @@ formTache.addEventListener("submit", (evenement) => {
     titre: titre,
     date: aujourdhuiEnTexte(),
     heure: "",
-    categorie: "perso",
+    categorie: agenda.categories[0].code,
     fait: false,
     urgent: false,
     dateLimite: "",

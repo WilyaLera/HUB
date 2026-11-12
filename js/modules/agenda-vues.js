@@ -245,7 +245,19 @@ function afficherVueSemaine() {
     if (dateTexte === aujourdhui)
       titre.textContent = `${titre.textContent} · aujourd'hui`;
     titre.addEventListener("click", () => ouvrirJour(dateTexte));
-    carte.appendChild(titre);
+
+    // Le petit + : ajouter directement quelque chose ce jour-là
+    const ajouter = document.createElement("button");
+    ajouter.type = "button";
+    ajouter.classList.add("plus-rond", "plus-jour");
+    ajouter.textContent = "+";
+    ajouter.setAttribute("aria-label", "Ajouter ce jour-là");
+    ajouter.addEventListener("click", () => ouvrirMenuPlus(dateTexte)); // agenda-feuille.js
+
+    const enTete = document.createElement("div");
+    enTete.classList.add("titre-carte", "titre-carte-entre");
+    enTete.append(titre, ajouter);
+    carte.appendChild(enTete);
 
     if (elementsDuJour(dateTexte).length === 0) {
       carte.appendChild(creerMessageVide("Journée libre. Profite !"));

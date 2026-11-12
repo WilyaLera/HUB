@@ -398,3 +398,117 @@
   background: color-mix(in srgb, #b06a9c 15%, var(--carte));
   font-weight: 700;
 }
+
+/* ---------- Le + de chaque jour (vue semaine) ---------- */
+
+.plus-jour {
+  border: none;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+/* ---------- Les réglages de l'agenda ---------- */
+
+.ligne-categorie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--bordure, rgba(58, 46, 40, 0.08));
+}
+
+.ligne-categorie-nom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--texte);
+  text-align: left;
+  cursor: pointer;
+}
+
+.form-categorie {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.choix-couleurs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.rond-couleur {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+}
+
+.rond-couleur.choisi {
+  border-color: var(--fond);
+  box-shadow: 0 0 0 2px var(--texte);
+}
+
+.form-categorie-boutons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Les trois types (Tâche, Événement, Anniv.) tiennent sur une ligne */
+.choix-type label {
+  flex: 1;
+  text-align: center;
+}
+
+.reglage-case {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 16px;
+  font-size: 15px;
+}
+
+.reglage-case input {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.carte-jour-semaine .titre-carte {
+  margin-bottom: 4px;
+}
+
+/* Une ligne de jour férié : la date tout à droite */
+.ligne-ferie,
+.ligne-categorie-nom {
+  margin: 0;
+  padding: 8px 0;
+}
+
+.ligne-ferie .petit,
+.ligne-categorie-nom .petit {
+  margin: 0 0 0 auto;
+}
+
+#reglage-pays {
+  width: 100%;
+}
+
+.etiquette-espacee {
+  margin-top: 24px;
+}

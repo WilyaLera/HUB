@@ -13,7 +13,7 @@
 //   { id, type: "tache" | "evenement", titre,
 //     date: "2026-11-12" (ou "" pour une tâche du pense-bête),
 //     heure: "14:30" (ou "" = sans heure / toute la journée),
-//     categorie: "perso" | "maison" | "travail" | "sorties" | "sante" | "anniversaire" | "admin",
+//     categorie: le code d'une catégorie (voir agenda.categories), ou "anniversaire",
 //     fait, urgent, dateLimite (tâches seulement),
 //     recurrence: "" | "jour" | "semaine" | "mois" | "annee",
 //     finRepetition: "" ou une date, faitLes: [dates] (tâches répétées),
@@ -21,20 +21,34 @@
 // =====================================================
 
 // ---------- 1. Les catégories ----------
+// Elles vivent maintenant dans le tiroir (agenda.categories) : tu peux en
+// ajouter, en modifier, en supprimer. Voici celles du départ.
 
-const CATEGORIES = [
+const CATEGORIES_DE_DEPART = [
   { code: "perso", nom: "Perso", couleur: "#C4704F" },
   { code: "maison", nom: "Maison", couleur: "#7E9C80" },
   { code: "travail", nom: "Travail", couleur: "#5E7FA3" },
   { code: "sorties", nom: "Sorties", couleur: "#C98B8B" },
   { code: "sante", nom: "Santé & soin", couleur: "#C99A3E" },
-  { code: "anniversaire", nom: "Anniversaire", couleur: "#B06A9C" },
   { code: "admin", nom: "Administratif", couleur: "#7abfd4" },
 ];
 
-// "maison" → { code, nom, couleur } (Perso si on ne trouve pas)
+// Les couleurs qu'on peut choisir pour une nouvelle catégorie
+const COULEURS_CATEGORIES = [
+  "#C4704F", "#7E9C80", "#5E7FA3", "#C98B8B", "#C99A3E",
+  "#7abfd4", "#9A86B8", "#8A9A5B", "#B89B72", "#D08C60",
+];
+
+// Deux « catégories » à part, qu'on ne peut pas supprimer :
+// les anniversaires (un type à eux) et les jours fériés
+const ANNIVERSAIRE = { code: "anniversaire", nom: "Anniversaire", couleur: "#B06A9C" };
+const FERIE = { code: "ferie", nom: "Jour férié", couleur: "#9C8F86" };
+
+// "maison" → { code, nom, couleur } (la première catégorie si on ne trouve pas)
 function categorieDe(code) {
-  return CATEGORIES.find((c) => c.code === code) || CATEGORIES[0];
+  if (code === ANNIVERSAIRE.code) return ANNIVERSAIRE;
+  if (code === FERIE.code) return FERIE;
+  return agenda.categories.find((c) => c.code === code) || agenda.categories[0];
 }
 
 // ---------- 2. Le tiroir « agenda » ----------
@@ -60,6 +74,19 @@ if (!agenda) {
   sauvegarder("agenda", agenda);
 }
 
+// Les nouveautés : les catégories et le réglage des jours fériés
+if (!agenda.categories) {
+  agenda.categories = CATEGORIES_DE_DEPART.map((c) => ({ ...c }));
+}
+// Les jours fériés : le pays choisi ("" = aucun), ceux qu'on a masqués,
+// et ceux qu'on a ajoutés soi-même
+if (agenda.paysFeries === undefined) {
+  agenda.paysFeries = agenda.joursFeries === false ? "" : "nc";
+  delete agenda.joursFeries;
+}
+if (!agenda.feriesMasques) agenda.feriesMasques = [];
+if (!agenda.feriesPerso) agenda.feriesPerso = [];
+
 function sauvegarderAgenda() {
   sauvegarder("agenda", agenda);
 }
@@ -68,6 +95,7 @@ function sauvegarderAgenda() {
 function rafraichirAgenda() {
   afficherAgenda(); // dans agenda-vues.js
   afficherCarteAujourdhui(); // dans accueil.js
+  afficherReglagesAgenda(); // dans agenda-reglages.js
 }
 
 // ---------- 3. Les éléments d'un jour ----------
@@ -89,11 +117,26 @@ function tachesDuJour(dateTexte) {
   });
 }
 
-// Les événements d'un jour, ceux « toute la journée » d'abord, puis par heure
+// Les événements d'un jour, ceux « toute la journée » d'abord, puis par heure.
+// Un jour férié s'ajoute tout en haut.
 function evenementsDuJour(dateTexte) {
-  return agenda.elements
+  const evenements = agenda.elements
     .filter((el) => !estUneTache(el) && tombeLe(el, dateTexte))
     .sort((a, b) => a.heure.localeCompare(b.heure));
+
+  const ferie = ferieDuJour(dateTexte);
+  if (ferie) {
+    evenements.unshift({
+      id: `ferie-${dateTexte}`,
+      type: "evenement",
+      titre: ferie,
+      date: dateTexte,
+      heure: "",
+      categorie: FERIE.code,
+      estFerie: true,
+    });
+  }
+  return evenements;
 }
 
 // Tout ce qui se passe un jour (pour les pastilles du calendrier)
@@ -217,15 +260,20 @@ function creerLigneElement(element, options = {}) {
     // L'heure de l'événement (ou « Journée »)
     const heure = document.createElement("span");
     heure.classList.add("agenda-heure");
-    heure.textContent = element.anniversaire ? "🎂" : element.heure || "Journée";
+    heure.textContent = element.heure || "Journée";
+    if (element.anniversaire) heure.textContent = "🎂";
+    if (element.estFerie) heure.textContent = "Férié";
     ligne.appendChild(heure);
   }
 
   // Le titre et les petits détails : on les touche pour modifier
-  const zone = document.createElement("button");
-  zone.type = "button";
+  // (un jour férié ne se modifie pas : un simple <span> au lieu d'un bouton)
+  const zone = document.createElement(element.estFerie ? "span" : "button");
   zone.classList.add("ligne-agenda-ouvrir");
-  zone.addEventListener("click", () => ouvrirFeuilleElement(element)); // agenda-feuille.js
+  if (!element.estFerie) {
+    zone.type = "button";
+    zone.addEventListener("click", () => ouvrirFeuilleElement(element)); // agenda-feuille.js
+  }
 
   const titre = document.createElement("span");
   titre.classList.add("ligne-agenda-titre");
@@ -327,4 +375,120 @@ function titreAffiche(element, dateTexte) {
 function anniversairesDeDemain() {
   const demain = ajouterJours(aujourdhuiEnTexte(), 1);
   return agenda.elements.filter((el) => el.anniversaire && tombeLe(el, demain));
+}
+
+// ---------- 8. Les jours fériés ----------
+
+// La date de Pâques d'une année (le calcul de Meeus : un vieux calcul
+// d'astronome, qu'on recopie tel quel sans avoir besoin de le comprendre !)
+function dateDePaques(annee) {
+  const a = annee % 19;
+  const b = Math.floor(annee / 100);
+  const c = annee % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const mois = Math.floor((h + l - 7 * m + 114) / 31);
+  const jour = ((h + l - 7 * m + 114) % 31) + 1;
+  return dateEnTexte(new Date(annee, mois - 1, jour));
+}
+
+// Le n-ième lundi d'un mois (ex. : le 1er lundi de septembre)
+function nemeLundi(annee, mois, n) {
+  const date = new Date(annee, mois - 1, 1);
+  while (date.getDay() !== 1) date.setDate(date.getDate() + 1);
+  date.setDate(date.getDate() + 7 * (n - 1));
+  return dateEnTexte(date);
+}
+
+// Le lundi juste avant un jour (ex. : le lundi avant le 25 mai)
+function lundiAvant(annee, mois, jour) {
+  const date = new Date(annee, mois - 1, jour - 1);
+  while (date.getDay() !== 1) date.setDate(date.getDate() - 1);
+  return dateEnTexte(date);
+}
+
+// Tous les jours fériés qu'on sait calculer : un nom, et sa date pour une année
+const FERIES = {
+  jourDeLAn: { nom: "Jour de l'an", date: (an) => `${an}-01-01` },
+  evangile: { nom: "Arrivée de l'Évangile", date: (an) => `${an}-03-05` },
+  vendrediSaint: { nom: "Vendredi saint", date: (an) => ajouterJours(dateDePaques(an), -2) },
+  lundiPaques: { nom: "Lundi de Pâques", date: (an) => ajouterJours(dateDePaques(an), 1) },
+  travail: { nom: "Fête du travail", date: (an) => `${an}-05-01` },
+  victoire: { nom: "Victoire 1945", date: (an) => `${an}-05-08` },
+  ascension: { nom: "Ascension", date: (an) => ajouterJours(dateDePaques(an), 39) },
+  lundiPentecote: { nom: "Lundi de Pentecôte", date: (an) => ajouterJours(dateDePaques(an), 50) },
+  patriotes: { nom: "Journée des patriotes", date: (an) => lundiAvant(an, 5, 25) },
+  saintJean: { nom: "Fête nationale du Québec", date: (an) => `${an}-06-24` },
+  autonomie: { nom: "Fête de l'autonomie", date: (an) => `${an}-06-29` },
+  canada: { nom: "Fête du Canada", date: (an) => `${an}-07-01` },
+  quatorze: { nom: "Fête nationale", date: (an) => `${an}-07-14` },
+  belgique: { nom: "Fête nationale", date: (an) => `${an}-07-21` },
+  assomption: { nom: "Assomption", date: (an) => `${an}-08-15` },
+  travailQc: { nom: "Fête du travail", date: (an) => nemeLundi(an, 9, 1) },
+  citoyennete: { nom: "Fête de la citoyenneté", date: (an) => `${an}-09-24` },
+  actionDeGrace: { nom: "Action de grâce", date: (an) => nemeLundi(an, 10, 2) },
+  toussaint: { nom: "Toussaint", date: (an) => `${an}-11-01` },
+  armistice: { nom: "Armistice", date: (an) => `${an}-11-11` },
+  noel: { nom: "Noël", date: (an) => `${an}-12-25` },
+};
+
+// Les pays : leur nom et la liste de leurs jours fériés
+const PAYS_FERIES = {
+  nc: {
+    nom: "Nouvelle-Calédonie",
+    feries: ["jourDeLAn", "lundiPaques", "travail", "victoire", "ascension", "lundiPentecote",
+      "quatorze", "assomption", "citoyennete", "toussaint", "armistice", "noel"],
+  },
+  pf: {
+    nom: "Polynésie française",
+    feries: ["jourDeLAn", "evangile", "vendrediSaint", "lundiPaques", "travail", "victoire",
+      "ascension", "lundiPentecote", "autonomie", "quatorze", "assomption", "toussaint",
+      "armistice", "noel"],
+  },
+  fr: {
+    nom: "France métropolitaine",
+    feries: ["jourDeLAn", "lundiPaques", "travail", "victoire", "ascension", "lundiPentecote",
+      "quatorze", "assomption", "toussaint", "armistice", "noel"],
+  },
+  be: {
+    nom: "Belgique",
+    feries: ["jourDeLAn", "lundiPaques", "travail", "ascension", "lundiPentecote", "belgique",
+      "assomption", "toussaint", "armistice", "noel"],
+  },
+  qc: {
+    nom: "Québec",
+    feries: ["jourDeLAn", "vendrediSaint", "lundiPaques", "patriotes", "saintJean", "canada",
+      "travailQc", "actionDeGrace", "noel"],
+  },
+};
+
+// Les jours fériés d'une année : { "2026-12-25": "Noël", … }
+// (ceux du pays choisi, sans ceux masqués, plus ceux que tu as ajoutés)
+function joursFeriesDe(annee) {
+  const resultat = {};
+  const pays = PAYS_FERIES[agenda.paysFeries];
+  if (pays) {
+    pays.feries.forEach((cle) => {
+      if (agenda.feriesMasques.includes(cle)) return;
+      resultat[FERIES[cle].date(annee)] = FERIES[cle].nom;
+    });
+  }
+  // Les tiens : { id, nom, jourMois: "03-15" }, chaque année
+  agenda.feriesPerso.forEach((ferie) => {
+    resultat[`${annee}-${ferie.jourMois}`] = ferie.nom;
+  });
+  return resultat;
+}
+
+// Le nom du jour férié, ou null
+function ferieDuJour(dateTexte) {
+  const annee = Number(dateTexte.slice(0, 4));
+  return joursFeriesDe(annee)[dateTexte] || null;
 }

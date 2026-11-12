@@ -20,10 +20,10 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=17" />
-    <link rel="stylesheet" href="css/navigation.css?v=17" />
-    <link rel="stylesheet" href="css/budget.css?v=17" />
-    <link rel="stylesheet" href="css/agenda.css?v=17" />
+    <link rel="stylesheet" href="css/base.css?v=18" />
+    <link rel="stylesheet" href="css/navigation.css?v=18" />
+    <link rel="stylesheet" href="css/budget.css?v=18" />
+    <link rel="stylesheet" href="css/agenda.css?v=18" />
   </head>
 
   <body>
@@ -134,6 +134,66 @@
             <span class="plus-rond">+</span> Ajouter au pense-bête
           </button>
         </article>
+
+        <!-- Les réglages de l'agenda (une carte qui se replie) -->
+        <details id="carte-reglages-agenda" class="carte carte-repliable">
+          <summary><h2>Réglages de l'agenda</h2></summary>
+
+          <p class="etiquette">Jours fériés</p>
+          <select id="reglage-pays" class="champ-note"></select>
+          <details id="details-feries" class="options">
+            <summary>Choisir lesquels afficher</summary>
+            <p class="sous-titre petit">
+              Décoche ceux que tu ne fais pas. Tu peux aussi ajouter les tiens :
+              ils reviennent chaque année.
+            </p>
+            <div id="liste-feries"></div>
+            <form id="form-ferie" class="form-categorie" hidden>
+              <input
+                id="ferie-nom"
+                class="champ-note"
+                type="text"
+                placeholder="Nom (ex. : Pont de l'entreprise)"
+                maxlength="40"
+                required
+              />
+              <input id="ferie-date" class="champ-date" type="date" required />
+              <div class="form-categorie-boutons">
+                <button type="button" id="annuler-ferie" class="lien">Annuler</button>
+                <button type="submit" class="bouton">Ajouter</button>
+              </div>
+            </form>
+            <button type="button" id="ajouter-ferie" class="bouton-ajout">
+              <span class="plus-rond">+</span> Ajouter un jour férié
+            </button>
+          </details>
+
+          <p class="etiquette etiquette-espacee">Mes catégories</p>
+          <p class="sous-titre petit">
+            Touche une catégorie pour la renommer ou changer sa couleur.
+          </p>
+          <div id="liste-categories"></div>
+
+          <!-- Ajouter ou modifier une catégorie -->
+          <form id="form-categorie" class="form-categorie" hidden>
+            <input
+              id="categorie-nom"
+              class="champ-note"
+              type="text"
+              placeholder="Nom (ex. : Sport)"
+              maxlength="24"
+              required
+            />
+            <div id="categorie-couleurs" class="choix-couleurs"></div>
+            <div class="form-categorie-boutons">
+              <button type="button" id="annuler-categorie" class="lien">Annuler</button>
+              <button type="submit" class="bouton">Ajouter</button>
+            </div>
+          </form>
+          <button type="button" id="ajouter-categorie" class="bouton-ajout">
+            <span class="plus-rond">+</span> Ajouter une catégorie
+          </button>
+        </details>
       </section>
 
       <!-- Module Foyer -->
@@ -1044,6 +1104,9 @@
         <button type="button" id="plus-evenement" class="menu-plus-choix">
           <span class="menu-plus-icone">◷</span> Un événement
         </button>
+        <button type="button" id="plus-anniversaire" class="menu-plus-choix">
+          <span class="menu-plus-icone">🎂</span> Un anniversaire
+        </button>
         <button type="button" id="plus-depense" class="menu-plus-choix">
           <span class="menu-plus-icone">F</span> Une dépense
         </button>
@@ -1060,7 +1123,7 @@
           </button>
         </div>
 
-        <!-- Tâche ou événement ? -->
+        <!-- Tâche, événement ou anniversaire ? -->
         <div class="choix-vue choix-type">
           <label>
             <input type="radio" name="element-type" value="tache" /> Tâche
@@ -1068,13 +1131,10 @@
           <label>
             <input type="radio" name="element-type" value="evenement" /> Événement
           </label>
+          <label>
+            <input type="radio" name="element-type" value="anniversaire" /> Anniv.
+          </label>
         </div>
-
-        <!-- Un anniversaire ? (événements seulement) -->
-        <label id="bloc-anniversaire" class="point-oubli">
-          <input type="checkbox" id="element-anniversaire" />
-          C'est un anniversaire 🎂
-        </label>
 
         <input id="element-titre" class="champ-note champ-titre" type="text" required />
 
@@ -1172,21 +1232,22 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=17"></script>
-    <script src="js/outils/dates.js?v=17"></script>
-    <script src="js/modules/navigation.js?v=17"></script>
-    <script src="js/modules/infos.js?v=17"></script>
-    <script src="js/modules/accueil.js?v=17"></script>
-    <script src="js/modules/budget.js?v=17"></script>
-    <script src="js/modules/budget-repartition.js?v=17"></script>
-    <script src="js/modules/budget-mois.js?v=17"></script>
-    <script src="js/modules/budget-raccourcis.js?v=17"></script>
-    <script src="js/modules/budget-epargne.js?v=17"></script>
-    <script src="js/modules/budget-point.js?v=17"></script>
-    <script src="js/donnees/sauvegarde.js?v=17"></script>
-    <script src="js/modules/agenda.js?v=17"></script>
-    <script src="js/modules/agenda-vues.js?v=17"></script>
-    <script src="js/modules/agenda-feuille.js?v=17"></script>
-    <script src="js/app.js?v=17"></script>
+    <script src="js/donnees/stockage.js?v=18"></script>
+    <script src="js/outils/dates.js?v=18"></script>
+    <script src="js/modules/navigation.js?v=18"></script>
+    <script src="js/modules/infos.js?v=18"></script>
+    <script src="js/modules/accueil.js?v=18"></script>
+    <script src="js/modules/budget.js?v=18"></script>
+    <script src="js/modules/budget-repartition.js?v=18"></script>
+    <script src="js/modules/budget-mois.js?v=18"></script>
+    <script src="js/modules/budget-raccourcis.js?v=18"></script>
+    <script src="js/modules/budget-epargne.js?v=18"></script>
+    <script src="js/modules/budget-point.js?v=18"></script>
+    <script src="js/donnees/sauvegarde.js?v=18"></script>
+    <script src="js/modules/agenda.js?v=18"></script>
+    <script src="js/modules/agenda-vues.js?v=18"></script>
+    <script src="js/modules/agenda-feuille.js?v=18"></script>
+    <script src="js/modules/agenda-reglages.js?v=18"></script>
+    <script src="js/app.js?v=18"></script>
   </body>
 </html>

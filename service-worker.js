@@ -8,7 +8,7 @@
 // Comme ça, une mise à jour ne mélange jamais l'ancien et le nouveau code.
 // =====================================================
 
-const VERSION = "mon-hub-v16";
+const VERSION = "mon-hub-v18";
 
 // Installation : la nouvelle version prend la main tout de suite
 self.addEventListener("install", () => {

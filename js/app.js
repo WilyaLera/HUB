@@ -21,6 +21,7 @@ afficherBudget();
 
 // L'Agenda, et la carte « Aujourd'hui » de l'Accueil
 afficherAgenda();
+afficherReglagesAgenda();
 afficherCarteAujourdhui();
 
 // Dessine toutes les icônes Lucide (en dernier, quand tout le HTML est prêt).

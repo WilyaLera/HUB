@@ -1,7 +1,7 @@
 // =====================================================
 // Module Agenda — partie 3 : ajouter et modifier
-//   1. le menu du + (une tâche, un événement, une dépense)
-//   2. la feuille « tâche / événement » : ouvrir, adapter, enregistrer
+//   1. le menu du + (une tâche, un événement, un anniversaire, une dépense)
+//   2. la feuille « tâche / événement / anniversaire » : ouvrir, adapter, enregistrer
 // =====================================================
 
 // ---------- 1. Le menu du + ----------
@@ -36,6 +36,10 @@ document.getElementById("plus-evenement").addEventListener("click", () => {
   fermerMenuPlus();
   ouvrirFeuilleElement(null, { type: "evenement", date: datePourLePlus });
 });
+document.getElementById("plus-anniversaire").addEventListener("click", () => {
+  fermerMenuPlus();
+  ouvrirFeuilleElement(null, { type: "anniversaire", date: datePourLePlus });
+});
 document.getElementById("plus-depense").addEventListener("click", () => {
   fermerMenuPlus();
   ouvrirFeuilleDepense(null); // dans budget-mois.js
@@ -52,14 +56,15 @@ const elementHeure = document.getElementById("element-heure");
 const elementJournee = document.getElementById("element-journee");
 const elementUrgent = document.getElementById("element-urgent");
 const elementLimite = document.getElementById("element-limite");
-const elementAnniversaire = document.getElementById("element-anniversaire");
 const elementNaissance = document.getElementById("element-naissance");
 const elementRepetition = document.getElementById("element-repetition");
 const elementFinRepetition = document.getElementById("element-fin-repetition");
 
 let elementEnModification = null;
 
-// Le type choisi : "tache" ou "evenement"
+// Le type choisi : "tache", "evenement" ou "anniversaire".
+// (Dans le tiroir, un anniversaire reste un événement avec anniversaire: true :
+// comme ça, ceux que tu as déjà notés continuent de marcher.)
 function typeElementChoisi() {
   return formElement.querySelector('input[name="element-type"]:checked').value;
 }
@@ -68,7 +73,7 @@ function typeElementChoisi() {
 function afficherChoixCategories(codeChoisi) {
   const zone = document.getElementById("element-categories");
   zone.replaceChildren();
-  CATEGORIES.forEach((categorie) => {
+  agenda.categories.forEach((categorie) => {
     const pastille = document.createElement("label");
     pastille.classList.add("pastille", "pastille-categorie");
     // La couleur de la catégorie, gardée dans une « variable CSS » de la pastille
@@ -86,13 +91,13 @@ function afficherChoixCategories(codeChoisi) {
 // Montre ou cache les champs selon le type et les cases cochées
 function adapterFeuilleElement() {
   const tache = typeElementChoisi() === "tache";
+  const anniversaire = typeElementChoisi() === "anniversaire";
   const enModification = Boolean(elementEnModification);
-
-  const anniversaire = !tache && elementAnniversaire.checked;
 
   let titre = tache ? "Nouvelle tâche" : "Nouvel événement";
   if (anniversaire) titre = "Nouvel anniversaire";
   if (enModification) titre = tache ? "Modifier la tâche" : "Modifier l'événement";
+  if (enModification && anniversaire) titre = "Modifier l'anniversaire";
   document.getElementById("element-feuille-titre").textContent = titre;
   formElement.querySelector('button[type="submit"]').textContent = enModification
     ? "Enregistrer"
@@ -102,7 +107,6 @@ function adapterFeuilleElement() {
 
   // Un anniversaire : chaque année, toute la journée, sa propre catégorie.
   // On cache donc l'heure, la répétition et les catégories.
-  document.getElementById("bloc-anniversaire").hidden = tache;
   elementNaissance.hidden = !anniversaire;
   document.getElementById("etiquette-quand").textContent = anniversaire
     ? "Le jour de l'anniversaire"
@@ -133,7 +137,6 @@ document.querySelectorAll('input[name="element-type"]').forEach((bouton) => {
 });
 elementSansDate.addEventListener("change", adapterFeuilleElement);
 elementJournee.addEventListener("change", adapterFeuilleElement);
-elementAnniversaire.addEventListener("change", adapterFeuilleElement);
 elementRepetition.addEventListener("change", adapterFeuilleElement);
 
 // Ouvre la feuille. Avec un élément : on le modifie.
@@ -147,7 +150,7 @@ function ouvrirFeuilleElement(element, propose = {}) {
     titre: "",
     date: propose.date === undefined ? aujourdhuiEnTexte() : propose.date,
     heure: "",
-    categorie: "perso",
+    categorie: agenda.categories[0].code,
     urgent: false,
     dateLimite: "",
     recurrence: "",
@@ -156,7 +159,9 @@ function ouvrirFeuilleElement(element, propose = {}) {
     anneeNaissance: "",
   };
 
-  document.querySelector(`input[name="element-type"][value="${valeurs.type}"]`).checked = true;
+  let type = valeurs.type;
+  if (valeurs.anniversaire || type === "anniversaire") type = "anniversaire";
+  document.querySelector(`input[name="element-type"][value="${type}"]`).checked = true;
   elementTitre.value = valeurs.titre;
   elementSansDate.checked = valeurs.date === "";
   elementDate.value = valeurs.date || aujourdhuiEnTexte();
@@ -166,7 +171,6 @@ function ouvrirFeuilleElement(element, propose = {}) {
   elementUrgent.checked = Boolean(valeurs.urgent);
   elementLimite.value = valeurs.dateLimite || "";
   document.getElementById("element-options").open = Boolean(valeurs.dateLimite);
-  elementAnniversaire.checked = Boolean(valeurs.anniversaire);
   elementNaissance.value = valeurs.anneeNaissance || "";
   elementRepetition.value = valeurs.recurrence || "";
   elementFinRepetition.value = valeurs.finRepetition || "";
@@ -210,7 +214,7 @@ formElement.addEventListener("submit", (evenement) => {
 
   const tache = typeElementChoisi() === "tache";
   const categorieCochee = formElement.querySelector('input[name="element-categorie"]:checked');
-  const anniversaire = !tache && elementAnniversaire.checked;
+  const anniversaire = typeElementChoisi() === "anniversaire";
   const sansDate = tache && elementSansDate.checked;
 
   const valeurs = {
@@ -219,7 +223,7 @@ formElement.addEventListener("submit", (evenement) => {
     // Une tâche « sans date » va dans le pense-bête
     date: tache && elementSansDate.checked ? "" : elementDate.value,
     heure: !tache && !elementJournee.checked ? elementHeure.value : "",
-    categorie: categorieCochee ? categorieCochee.value : "perso",
+    categorie: categorieCochee ? categorieCochee.value : agenda.categories[0].code,
     urgent: tache && elementUrgent.checked,
     dateLimite: tache ? elementLimite.value : "",
     recurrence: sansDate ? "" : elementRepetition.value,
@@ -228,13 +232,12 @@ formElement.addEventListener("submit", (evenement) => {
     anneeNaissance: anniversaire && elementNaissance.value ? Number(elementNaissance.value) : "",
   };
 
-  // Un anniversaire : chaque année, toute la journée, catégorie Anniversaire
+  // Un anniversaire : chaque année, toute la journée, sa couleur à lui
   if (anniversaire) {
     valeurs.recurrence = "annee";
     valeurs.finRepetition = "";
     valeurs.heure = "";
-    // Si tu as supprimé la catégorie Anniversaire, on garde celle choisie
-    if (CATEGORIES.some((c) => c.code === "anniversaire")) valeurs.categorie = "anniversaire";
+    valeurs.categorie = ANNIVERSAIRE.code;
   }
 
   const etaitUneModification = Boolean(elementEnModification);
