@@ -221,21 +221,22 @@ formCategorie.addEventListener("submit", (evenement) => {
 });
 
 // Supprimer : ses tâches et événements passent dans la première catégorie qui reste
+// (et « Annuler » remet tout comme avant)
 function supprimerCategorie(categorie) {
   const autres = agenda.categories.filter((c) => c.code !== categorie.code);
-  const combien = agenda.elements.filter((el) => el.categorie === categorie.code).length;
-  let question = `Supprimer la catégorie « ${categorie.nom} » ?`;
-  if (combien > 0) {
-    const phrase = combien > 1 ? `${combien} éléments passeront` : "1 élément passera";
-    question += `\n${phrase} dans « ${autres[0].nom} ».`;
-  }
-  if (!confirm(question)) return;
-
-  agenda.elements.forEach((el) => {
-    if (el.categorie === categorie.code) el.categorie = autres[0].code;
-  });
-  agenda.categories = autres;
-  sauvegarderAgenda();
   fermerFormCategorie();
-  rafraichirAgenda();
+  agirAvecAnnuler({
+    tiroir: agenda,
+    message: `Catégorie « ${categorie.nom} » supprimée`,
+    action: () => {
+      agenda.elements.forEach((el) => {
+        if (el.categorie === categorie.code) el.categorie = autres[0].code;
+      });
+      agenda.categories = autres;
+    },
+    apres: () => {
+      sauvegarderAgenda();
+      rafraichirAgenda();
+    },
+  });
 }

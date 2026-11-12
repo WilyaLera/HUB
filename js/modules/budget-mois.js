@@ -449,13 +449,20 @@ function afficherChargesDuMois(periode) {
         `Annuler le paiement de ${charge.nom}`,
       );
       annuler.addEventListener("click", () => {
-        if (!confirm(`Annuler le paiement de « ${charge.nom} » ?`)) return;
-        // Si c'était une grosse échéance, on remet sa date d'avant
-        if (paiement.echeanceAvant)
-          charge.prochaineEcheance = paiement.echeanceAvant;
-        budget.paiements = budget.paiements.filter((p) => p.id !== paiement.id);
-        sauvegarderBudget();
-        afficherBudget();
+        agirAvecAnnuler({
+          tiroir: budget,
+          message: "Paiement retiré",
+          action: () => {
+            // Si c'était une grosse échéance, on remet sa date d'avant
+            if (paiement.echeanceAvant)
+              charge.prochaineEcheance = paiement.echeanceAvant;
+            budget.paiements = budget.paiements.filter((p) => p.id !== paiement.id);
+          },
+          apres: () => {
+            sauvegarderBudget();
+            afficherBudget();
+          },
+        });
       });
       ligne.appendChild(annuler);
     } else {
@@ -1010,12 +1017,4 @@ formDepense.addEventListener("submit", (evenement) => {
 });
 
 // Un petit message qui apparaît puis disparaît tout seul
-function montrerPetitMessage(texte) {
-  const message = document.getElementById("petit-message");
-  message.textContent = texte;
-  message.hidden = false;
-  // setTimeout : « fais ceci dans 2 secondes »
-  setTimeout(() => {
-    message.hidden = true;
-  }, 2000);
-}
+// (montrerPetitMessage vit maintenant dans js/outils/annuler.js)

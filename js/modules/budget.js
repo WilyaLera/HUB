@@ -180,9 +180,16 @@ function creerLigneBudget(titre, detail, droite, quandOnTouche, quandOnSupprime)
   boutonSupprimer.setAttribute("aria-label", `Supprimer ${titre}`);
   boutonSupprimer.textContent = "✕";
   boutonSupprimer.addEventListener("click", () => {
-    if (confirm(`Supprimer « ${titre} » ?`)) {
-      quandOnSupprime();
-    }
+    // On supprime tout de suite, et « Annuler » remet tout comme avant
+    agirAvecAnnuler({
+      tiroir: budget,
+      message: `« ${titre} » supprimé`,
+      action: quandOnSupprime,
+      apres: () => {
+        sauvegarderBudget();
+        afficherBudget();
+      },
+    });
   });
 
   ligne.appendChild(zone);

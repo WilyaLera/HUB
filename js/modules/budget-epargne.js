@@ -299,11 +299,19 @@ formProjet.querySelector(".bouton-annuler").addEventListener("click", fermerProj
 // Supprimer le projet en cours de modification
 document.getElementById("supprimer-projet").addEventListener("click", () => {
   const projet = budget.epargne.projets.find((p) => p.id === projetEnModification);
-  if (!projet || !confirm(`Supprimer le projet « ${projet.nom} » ?`)) return;
-  budget.epargne.projets = budget.epargne.projets.filter((p) => p.id !== projet.id);
-  sauvegarderBudget();
+  if (!projet) return;
   fermerProjet();
-  afficherEpargne();
+  agirAvecAnnuler({
+    tiroir: budget,
+    message: `Projet « ${projet.nom} » supprimé`,
+    action: () => {
+      budget.epargne.projets = budget.epargne.projets.filter((p) => p.id !== projet.id);
+    },
+    apres: () => {
+      sauvegarderBudget();
+      afficherEpargne();
+    },
+  });
 });
 
 formProjet.addEventListener("submit", (evenement) => {

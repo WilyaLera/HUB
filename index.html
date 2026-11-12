@@ -20,10 +20,10 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=18" />
-    <link rel="stylesheet" href="css/navigation.css?v=18" />
-    <link rel="stylesheet" href="css/budget.css?v=18" />
-    <link rel="stylesheet" href="css/agenda.css?v=18" />
+    <link rel="stylesheet" href="css/base.css?v=19" />
+    <link rel="stylesheet" href="css/navigation.css?v=19" />
+    <link rel="stylesheet" href="css/budget.css?v=19" />
+    <link rel="stylesheet" href="css/agenda.css?v=19" />
   </head>
 
   <body>
@@ -1207,47 +1207,51 @@
     </div>
 
     <!-- Petit message qui apparaît puis disparaît -->
-    <p id="petit-message" class="petit-message" hidden></p>
+    <div id="petit-message" class="petit-message" role="status" hidden>
+      <span id="petit-message-texte"></span>
+      <button type="button" id="petit-message-annuler" hidden>Annuler</button>
+    </div>
 
     <nav class="barre-nav">
-      <button class="onglet actif" data-ecran="accueil">
+      <button class="onglet actif" data-ecran="accueil" aria-label="Accueil">
         <i data-lucide="house"></i>
         <span>Accueil</span>
       </button>
-      <button class="onglet" data-ecran="agenda">
+      <button class="onglet" data-ecran="agenda" aria-label="Agenda">
         <i data-lucide="calendar-days"></i>
         <span>Agenda</span>
       </button>
       <button class="bouton-plus" aria-label="Ajouter">
         <i data-lucide="plus"></i>
       </button>
-      <button class="onglet" data-ecran="foyer">
+      <button class="onglet" data-ecran="foyer" aria-label="Foyer">
         <i data-lucide="sofa"></i>
         <span>Foyer</span>
       </button>
-      <button class="onglet" data-ecran="moi">
+      <button class="onglet" data-ecran="moi" aria-label="Moi">
         <i data-lucide="flower"></i>
         <span>Moi</span>
       </button>
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=18"></script>
-    <script src="js/outils/dates.js?v=18"></script>
-    <script src="js/modules/navigation.js?v=18"></script>
-    <script src="js/modules/infos.js?v=18"></script>
-    <script src="js/modules/accueil.js?v=18"></script>
-    <script src="js/modules/budget.js?v=18"></script>
-    <script src="js/modules/budget-repartition.js?v=18"></script>
-    <script src="js/modules/budget-mois.js?v=18"></script>
-    <script src="js/modules/budget-raccourcis.js?v=18"></script>
-    <script src="js/modules/budget-epargne.js?v=18"></script>
-    <script src="js/modules/budget-point.js?v=18"></script>
-    <script src="js/donnees/sauvegarde.js?v=18"></script>
-    <script src="js/modules/agenda.js?v=18"></script>
-    <script src="js/modules/agenda-vues.js?v=18"></script>
-    <script src="js/modules/agenda-feuille.js?v=18"></script>
-    <script src="js/modules/agenda-reglages.js?v=18"></script>
-    <script src="js/app.js?v=18"></script>
+    <script src="js/donnees/stockage.js?v=19"></script>
+    <script src="js/outils/dates.js?v=19"></script>
+    <script src="js/outils/annuler.js?v=19"></script>
+    <script src="js/modules/navigation.js?v=19"></script>
+    <script src="js/modules/infos.js?v=19"></script>
+    <script src="js/modules/accueil.js?v=19"></script>
+    <script src="js/modules/budget.js?v=19"></script>
+    <script src="js/modules/budget-repartition.js?v=19"></script>
+    <script src="js/modules/budget-mois.js?v=19"></script>
+    <script src="js/modules/budget-raccourcis.js?v=19"></script>
+    <script src="js/modules/budget-epargne.js?v=19"></script>
+    <script src="js/modules/budget-point.js?v=19"></script>
+    <script src="js/donnees/sauvegarde.js?v=19"></script>
+    <script src="js/modules/agenda.js?v=19"></script>
+    <script src="js/modules/agenda-vues.js?v=19"></script>
+    <script src="js/modules/agenda-feuille.js?v=19"></script>
+    <script src="js/modules/agenda-reglages.js?v=19"></script>
+    <script src="js/app.js?v=19"></script>
   </body>
 </html>

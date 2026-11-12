@@ -199,11 +199,19 @@ voile.addEventListener("click", () => {
 // Supprimer
 document.getElementById("supprimer-element").addEventListener("click", () => {
   const element = agenda.elements.find((el) => el.id === elementEnModification);
-  if (!element || !confirm(`Supprimer « ${element.titre} » ?`)) return;
-  agenda.elements = agenda.elements.filter((el) => el.id !== element.id);
-  sauvegarderAgenda();
+  if (!element) return;
   fermerFeuilleElement();
-  rafraichirAgenda();
+  agirAvecAnnuler({
+    tiroir: agenda,
+    message: `« ${element.titre} » supprimé`,
+    action: () => {
+      agenda.elements = agenda.elements.filter((el) => el.id !== element.id);
+    },
+    apres: () => {
+      sauvegarderAgenda();
+      rafraichirAgenda();
+    },
+  });
 });
 
 // Enregistrer
