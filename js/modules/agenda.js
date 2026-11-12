@@ -332,7 +332,7 @@ function creerLigneElement(element, options = {}) {
     const heure = document.createElement("span");
     heure.classList.add("agenda-heure");
     heure.textContent = element.heure || "Journée";
-    if (element.anniversaire) heure.textContent = "🎂";
+    if (element.anniversaire) heure.replaceChildren(creerIcone("cake"));
     if (element.estFerie) heure.textContent = "Férié";
     ligne.appendChild(heure);
   }
@@ -365,7 +365,7 @@ function creerLigneElement(element, options = {}) {
     details.push(`du ${formaterDate(element.date, false)}`);
   }
   if (seRepete(element) && !element.anniversaire) {
-    details.push(`🔁 ${MOTS_REPETITION[element.recurrence]}`);
+    details.push(MOTS_REPETITION[element.recurrence]);
   }
   if (element.dateLimite && !fait) {
     details.push(
@@ -378,7 +378,9 @@ function creerLigneElement(element, options = {}) {
     const petit = document.createElement("span");
     petit.classList.add("ligne-agenda-details");
     petit.classList.toggle("est-urgent", element.urgent && !fait);
-    petit.textContent = details.join(" · ");
+    // Une petite icône « répétition » devant, si l'élément se répète
+    if (seRepete(element) && !element.anniversaire) petit.appendChild(creerIcone("repeat"));
+    petit.append(details.join(" · "));
     zone.appendChild(petit);
   }
   ligne.appendChild(zone);

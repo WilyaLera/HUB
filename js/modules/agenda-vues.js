@@ -276,47 +276,6 @@ function afficherVueJour() {
     jourEnLettres(jourChoisi),
   );
 
-  // ----- « À caser » : les tâches du jour, sans heure -----
-  const carteTaches = document.createElement("article");
-  carteTaches.classList.add("carte", "carte-a-caser");
-
-  // On prend d'abord les tâches du jour (on en a besoin pour le titre)
-  const taches = tachesDuJour(jourChoisi);
-
-  // Combien ne sont pas encore faites ?
-  // (estFait sait aussi gérer les tâches qui se répètent)
-  const restantes = taches.filter((tache) => !estFait(tache, jourChoisi)).length;
-
-  // Le titre, avec un petit compteur
-  let texteTitre = `À caser · ${restantes} restantes`;
-  if (restantes === 0) {
-    texteTitre = "À caser · tout est fait 🌸";
-  } else if (restantes === 1) {
-    texteTitre = "À caser · 1 restante";
-  }
-
-  const titreTaches = document.createElement("h2");
-  titreTaches.textContent = texteTitre;
-  carteTaches.appendChild(titreTaches);
-  if (taches.length === 0) {
-    carteTaches.appendChild(creerMessageVide("Aucune tâche ce jour-là."));
-  }
-  // « Demain » n'a de sens que pour aujourd'hui (ou un jour passé)
-  const avecDemain = jourChoisi <= aujourdhui;
-  taches.forEach((tache) =>
-    carteTaches.appendChild(creerLigneElement(tache, { avecDemain, date: jourChoisi })),
-  );
-  if (avecDemain) {
-    const lien = creerLienToutGlisser(taches);
-    if (lien) carteTaches.appendChild(lien);
-  }
-  carteTaches.appendChild(
-    creerBoutonAjouter("Ajouter une tâche", () =>
-      ouvrirFeuilleElement(null, { type: "tache", date: jourChoisi }),
-    ),
-  );
-  contenuAgenda.appendChild(carteTaches);
-
   // ----- Ma journée, par moments -----
   const carteJournee = document.createElement("article");
   carteJournee.classList.add("carte");
@@ -360,6 +319,49 @@ function afficherVueJour() {
     ),
   );
   contenuAgenda.appendChild(carteJournee);
+
+  // ----- « Quand tu veux » : les tâches du jour, sans heure -----
+  // (après la journée : on regarde d'abord ses rendez-vous, tranquillement)
+  const carteTaches = document.createElement("article");
+  carteTaches.classList.add("carte");
+
+  const taches = tachesDuJour(jourChoisi);
+
+  // Un petit compteur, tourné vers ce qui est déjà fait
+  // (estFait sait aussi gérer les tâches qui se répètent)
+  const faites = taches.filter((tache) => estFait(tache, jourChoisi)).length;
+  let texteTitre = "Quand tu veux";
+  if (taches.length > 0 && faites === taches.length) {
+    texteTitre = "Quand tu veux · tout est fait 🌸";
+  } else if (faites > 0) {
+    texteTitre = `Quand tu veux · ${faites} de faite${faites > 1 ? "s" : ""} 🌱`;
+  } else if (taches.length > 1) {
+    texteTitre = `Quand tu veux · ${taches.length} petites choses`;
+  } else if (taches.length === 1) {
+    texteTitre = "Quand tu veux · 1 petite chose";
+  }
+
+  const titreTaches = document.createElement("h2");
+  titreTaches.textContent = texteTitre;
+  carteTaches.appendChild(titreTaches);
+  if (taches.length === 0) {
+    carteTaches.appendChild(creerMessageVide("Rien à caser. Une journée légère."));
+  }
+  // « Demain » n'a de sens que pour aujourd'hui (ou un jour passé)
+  const avecDemain = jourChoisi <= aujourdhui;
+  taches.forEach((tache) =>
+    carteTaches.appendChild(creerLigneElement(tache, { avecDemain, date: jourChoisi })),
+  );
+  if (avecDemain) {
+    const lien = creerLienToutGlisser(taches);
+    if (lien) carteTaches.appendChild(lien);
+  }
+  carteTaches.appendChild(
+    creerBoutonAjouter("Ajouter une tâche", () =>
+      ouvrirFeuilleElement(null, { type: "tache", date: jourChoisi }),
+    ),
+  );
+  contenuAgenda.appendChild(carteTaches);
 }
 
 // Les moments de la journée
@@ -441,7 +443,7 @@ function afficherPenseBete() {
     const bouton = document.createElement("button");
     bouton.type = "button";
     bouton.classList.add("lien", "lien-petit");
-    bouton.textContent = "🎲 Piocher une idée";
+    bouton.append(creerIcone("dices"), "Piocher une idée");
     bouton.addEventListener("click", () => {
       ideePiochee = piocherIdee(null);
       afficherPenseBete();

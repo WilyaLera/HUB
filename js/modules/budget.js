@@ -178,7 +178,7 @@ function creerLigneBudget(titre, detail, droite, quandOnTouche, quandOnSupprime)
   boutonSupprimer.type = "button";
   boutonSupprimer.classList.add("bouton-supprimer");
   boutonSupprimer.setAttribute("aria-label", `Supprimer ${titre}`);
-  boutonSupprimer.textContent = "✕";
+  boutonSupprimer.appendChild(creerIcone("x"));
   boutonSupprimer.addEventListener("click", () => {
     // On supprime tout de suite, et « Annuler » remet tout comme avant
     agirAvecAnnuler({

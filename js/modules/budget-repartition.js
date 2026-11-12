@@ -429,7 +429,7 @@ function afficherMessageVirements() {
   const verse = virementDe("moi") + virementDe("partenaire");
   const ecart = verse - besoinCompteCommun();
   if (ecart > 0) {
-    message.textContent = `${formaterMontant(ecart)} de plus que le nécessaire : un petit coussin 🛋️`;
+    message.textContent = `${formaterMontant(ecart)} de plus que le nécessaire : un petit coussin de sécurité`;
   } else if (ecart < 0) {
     message.textContent = `Il manque ${formaterMontant(-ecart)} sur le compte commun.`;
   } else {

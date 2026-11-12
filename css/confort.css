@@ -75,11 +75,6 @@
 
 /* ---------- La vue Jour ---------- */
 
-/* « À caser » : une bande couleur miel */
-.carte-a-caser {
-  background: color-mix(in srgb, var(--miel) 22%, var(--carte));
-}
-
 .titre-moment {
   margin: 16px 0 4px;
   font-size: 12px;
@@ -211,4 +206,71 @@ html[data-calme] *::after {
 .fleche {
   min-width: 44px;
   min-height: 44px;
+}
+
+/* ---------- v22 ---------- */
+
+/* Les icônes Lucide ajoutées par le JavaScript (creerIcone) */
+.icone,
+svg.icone {
+  width: 1.1em;
+  height: 1.1em;
+  vertical-align: -0.2em;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.agenda-heure .icone {
+  margin-right: 0;
+  color: #b06a9c;
+}
+
+.ligne-agenda-details .icone {
+  width: 1em;
+  height: 1em;
+  margin-right: 4px;
+}
+
+.bouton-supprimer .icone,
+.bouton-supprimer svg {
+  margin: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.rappel-anniversaire {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Le titre « Demain » qu'on peut toucher */
+.titre-carte-bouton {
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  text-align: left;
+}
+
+.titre-carte-bouton h2 {
+  margin: 0;
+}
+
+.titre-carte-bouton svg {
+  width: 22px;
+  height: 22px;
+  color: var(--accent);
+}
+
+.menu-plus-icone svg {
+  width: 20px;
+  height: 20px;
 }

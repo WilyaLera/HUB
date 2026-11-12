@@ -70,9 +70,10 @@ async function activerResume() {
   preparerResume();
 
   // Un premier résumé tout de suite, pour voir à quoi ça ressemble
-  sw.showNotification("Aujourd'hui", {
+  sw.showNotification("Mon Hub · Aujourd'hui", {
     body: texteResume(resumeDuJour(aujourdhuiEnTexte())),
     icon: "image/icone-192.png",
+    badge: "image/badge-96.png", // la petite icône de la barre du haut
     tag: "resume-du-jour",
   }).catch(() => {}); // si le téléphone refuse, pas de souci
 

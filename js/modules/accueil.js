@@ -42,11 +42,14 @@ function afficherCarteAujourdhui() {
   const evenements = evenementsDuJour(aujourdhui);
   const taches = tachesDuJour(aujourdhui);
 
-  // Le petit rappel de la veille : « Demain, c'est l'anniversaire de Léa 🎂 »
+  // Le petit rappel de la veille : « Demain, c'est l'anniversaire de Léa »
   anniversairesDeDemain().forEach((anniv) => {
     const rappel = document.createElement("p");
     rappel.classList.add("rappel-anniversaire");
-    rappel.textContent = `Demain, c'est l'${titreAffiche(anniv, ajouterJours(aujourdhui, 1)).replace("Anniversaire", "anniversaire")} 🎂`;
+    rappel.append(
+      creerIcone("cake"),
+      `Demain, c'est l'${titreAffiche(anniv, ajouterJours(aujourdhui, 1)).replace("Anniversaire", "anniversaire")}`,
+    );
     listeTaches.appendChild(rappel);
   });
 
@@ -89,8 +92,15 @@ function afficherCarteDemain() {
   }
   if (zone.children.length === 0) {
     zone.appendChild(creerMessageVide("Rien de prévu demain. Une journée à toi 🌙"));
+    zone.appendChild(
+      creerBoutonAjouter("Ajouter pour demain", () => ouvrirMenuPlus(demain)), // agenda-feuille.js
+    );
   }
 }
+
+document.getElementById("titre-demain").addEventListener("click", () => {
+  ouvrirMenuPlus(ajouterJours(aujourdhuiEnTexte(), 1));
+});
 
 // Carte Idée //
 // Une tâche du pense-bête, piochée au hasard (« Une autre » en pioche une nouvelle)

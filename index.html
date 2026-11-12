@@ -20,12 +20,12 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=21" />
-    <link rel="stylesheet" href="css/navigation.css?v=21" />
-    <link rel="stylesheet" href="css/budget.css?v=21" />
-    <link rel="stylesheet" href="css/agenda.css?v=21" />
-    <link rel="stylesheet" href="css/confort.css?v=21" />
-    <link rel="stylesheet" href="css/ordinateur.css?v=21" />
+    <link rel="stylesheet" href="css/base.css?v=22" />
+    <link rel="stylesheet" href="css/navigation.css?v=22" />
+    <link rel="stylesheet" href="css/budget.css?v=22" />
+    <link rel="stylesheet" href="css/agenda.css?v=22" />
+    <link rel="stylesheet" href="css/confort.css?v=22" />
+    <link rel="stylesheet" href="css/ordinateur.css?v=22" />
   </head>
 
   <body>
@@ -67,7 +67,11 @@
         <!-- carte budget : la même que dans « Mon mois ». La toucher ouvre le Budget -->
         <!-- Carte Demain : seulement le soir (à partir de 17 h) -->
         <article class="carte carte-accueil" data-carte="demain">
-          <h2>Demain</h2>
+          <!-- Toucher le titre : ajouter quelque chose pour demain -->
+          <button type="button" id="titre-demain" class="titre-carte-bouton">
+            <h2>Demain</h2>
+            <i data-lucide="plus"></i>
+          </button>
           <div id="liste-demain"></div>
         </article>
 
@@ -212,7 +216,7 @@
 
           <!-- Petit rappel de sauvegarde (si ça fait longtemps) -->
           <div id="rappel-sauvegarde" class="rappel" hidden>
-            <span>Pense à sauvegarder tes chiffres 💾</span>
+            <span><i data-lucide="save"></i> Pense à sauvegarder tes chiffres</span>
             <button
               type="button"
               id="bouton-rappel-sauvegarder"
@@ -372,9 +376,7 @@
                 id="fermer-explication"
                 class="bouton-supprimer"
                 aria-label="Fermer"
-              >
-                ✕
-              </button>
+              ><i data-lucide="x"></i></button>
               <strong id="explication-titre"></strong>
               <p id="explication-texte"></p>
             </div>
@@ -1041,9 +1043,7 @@
             id="fermer-feuille"
             class="bouton-supprimer"
             aria-label="Fermer"
-          >
-            ✕
-          </button>
+          ><i data-lucide="x"></i></button>
         </div>
 
         <!-- Dépense ou rentrée d'argent ? -->
@@ -1135,9 +1135,7 @@
           id="fermer-point"
           class="bouton-supprimer"
           aria-label="Fermer"
-        >
-          ✕
-        </button>
+        ><i data-lucide="x"></i></button>
       </div>
       <div id="point-contenu"></div>
       <div class="point-boutons">
@@ -1152,22 +1150,20 @@
     <div id="feuille-plus" class="feuille" hidden>
       <div class="feuille-haut">
         <h2>Ajouter…</h2>
-        <button type="button" id="fermer-plus" class="bouton-supprimer" aria-label="Fermer">
-          ✕
-        </button>
+        <button type="button" id="fermer-plus" class="bouton-supprimer" aria-label="Fermer"><i data-lucide="x"></i></button>
       </div>
       <div class="menu-plus">
         <button type="button" id="plus-tache" class="menu-plus-choix">
-          <span class="menu-plus-icone">✓</span> Une tâche
+          <span class="menu-plus-icone"><i data-lucide="square-check"></i></span> Une tâche
         </button>
         <button type="button" id="plus-evenement" class="menu-plus-choix">
-          <span class="menu-plus-icone">◷</span> Un événement
+          <span class="menu-plus-icone"><i data-lucide="clock"></i></span> Un événement
         </button>
         <button type="button" id="plus-anniversaire" class="menu-plus-choix">
-          <span class="menu-plus-icone">🎂</span> Un anniversaire
+          <span class="menu-plus-icone"><i data-lucide="cake"></i></span> Un anniversaire
         </button>
         <button type="button" id="plus-depense" class="menu-plus-choix">
-          <span class="menu-plus-icone">F</span> Une dépense
+          <span class="menu-plus-icone"><i data-lucide="wallet"></i></span> Une dépense
         </button>
       </div>
     </div>
@@ -1189,9 +1185,7 @@
       <form id="form-element">
         <div class="feuille-haut">
           <h2 id="element-feuille-titre">Nouvelle tâche</h2>
-          <button type="button" id="fermer-element" class="bouton-supprimer" aria-label="Fermer">
-            ✕
-          </button>
+          <button type="button" id="fermer-element" class="bouton-supprimer" aria-label="Fermer"><i data-lucide="x"></i></button>
         </div>
 
         <!-- Tâche, événement ou anniversaire ? -->
@@ -1316,26 +1310,27 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=21"></script>
-    <script src="js/outils/dates.js?v=21"></script>
-    <script src="js/outils/annuler.js?v=21"></script>
-    <script src="js/modules/navigation.js?v=21"></script>
-    <script src="js/modules/infos.js?v=21"></script>
-    <script src="js/modules/accueil.js?v=21"></script>
-    <script src="js/modules/budget.js?v=21"></script>
-    <script src="js/modules/budget-repartition.js?v=21"></script>
-    <script src="js/modules/budget-mois.js?v=21"></script>
-    <script src="js/modules/budget-raccourcis.js?v=21"></script>
-    <script src="js/modules/budget-epargne.js?v=21"></script>
-    <script src="js/modules/budget-point.js?v=21"></script>
-    <script src="js/donnees/sauvegarde.js?v=21"></script>
-    <script src="js/modules/agenda.js?v=21"></script>
-    <script src="js/modules/agenda-vues.js?v=21"></script>
-    <script src="js/modules/agenda-feuille.js?v=21"></script>
-    <script src="js/modules/agenda-reglages.js?v=21"></script>
-    <script src="js/modules/agenda-notifs.js?v=21"></script>
-    <script src="js/modules/accueil-cartes.js?v=21"></script>
-    <script src="js/modules/moi.js?v=21"></script>
-    <script src="js/app.js?v=21"></script>
+    <script src="js/donnees/stockage.js?v=22"></script>
+    <script src="js/outils/dates.js?v=22"></script>
+    <script src="js/outils/annuler.js?v=22"></script>
+    <script src="js/outils/icones.js?v=22"></script>
+    <script src="js/modules/navigation.js?v=22"></script>
+    <script src="js/modules/infos.js?v=22"></script>
+    <script src="js/modules/accueil.js?v=22"></script>
+    <script src="js/modules/budget.js?v=22"></script>
+    <script src="js/modules/budget-repartition.js?v=22"></script>
+    <script src="js/modules/budget-mois.js?v=22"></script>
+    <script src="js/modules/budget-raccourcis.js?v=22"></script>
+    <script src="js/modules/budget-epargne.js?v=22"></script>
+    <script src="js/modules/budget-point.js?v=22"></script>
+    <script src="js/donnees/sauvegarde.js?v=22"></script>
+    <script src="js/modules/agenda.js?v=22"></script>
+    <script src="js/modules/agenda-vues.js?v=22"></script>
+    <script src="js/modules/agenda-feuille.js?v=22"></script>
+    <script src="js/modules/agenda-reglages.js?v=22"></script>
+    <script src="js/modules/agenda-notifs.js?v=22"></script>
+    <script src="js/modules/accueil-cartes.js?v=22"></script>
+    <script src="js/modules/moi.js?v=22"></script>
+    <script src="js/app.js?v=22"></script>
   </body>
 </html>

@@ -161,7 +161,7 @@ let projetEnAjoutArgent = null; // le projet où l'on ajoute de l'argent
 // Où en est un projet ? « Dans les temps », « Atteint en mars 2027 »…
 function etatDuProjet(projet) {
   const reste = projet.objectif - projet.dejaDeCote;
-  if (reste <= 0) return { texte: "Objectif atteint 🎉", attention: false };
+  if (reste <= 0) return { texte: "Objectif atteint 🌱", attention: false };
 
   if (projet.parMois <= 0) {
     return { texte: "Choisis un montant par mois pour voir quand tu y seras.", attention: false };

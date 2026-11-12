@@ -75,7 +75,7 @@ function afficherFeries() {
     const supprimer = document.createElement("button");
     supprimer.type = "button";
     supprimer.classList.add("bouton-supprimer");
-    supprimer.textContent = "✕";
+    supprimer.appendChild(creerIcone("x"));
     supprimer.setAttribute("aria-label", `Supprimer ${ferie.nom}`);
     supprimer.addEventListener("click", () => {
       agenda.feriesPerso = agenda.feriesPerso.filter((f) => f.id !== ferie.id);
@@ -145,7 +145,7 @@ function afficherReglagesAgenda() {
       const supprimer = document.createElement("button");
       supprimer.type = "button";
       supprimer.classList.add("bouton-supprimer");
-      supprimer.textContent = "✕";
+      supprimer.appendChild(creerIcone("x"));
       supprimer.setAttribute("aria-label", `Supprimer ${categorie.nom}`);
       supprimer.addEventListener("click", () => supprimerCategorie(categorie));
       ligne.appendChild(supprimer);

@@ -8,7 +8,7 @@
 // Comme ça, une mise à jour ne mélange jamais l'ancien et le nouveau code.
 // =====================================================
 
-const VERSION = "mon-hub-v21";
+const VERSION = "mon-hub-v22";
 const CACHE_RESUME = "hub-resume"; // le résumé préparé par l'appli (agenda-notifs.js)
 
 // Installation : la nouvelle version prend la main tout de suite
@@ -93,12 +93,12 @@ async function envoyerResume() {
   const jours = await reponse.json();
 
   // Avant 17 h : la journée en cours. Après : demain.
-  let titre = "Aujourd'hui";
+  let titre = "Mon Hub · Aujourd'hui";
   let date = aujourdhui;
   if (heure >= 17) {
     const demain = new Date(maintenant);
     demain.setDate(demain.getDate() + 1);
-    titre = "Demain";
+    titre = "Mon Hub · Demain";
     date = dateEnTexteSW(demain);
   }
   const jour = jours[date];
@@ -107,6 +107,7 @@ async function envoyerResume() {
   await self.registration.showNotification(titre, {
     body: texteResumeSW(jour),
     icon: "image/icone-192.png",
+    badge: "image/badge-96.png",
     tag: "resume-du-jour",
   });
   await cache.put("dernier.txt", new Response(aujourdhui));
