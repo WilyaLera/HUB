@@ -176,3 +176,10 @@
     margin-bottom: 20px;
   }
 }
+
+/* Sur ordinateur, le lien des réglages de l'agenda prend toute la largeur, tout en bas */
+@media (min-width: 900px) {
+  #agenda > .lien-reglages {
+    grid-column: 1 / -1;
+  }
+}
