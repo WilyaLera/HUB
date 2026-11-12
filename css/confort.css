@@ -1,0 +1,214 @@
+/* =====================================================
+   v21 : l'accueil réorganisable, la vue Jour par moments,
+   les gestes, les dates rapides, l'apparence et
+   la règle des boutons (tout ce qui se touche fait au moins 44 px)
+   ===================================================== */
+
+/* ---------- L'accueil ---------- */
+
+/* En colonne : chaque carte a sa place (« order », choisie dans Mon accueil) */
+#accueil.actif {
+  display: flex;
+  flex-direction: column;
+}
+
+.accueil-entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.accueil-entete .salutation {
+  margin-bottom: 0;
+}
+
+/* Le bouton rond (modifier l'accueil, flèches…) */
+.bouton-rond {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--carte);
+  color: var(--texte-doux);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(58, 46, 40, 0.06);
+}
+
+.bouton-rond:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.bouton-rond-petit {
+  background: var(--fond);
+  box-shadow: none;
+}
+
+/* Les lignes de la feuille « Mon accueil » */
+.ligne-carte-accueil {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--trait);
+}
+
+.ligne-carte-accueil input {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+
+.ligne-carte-accueil-texte {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- La vue Jour ---------- */
+
+/* « À caser » : une bande couleur miel */
+.carte-a-caser {
+  background: color-mix(in srgb, var(--miel) 22%, var(--carte));
+}
+
+.titre-moment {
+  margin: 16px 0 4px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--texte-doux);
+}
+
+.trait-maintenant {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.trait-maintenant::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.trait-maintenant::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background: var(--accent);
+  order: -1;
+}
+
+/* ---------- Le geste « glisser vers demain » ---------- */
+
+.ligne-glissable {
+  transition: transform 0.2s ease;
+  touch-action: pan-y; /* le doigt peut toujours faire défiler la page */
+}
+
+.ligne-glissable.en-glissement {
+  transition: none;
+  background: color-mix(in srgb, var(--miel) 30%, transparent);
+  border-radius: 12px;
+}
+
+.ligne-glissable.pret-a-glisser {
+  background: color-mix(in srgb, var(--miel) 60%, transparent);
+}
+
+/* ---------- Les dates rapides ---------- */
+
+.choix-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.pastille-date {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid var(--trait);
+  border-radius: 999px;
+  background: none;
+  color: var(--texte);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pastille-date.choisie {
+  background: var(--texte);
+  border-color: var(--texte);
+  color: var(--carte);
+}
+
+.pastille-pense-bete {
+  border-style: dashed;
+  color: var(--texte-doux);
+}
+
+/* ---------- Moi : l'apparence ---------- */
+
+.reglage-espace {
+  margin-top: 16px;
+}
+
+/* Texte plus grand : tout l'écran grossit un peu */
+html[data-texte="grand"] body {
+  zoom: 1.12;
+}
+
+/* Moins d'animations */
+html[data-calme] *,
+html[data-calme] *::before,
+html[data-calme] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* ---------- La règle des boutons : 44 px minimum ---------- */
+
+.bouton-supprimer {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+/* Le ⓘ garde sa petite pastille, mais sa zone tactile est plus grande */
+.bouton-info {
+  position: relative;
+}
+
+.bouton-info::after {
+  content: "";
+  position: absolute;
+  inset: -11px;
+}
+
+.bouton-demain {
+  min-height: 40px;
+}
+
+.fleche {
+  min-width: 44px;
+  min-height: 44px;
+}

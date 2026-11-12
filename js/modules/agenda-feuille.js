@@ -121,16 +121,71 @@ function adapterFeuilleElement() {
     !enModification || elementRepetition.value === "";
 
   // Tâche : « sans date » (pense-bête), urgent, échéance
-  document.getElementById("bloc-sans-date").hidden = !tache;
   document.getElementById("bloc-element-urgent").hidden = !tache;
-  document.getElementById("element-options").hidden = !tache;
   // Événement : l'heure, ou « toute la journée »
   document.getElementById("bloc-element-heure").hidden = tache || anniversaire;
 
-  elementDate.hidden = tache && elementSansDate.checked;
   elementHeure.hidden = elementJournee.checked;
   document.getElementById("supprimer-element").hidden = !enModification;
+
+  // Les dates rapides (pas pour un anniversaire : on choisit sa vraie date)
+  document.getElementById("choix-dates").hidden = anniversaire;
+  document.querySelector(".pastille-pense-bete").hidden = !tache;
+  document.getElementById("bloc-sans-date").hidden = true; // remplacé par « Un jour »
+  marquerDateChoisie();
+  elementDate.hidden = !anniversaire && !dateLibre;
+  if (tache && elementSansDate.checked) elementDate.hidden = true;
+
+  // « Plus d'options » : répétition (pas pour un anniversaire), urgent et échéance (tâches)
+  document.getElementById("element-options").hidden = anniversaire;
+  document.getElementById("bloc-limite").hidden = !tache;
 }
+
+// ---------- Les dates rapides ----------
+
+let dateLibre = false; // true : on a touché « Choisir… », le calendrier reste ouvert
+
+// Le prochain samedi (ou aujourd'hui, si on est déjà le week-end)
+function prochainWeekend() {
+  const aujourdhui = aujourdhuiEnTexte();
+  const jour = texteEnDate(aujourdhui).getDay(); // 0 = dimanche, 6 = samedi
+  if (jour === 6 || jour === 0) return aujourdhui;
+  return ajouterJours(aujourdhui, 6 - jour);
+}
+
+// Quelle pastille correspond à la date du formulaire ?
+function quandActuel() {
+  if (typeElementChoisi() === "tache" && elementSansDate.checked) return "pense-bete";
+  if (dateLibre) return "choisir";
+  const aujourdhui = aujourdhuiEnTexte();
+  if (elementDate.value === aujourdhui) return "aujourdhui";
+  if (elementDate.value === ajouterJours(aujourdhui, 1)) return "demain";
+  if (elementDate.value === prochainWeekend()) return "weekend";
+  return "choisir";
+}
+
+function marquerDateChoisie() {
+  const quand = quandActuel();
+  // Une autre date que les raccourcis : on montre le calendrier
+  if (quand === "choisir") dateLibre = true;
+  document.querySelectorAll(".pastille-date").forEach((pastille) => {
+    pastille.classList.toggle("choisie", pastille.dataset.quand === quand);
+  });
+}
+
+document.querySelectorAll(".pastille-date").forEach((pastille) => {
+  pastille.addEventListener("click", () => {
+    const quand = pastille.dataset.quand;
+    const aujourdhui = aujourdhuiEnTexte();
+    elementSansDate.checked = quand === "pense-bete";
+    dateLibre = quand === "choisir";
+    if (quand === "aujourdhui") elementDate.value = aujourdhui;
+    if (quand === "demain") elementDate.value = ajouterJours(aujourdhui, 1);
+    if (quand === "weekend") elementDate.value = prochainWeekend();
+    adapterFeuilleElement();
+    if (quand === "choisir") elementDate.focus();
+  });
+});
 
 document.querySelectorAll('input[name="element-type"]').forEach((bouton) => {
   bouton.addEventListener("change", adapterFeuilleElement);
@@ -170,7 +225,11 @@ function ouvrirFeuilleElement(element, propose = {}) {
   elementHeure.value = valeurs.heure || "09:00";
   elementUrgent.checked = Boolean(valeurs.urgent);
   elementLimite.value = valeurs.dateLimite || "";
-  document.getElementById("element-options").open = Boolean(valeurs.dateLimite);
+  // « Plus d'options » s'ouvre tout seul si l'élément en a déjà
+  document.getElementById("element-options").open = Boolean(
+    valeurs.dateLimite || valeurs.urgent || (valeurs.recurrence && !valeurs.anniversaire),
+  );
+  dateLibre = false;
   elementNaissance.value = valeurs.anneeNaissance || "";
   elementRepetition.value = valeurs.recurrence || "";
   elementFinRepetition.value = valeurs.finRepetition || "";

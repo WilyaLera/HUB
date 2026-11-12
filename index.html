@@ -20,25 +20,34 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=20" />
-    <link rel="stylesheet" href="css/navigation.css?v=20" />
-    <link rel="stylesheet" href="css/budget.css?v=20" />
-    <link rel="stylesheet" href="css/agenda.css?v=20" />
-    <link rel="stylesheet" href="css/ordinateur.css?v=20" />
+    <link rel="stylesheet" href="css/base.css?v=21" />
+    <link rel="stylesheet" href="css/navigation.css?v=21" />
+    <link rel="stylesheet" href="css/budget.css?v=21" />
+    <link rel="stylesheet" href="css/agenda.css?v=21" />
+    <link rel="stylesheet" href="css/confort.css?v=21" />
+    <link rel="stylesheet" href="css/ordinateur.css?v=21" />
   </head>
 
   <body>
     <main>
       <!-- Module Accueil -->
       <section id="accueil" class="ecran actif">
-        <p id="date-du-jour" class="sous-titre"></p>
-        <h1 class="salutation">
-          <span id="salutation">Bonjour</span>
-          <i data-lucide="plant-pot"></i>
-        </h1>
+        <div class="accueil-entete">
+          <div>
+            <p id="date-du-jour" class="sous-titre"></p>
+            <h1 class="salutation">
+              <span id="salutation">Bonjour</span>
+              <i data-lucide="plant-pot"></i>
+            </h1>
+          </div>
+          <!-- Choisir les cartes de l'accueil et leur ordre (accueil-cartes.js) -->
+          <button type="button" id="modifier-accueil" class="bouton-rond" aria-label="Modifier l'accueil">
+            <i data-lucide="sliders-horizontal"></i>
+          </button>
+        </div>
 
         <!-- Carte Aujourd'hui -->
-        <article class="carte">
+        <article class="carte carte-accueil" data-carte="aujourdhui">
           <!-- Le titre ouvre l'Agenda, sur la vue du jour -->
           <button type="button" id="lien-aujourdhui" class="titre-lien" data-ecran="agenda">
             Aujourd'hui ›
@@ -54,14 +63,21 @@
           </form>
         </article>
 
-        <!-- Carte menus -->
-        <article class="carte">
-          <h2>Au menu</h2>
-          <div id="liste-menu"></div>
-        </article>
 
         <!-- carte budget : la même que dans « Mon mois ». La toucher ouvre le Budget -->
-        <article class="carte carte-mois carte-touchable" data-ecran="budget">
+        <!-- Carte Demain : seulement le soir (à partir de 17 h) -->
+        <article class="carte carte-accueil" data-carte="demain">
+          <h2>Demain</h2>
+          <div id="liste-demain"></div>
+        </article>
+
+        <!-- Carte Idée : une tâche du pense-bête, piochée au hasard -->
+        <article class="carte carte-accueil" data-carte="idee">
+          <h2>Une idée du pense-bête</h2>
+          <div id="zone-idee"></div>
+        </article>
+
+        <article class="carte carte-mois carte-touchable carte-accueil" data-carte="budget" data-ecran="budget">
           <div class="mois-entete">
             <h2 id="accueil-titre"></h2>
             <span id="accueil-jours" class="pastille-info"></span>
@@ -140,73 +156,6 @@
             <span class="plus-rond">+</span> Ajouter au pense-bête
           </button>
         </article>
-
-        <!-- Les réglages de l'agenda (une carte qui se replie) -->
-        <details id="carte-reglages-agenda" class="carte carte-repliable">
-          <summary><h2>Réglages de l'agenda</h2></summary>
-
-          <p class="etiquette">Jours fériés</p>
-          <select id="reglage-pays" class="champ-note"></select>
-          <details id="details-feries" class="options">
-            <summary>Choisir lesquels afficher</summary>
-            <p class="sous-titre petit">
-              Décoche ceux que tu ne fais pas. Tu peux aussi ajouter les tiens :
-              ils reviennent chaque année.
-            </p>
-            <div id="liste-feries"></div>
-            <form id="form-ferie" class="form-categorie" hidden>
-              <input
-                id="ferie-nom"
-                class="champ-note"
-                type="text"
-                placeholder="Nom (ex. : Pont de l'entreprise)"
-                maxlength="40"
-                required
-              />
-              <input id="ferie-date" class="champ-date" type="date" required />
-              <div class="form-categorie-boutons">
-                <button type="button" id="annuler-ferie" class="lien">Annuler</button>
-                <button type="submit" class="bouton">Ajouter</button>
-              </div>
-            </form>
-            <button type="button" id="ajouter-ferie" class="bouton-ajout">
-              <span class="plus-rond">+</span> Ajouter un jour férié
-            </button>
-          </details>
-
-          <p class="etiquette etiquette-espacee">Petit résumé du jour</p>
-          <label class="reglage-case">
-            <input type="checkbox" id="reglage-resume" />
-            Recevoir une notification douce avec ma journée
-          </label>
-          <p id="etat-resume" class="sous-titre petit" role="status"></p>
-
-          <p class="etiquette etiquette-espacee">Mes catégories</p>
-          <p class="sous-titre petit">
-            Touche une catégorie pour la renommer ou changer sa couleur.
-          </p>
-          <div id="liste-categories"></div>
-
-          <!-- Ajouter ou modifier une catégorie -->
-          <form id="form-categorie" class="form-categorie" hidden>
-            <input
-              id="categorie-nom"
-              class="champ-note"
-              type="text"
-              placeholder="Nom (ex. : Sport)"
-              maxlength="24"
-              required
-            />
-            <div id="categorie-couleurs" class="choix-couleurs"></div>
-            <div class="form-categorie-boutons">
-              <button type="button" id="annuler-categorie" class="lien">Annuler</button>
-              <button type="submit" class="bouton">Ajouter</button>
-            </div>
-          </form>
-          <button type="button" id="ajouter-categorie" class="bouton-ajout">
-            <span class="plus-rond">+</span> Ajouter une catégorie
-          </button>
-        </details>
         </aside>
       </section>
 
@@ -399,95 +348,6 @@
 
         <!-- Onglet 2 : Mon budget (le plan) -->
         <div id="panneau-mon-budget" class="panneau-budget actif">
-          <!-- Réglages (une carte qui se replie) -->
-          <details id="carte-reglages" class="carte carte-repliable">
-            <summary><h2>Mes réglages</h2></summary>
-
-            <p class="etiquette">Je gère mon budget</p>
-            <div class="choix">
-              <label class="pastille">
-                <input type="radio" name="mode" value="seul" /> Seul·e
-              </label>
-              <label class="pastille">
-                <input type="radio" name="mode" value="deux" /> À deux
-              </label>
-            </div>
-
-            <label class="champ si-a-deux">
-              Avec qui ?
-              <input
-                id="champ-prenom-partenaire"
-                type="text"
-                placeholder="Son prénom"
-              />
-            </label>
-
-            <p class="etiquette">Mon mois commence</p>
-            <div class="choix">
-              <label class="pastille">
-                <input type="radio" name="debut" value="premier" /> Le 1er
-              </label>
-              <label class="pastille">
-                <input type="radio" name="debut" value="salaire" /> Le jour de
-                mon salaire
-              </label>
-            </div>
-
-            <label id="bloc-jour-salaire" class="champ">
-              Il arrive le
-              <input
-                id="champ-jour-salaire"
-                class="champ-court"
-                type="number"
-                min="1"
-                max="31"
-                inputmode="numeric"
-              />
-              du mois
-            </label>
-
-            <p class="etiquette">L'argent des grosses échéances est gardé</p>
-            <div class="choix">
-              <label class="pastille">
-                <input type="radio" name="reserve" value="courant" /> Sur le
-                compte courant
-              </label>
-              <label class="pastille">
-                <input type="radio" name="reserve" value="livret" /> Sur un
-                livret à part
-              </label>
-            </div>
-            <!-- Organisation du compte commun (à deux seulement) -->
-            <div class="si-a-deux">
-              <p class="etiquette">Sur le compte commun, on met…</p>
-              <div class="choix">
-                <label class="pastille">
-                  <input type="radio" name="organisation" value="charges" />
-                  Les charges fixes
-                </label>
-                <label class="pastille">
-                  <input type="radio" name="organisation" value="charges-vie" />
-                  Charges + vie courante + épargne
-                </label>
-                <label class="pastille">
-                  <input type="radio" name="organisation" value="tout" /> Tout
-                </label>
-              </div>
-
-              <div id="choix-partage">
-                <p class="etiquette">On partage…</p>
-                <div class="choix">
-                  <label class="pastille">
-                    <input type="radio" name="partage" value="salaires" /> Selon
-                    les salaires
-                  </label>
-                  <label class="pastille">
-                    <input type="radio" name="partage" value="moitie" /> 50 / 50
-                  </label>
-                </div>
-              </div>
-            </div>
-          </details>
 
           <!-- Où va ton argent -->
           <article class="carte">
@@ -945,6 +805,191 @@
       <section id="moi" class="ecran">
         <h1>Moi</h1>
 
+        <!-- Mon prénom -->
+        <article class="carte">
+          <h2>Moi</h2>
+          <label class="champ">
+            Mon prénom
+            <input id="champ-prenom" class="champ-note" type="text" maxlength="30" placeholder="Ton prénom" />
+          </label>
+        </article>
+
+        <!-- L'apparence (moi.js) -->
+        <details id="carte-apparence" class="carte carte-repliable">
+          <summary><h2>Apparence</h2></summary>
+          <p class="etiquette">Thème</p>
+          <div class="choix">
+            <label class="pastille"><input type="radio" name="theme" value="" /> Terracotta</label>
+            <label class="pastille"><input type="radio" name="theme" value="lagon" /> Lagon</label>
+            <label class="pastille"><input type="radio" name="theme" value="lavande" /> Lavande</label>
+          </div>
+          <p class="etiquette">Taille du texte</p>
+          <div class="choix">
+            <label class="pastille"><input type="radio" name="taille-texte" value="" /> Normale</label>
+            <label class="pastille"><input type="radio" name="taille-texte" value="grand" /> Plus grande</label>
+          </div>
+          <label class="reglage-case reglage-espace">
+            <input type="checkbox" id="reglage-calme" />
+            Moins d'animations
+          </label>
+        </details>
+
+        <!-- Les réglages de l'agenda (une carte qui se replie) -->
+        <details id="carte-reglages-agenda" class="carte carte-repliable">
+          <summary><h2>Réglages de l'agenda</h2></summary>
+
+          <p class="etiquette">Jours fériés</p>
+          <select id="reglage-pays" class="champ-note"></select>
+          <details id="details-feries" class="options">
+            <summary>Choisir lesquels afficher</summary>
+            <p class="sous-titre petit">
+              Décoche ceux que tu ne fais pas. Tu peux aussi ajouter les tiens :
+              ils reviennent chaque année.
+            </p>
+            <div id="liste-feries"></div>
+            <form id="form-ferie" class="form-categorie" hidden>
+              <input
+                id="ferie-nom"
+                class="champ-note"
+                type="text"
+                placeholder="Nom (ex. : Pont de l'entreprise)"
+                maxlength="40"
+                required
+              />
+              <input id="ferie-date" class="champ-date" type="date" required />
+              <div class="form-categorie-boutons">
+                <button type="button" id="annuler-ferie" class="lien">Annuler</button>
+                <button type="submit" class="bouton">Ajouter</button>
+              </div>
+            </form>
+            <button type="button" id="ajouter-ferie" class="bouton-ajout">
+              <span class="plus-rond">+</span> Ajouter un jour férié
+            </button>
+          </details>
+          <p class="etiquette etiquette-espacee">Petit résumé du jour</p>
+          <label class="reglage-case">
+            <input type="checkbox" id="reglage-resume" />
+            Recevoir une notification douce avec ma journée
+          </label>
+          <p id="etat-resume" class="sous-titre petit" role="status"></p>
+
+          <p class="etiquette etiquette-espacee">Mes catégories</p>
+          <p class="sous-titre petit">
+            Touche une catégorie pour la renommer ou changer sa couleur.
+          </p>
+          <div id="liste-categories"></div>
+
+          <!-- Ajouter ou modifier une catégorie -->
+          <form id="form-categorie" class="form-categorie" hidden>
+            <input
+              id="categorie-nom"
+              class="champ-note"
+              type="text"
+              placeholder="Nom (ex. : Sport)"
+              maxlength="24"
+              required
+            />
+            <div id="categorie-couleurs" class="choix-couleurs"></div>
+            <div class="form-categorie-boutons">
+              <button type="button" id="annuler-categorie" class="lien">Annuler</button>
+              <button type="submit" class="bouton">Ajouter</button>
+            </div>
+          </form>
+          <button type="button" id="ajouter-categorie" class="bouton-ajout">
+            <span class="plus-rond">+</span> Ajouter une catégorie
+          </button>
+        </details>
+
+        <!-- Les réglages du budget -->
+        <details id="carte-reglages" class="carte carte-repliable">
+          <summary><h2>Réglages du budget</h2></summary>
+
+          <p class="etiquette">Je gère mon budget</p>
+          <div class="choix">
+            <label class="pastille">
+              <input type="radio" name="mode" value="seul" /> Seul·e
+            </label>
+            <label class="pastille">
+              <input type="radio" name="mode" value="deux" /> À deux
+            </label>
+          </div>
+
+          <label class="champ si-a-deux">
+            Avec qui ?
+            <input
+              id="champ-prenom-partenaire"
+              type="text"
+              placeholder="Son prénom"
+            />
+          </label>
+
+          <p class="etiquette">Mon mois commence</p>
+          <div class="choix">
+            <label class="pastille">
+              <input type="radio" name="debut" value="premier" /> Le 1er
+            </label>
+            <label class="pastille">
+              <input type="radio" name="debut" value="salaire" /> Le jour de
+              mon salaire
+            </label>
+          </div>
+
+          <label id="bloc-jour-salaire" class="champ">
+            Il arrive le
+            <input
+              id="champ-jour-salaire"
+              class="champ-court"
+              type="number"
+              min="1"
+              max="31"
+              inputmode="numeric"
+            />
+            du mois
+          </label>
+
+          <p class="etiquette">L'argent des grosses échéances est gardé</p>
+          <div class="choix">
+            <label class="pastille">
+              <input type="radio" name="reserve" value="courant" /> Sur le
+              compte courant
+            </label>
+            <label class="pastille">
+              <input type="radio" name="reserve" value="livret" /> Sur un
+              livret à part
+            </label>
+          </div>
+          <!-- Organisation du compte commun (à deux seulement) -->
+          <div class="si-a-deux">
+            <p class="etiquette">Sur le compte commun, on met…</p>
+            <div class="choix">
+              <label class="pastille">
+                <input type="radio" name="organisation" value="charges" />
+                Les charges fixes
+              </label>
+              <label class="pastille">
+                <input type="radio" name="organisation" value="charges-vie" />
+                Charges + vie courante + épargne
+              </label>
+              <label class="pastille">
+                <input type="radio" name="organisation" value="tout" /> Tout
+              </label>
+            </div>
+
+            <div id="choix-partage">
+              <p class="etiquette">On partage…</p>
+              <div class="choix">
+                <label class="pastille">
+                  <input type="radio" name="partage" value="salaires" /> Selon
+                  les salaires
+                </label>
+                <label class="pastille">
+                  <input type="radio" name="partage" value="moitie" /> 50 / 50
+                </label>
+              </div>
+            </div>
+          </div>
+        </details>
+
         <!-- Mes données : sauvegarder et restaurer -->
         <article class="carte">
           <div class="titre-carte">
@@ -1127,6 +1172,18 @@
       </div>
     </div>
 
+    <!-- Choisir les cartes de l'accueil -->
+    <div id="feuille-accueil" class="feuille" hidden>
+      <div class="feuille-haut">
+        <h2>Mon accueil</h2>
+        <button type="button" id="fermer-accueil" class="bouton">Terminé</button>
+      </div>
+      <p class="sous-titre">
+        Change l'ordre avec les flèches, et masque ce dont tu n'as pas besoin.
+      </p>
+      <div id="liste-cartes-accueil"></div>
+    </div>
+
     <!-- Ajouter ou modifier une tâche / un événement -->
     <div id="feuille-element" class="feuille" hidden>
       <form id="form-element">
@@ -1163,6 +1220,14 @@
         />
 
         <p id="etiquette-quand" class="etiquette">Quand ?</p>
+        <!-- Les dates rapides (agenda-feuille.js) -->
+        <div id="choix-dates" class="choix choix-dates">
+          <button type="button" class="pastille-date" data-quand="aujourdhui">Aujourd'hui</button>
+          <button type="button" class="pastille-date" data-quand="demain">Demain</button>
+          <button type="button" class="pastille-date" data-quand="weekend">Ce week-end</button>
+          <button type="button" class="pastille-date" data-quand="choisir">Choisir…</button>
+          <button type="button" class="pastille-date pastille-pense-bete" data-quand="pense-bete">Un jour (pense-bête)</button>
+        </div>
         <input id="element-date" class="champ-date" type="date" />
         <label id="bloc-sans-date" class="point-oubli">
           <input type="checkbox" id="element-sans-date" />
@@ -1177,40 +1242,42 @@
           </label>
         </div>
 
-        <!-- Les répétitions -->
-        <div id="bloc-repetition">
-          <p class="etiquette">Se répète</p>
-          <select id="element-repetition" class="champ-note">
-            <option value="">Ne se répète pas</option>
-            <option value="jour">Chaque jour</option>
-            <option value="semaine">Chaque semaine</option>
-            <option value="mois">Chaque mois</option>
-            <option value="annee">Chaque année</option>
-          </select>
-          <label id="bloc-fin-repetition" class="champ">
-            Jusqu'au (facultatif)
-            <input id="element-fin-repetition" type="date" />
-          </label>
-          <p id="note-repetition" class="sous-titre petit">
-            Modifier ou supprimer un élément qui se répète change toutes ses
-            répétitions.
-          </p>
-        </div>
 
         <div id="bloc-categories">
           <p class="etiquette">Catégorie</p>
           <div id="element-categories" class="choix"></div>
         </div>
 
-        <label id="bloc-element-urgent" class="point-oubli">
-          <input type="checkbox" id="element-urgent" />
-          Urgent (elle ne te proposera pas de la reporter)
-        </label>
 
         <details id="element-options" class="options">
           <summary>Plus d'options</summary>
-          <p class="etiquette">À faire au plus tard le… (facultatif)</p>
-          <input id="element-limite" class="champ-date" type="date" />
+          <!-- Les répétitions -->
+          <div id="bloc-repetition">
+            <p class="etiquette">Se répète</p>
+            <select id="element-repetition" class="champ-note">
+              <option value="">Ne se répète pas</option>
+              <option value="jour">Chaque jour</option>
+              <option value="semaine">Chaque semaine</option>
+              <option value="mois">Chaque mois</option>
+              <option value="annee">Chaque année</option>
+            </select>
+            <label id="bloc-fin-repetition" class="champ">
+              Jusqu'au (facultatif)
+              <input id="element-fin-repetition" type="date" />
+            </label>
+            <p id="note-repetition" class="sous-titre petit">
+              Modifier ou supprimer un élément qui se répète change toutes ses
+              répétitions.
+            </p>
+          </div>
+          <label id="bloc-element-urgent" class="point-oubli">
+          <input type="checkbox" id="element-urgent" />
+          Urgent (elle ne te proposera pas de la reporter)
+        </label>
+          <div id="bloc-limite">
+            <p class="etiquette">À faire au plus tard le… (facultatif)</p>
+            <input id="element-limite" class="champ-date" type="date" />
+          </div>
         </details>
 
         <button type="submit" class="bouton bouton-large">Ajouter</button>
@@ -1249,24 +1316,26 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=20"></script>
-    <script src="js/outils/dates.js?v=20"></script>
-    <script src="js/outils/annuler.js?v=20"></script>
-    <script src="js/modules/navigation.js?v=20"></script>
-    <script src="js/modules/infos.js?v=20"></script>
-    <script src="js/modules/accueil.js?v=20"></script>
-    <script src="js/modules/budget.js?v=20"></script>
-    <script src="js/modules/budget-repartition.js?v=20"></script>
-    <script src="js/modules/budget-mois.js?v=20"></script>
-    <script src="js/modules/budget-raccourcis.js?v=20"></script>
-    <script src="js/modules/budget-epargne.js?v=20"></script>
-    <script src="js/modules/budget-point.js?v=20"></script>
-    <script src="js/donnees/sauvegarde.js?v=20"></script>
-    <script src="js/modules/agenda.js?v=20"></script>
-    <script src="js/modules/agenda-vues.js?v=20"></script>
-    <script src="js/modules/agenda-feuille.js?v=20"></script>
-    <script src="js/modules/agenda-reglages.js?v=20"></script>
-    <script src="js/modules/agenda-notifs.js?v=20"></script>
-    <script src="js/app.js?v=20"></script>
+    <script src="js/donnees/stockage.js?v=21"></script>
+    <script src="js/outils/dates.js?v=21"></script>
+    <script src="js/outils/annuler.js?v=21"></script>
+    <script src="js/modules/navigation.js?v=21"></script>
+    <script src="js/modules/infos.js?v=21"></script>
+    <script src="js/modules/accueil.js?v=21"></script>
+    <script src="js/modules/budget.js?v=21"></script>
+    <script src="js/modules/budget-repartition.js?v=21"></script>
+    <script src="js/modules/budget-mois.js?v=21"></script>
+    <script src="js/modules/budget-raccourcis.js?v=21"></script>
+    <script src="js/modules/budget-epargne.js?v=21"></script>
+    <script src="js/modules/budget-point.js?v=21"></script>
+    <script src="js/donnees/sauvegarde.js?v=21"></script>
+    <script src="js/modules/agenda.js?v=21"></script>
+    <script src="js/modules/agenda-vues.js?v=21"></script>
+    <script src="js/modules/agenda-feuille.js?v=21"></script>
+    <script src="js/modules/agenda-reglages.js?v=21"></script>
+    <script src="js/modules/agenda-notifs.js?v=21"></script>
+    <script src="js/modules/accueil-cartes.js?v=21"></script>
+    <script src="js/modules/moi.js?v=21"></script>
+    <script src="js/app.js?v=21"></script>
   </body>
 </html>

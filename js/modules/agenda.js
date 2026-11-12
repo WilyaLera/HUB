@@ -171,10 +171,80 @@ function glisserADemain(tache) {
 
 // « Tout glisser à demain » : seulement les tâches qui le peuvent
 function toutGlisserADemain(taches) {
-  taches.filter(peutGlisser).forEach(glisserADemain);
-  sauvegarderAgenda();
-  rafraichirAgenda();
-  montrerPetitMessage("C'est pour demain 🌙");
+  agirAvecAnnuler({
+    tiroir: agenda,
+    message: "C'est pour demain 🌙",
+    action: () => taches.filter(peutGlisser).forEach(glisserADemain),
+    apres: () => {
+      sauvegarderAgenda();
+      rafraichirAgenda();
+    },
+  });
+}
+
+// Une seule tâche à demain (avec « Annuler »)
+function reporterADemain(tache) {
+  agirAvecAnnuler({
+    tiroir: agenda,
+    message: "C'est pour demain 🌙",
+    action: () => glisserADemain(tache),
+    apres: () => {
+      sauvegarderAgenda();
+      rafraichirAgenda();
+    },
+  });
+}
+
+// Le geste : glisser une ligne vers la droite pour la passer à demain.
+// (Le bouton « Demain » reste là pour qui préfère toucher.)
+function activerGlissement(ligne, quandGlisse) {
+  let departX = null;
+  let departY = null;
+  let decalage = 0;
+  ligne.classList.add("ligne-glissable");
+
+  function remettre() {
+    ligne.style.transform = "";
+    ligne.classList.remove("en-glissement", "pret-a-glisser");
+    departX = null;
+    decalage = 0;
+  }
+
+  ligne.addEventListener(
+    "touchstart",
+    (e) => {
+      departX = e.touches[0].clientX;
+      departY = e.touches[0].clientY;
+      decalage = 0;
+    },
+    { passive: true },
+  );
+  ligne.addEventListener(
+    "touchmove",
+    (e) => {
+      if (departX === null) return;
+      const dx = e.touches[0].clientX - departX;
+      const dy = e.touches[0].clientY - departY;
+      // Le doigt descend plutôt qu'il ne glisse : c'est qu'on fait défiler la page
+      if (decalage === 0 && Math.abs(dy) > Math.abs(dx)) {
+        departX = null;
+        return;
+      }
+      if (dx > 0) {
+        decalage = Math.min(dx, 140);
+        ligne.style.transform = `translateX(${decalage}px)`;
+        ligne.classList.add("en-glissement");
+        ligne.classList.toggle("pret-a-glisser", decalage > 90);
+      }
+    },
+    { passive: true },
+  );
+  ligne.addEventListener("touchend", () => {
+    const assez = decalage > 90;
+    remettre();
+    if (assez) quandGlisse();
+  });
+  ligne.addEventListener("touchcancel", remettre);
 }
 
 // Le petit lien discret : il n'apparaît que s'il y a au moins 2 tâches à glisser
@@ -319,13 +389,9 @@ function creerLigneElement(element, options = {}) {
     demain.type = "button";
     demain.classList.add("bouton-demain");
     demain.textContent = "Demain";
-    demain.addEventListener("click", () => {
-      glisserADemain(element);
-      sauvegarderAgenda();
-      rafraichirAgenda();
-      montrerPetitMessage("C'est pour demain 🌙");
-    });
+    demain.addEventListener("click", () => reporterADemain(element));
     ligne.appendChild(demain);
+    activerGlissement(ligne, () => reporterADemain(element));
   }
 
   return ligne;

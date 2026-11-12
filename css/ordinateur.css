@@ -86,10 +86,6 @@
     margin-bottom: 0;
   }
 
-  #accueil > .carte:first-of-type {
-    grid-row: span 2;
-  }
-
   /* L'Agenda : le calendrier à gauche, le reste à droite */
   #agenda.actif {
     display: grid;

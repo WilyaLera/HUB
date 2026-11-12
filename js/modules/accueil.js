@@ -25,24 +25,7 @@ if (prenom) {
 }
 document.getElementById("salutation").textContent = texte;
 
-// Carte menu //
-const menu = [
-  { moment: "Midi", plat: "Salade de lentilles" },
-  { moment: "Soir", plat: "Curry de légumes" },
-  { moment: "Goûter", plat: "Banane" },
-];
-const listeMenu = document.getElementById("liste-menu");
-
-menu.forEach((repas) => {
-  const ligne = document.createElement("p");
-
-  const moment = document.createElement("strong");
-  moment.textContent = repas.moment;
-
-  ligne.appendChild(moment);
-  ligne.append(` · ${repas.plat}`);
-  listeMenu.appendChild(ligne);
-});
+// (La carte « Au menu » reviendra avec le module Repas)
 
 //Carte Aujourd'hui //
 // Elle montre les tâches et les événements du jour, tirés de l'Agenda
@@ -78,23 +61,56 @@ function afficherCarteAujourdhui() {
   const lien = creerLienToutGlisser(taches);
   if (lien) listeTaches.appendChild(lien);
 
-  // Journée vide : on pioche une idée dans le pense-bête
+  // Journée vide : un petit mot doux
   if (taches.length === 0 && evenements.length === 0 && anniversairesDeDemain().length === 0) {
-    const idees = penseBete();
-    if (idees.length > 0) {
-      if (!ideeAccueil || !idees.includes(ideeAccueil)) {
-        ideeAccueil = piocherIdee(null);
-      }
-      listeTaches.appendChild(
-        creerPioche(ideeAccueil, () => {
-          ideeAccueil = piocherIdee(ideeAccueil.id);
-          afficherCarteAujourdhui();
-        }),
-      );
-    } else {
-      listeTaches.appendChild(creerMessageVide("Rien de prévu aujourd'hui. Profite 🌸"));
-    }
+    listeTaches.appendChild(creerMessageVide("Rien de prévu aujourd'hui. Profite 🌸"));
   }
+
+  afficherCarteDemain();
+  afficherCarteIdee();
+}
+
+// Carte Demain //
+// Un aperçu doux du lendemain : les rendez-vous, et combien de tâches.
+function afficherCarteDemain() {
+  const zone = document.getElementById("liste-demain");
+  zone.replaceChildren();
+  const demain = ajouterJours(aujourdhuiEnTexte(), 1);
+
+  evenementsDuJour(demain).forEach((ev) => {
+    zone.appendChild(creerLigneElement(ev, { date: demain }));
+  });
+  const nombre = tachesDuJour(demain).length;
+  if (nombre > 0) {
+    const ligne = document.createElement("p");
+    ligne.classList.add("sous-titre");
+    ligne.textContent = nombre === 1 ? "1 tâche prévue" : `${nombre} tâches prévues`;
+    zone.appendChild(ligne);
+  }
+  if (zone.children.length === 0) {
+    zone.appendChild(creerMessageVide("Rien de prévu demain. Une journée à toi 🌙"));
+  }
+}
+
+// Carte Idée //
+// Une tâche du pense-bête, piochée au hasard (« Une autre » en pioche une nouvelle)
+function afficherCarteIdee() {
+  const zone = document.getElementById("zone-idee");
+  zone.replaceChildren();
+  const idees = penseBete();
+  if (idees.length === 0) {
+    zone.appendChild(creerMessageVide("Ton pense-bête est vide. Les idées sans date viendront ici."));
+    return;
+  }
+  if (!ideeAccueil || !idees.includes(ideeAccueil)) {
+    ideeAccueil = piocherIdee(null);
+  }
+  zone.appendChild(
+    creerPioche(ideeAccueil, () => {
+      ideeAccueil = piocherIdee(ideeAccueil.id);
+      afficherCarteIdee();
+    }),
+  );
 }
 
 // Ajouter vite une tâche pour aujourd'hui

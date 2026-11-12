@@ -276,9 +276,9 @@ function afficherVueJour() {
     jourEnLettres(jourChoisi),
   );
 
-  // Les tâches du jour
+  // ----- « À caser » : les tâches du jour, sans heure -----
   const carteTaches = document.createElement("article");
-  carteTaches.classList.add("carte");
+  carteTaches.classList.add("carte", "carte-a-caser");
 
   // On prend d'abord les tâches du jour (on en a besoin pour le titre)
   const taches = tachesDuJour(jourChoisi);
@@ -288,11 +288,11 @@ function afficherVueJour() {
   const restantes = taches.filter((tache) => !estFait(tache, jourChoisi)).length;
 
   // Le titre, avec un petit compteur
-  let texteTitre = `Tâches du jour · ${restantes} restantes`;
+  let texteTitre = `À caser · ${restantes} restantes`;
   if (restantes === 0) {
-    texteTitre = "Tâches du jour · tout est fait 🌸";
+    texteTitre = "À caser · tout est fait 🌸";
   } else if (restantes === 1) {
-    texteTitre = "Tâches du jour · 1 restante";
+    texteTitre = "À caser · 1 restante";
   }
 
   const titreTaches = document.createElement("h2");
@@ -317,7 +317,7 @@ function afficherVueJour() {
   );
   contenuAgenda.appendChild(carteTaches);
 
-  // Ma journée : les événements, par heure
+  // ----- Ma journée, par moments -----
   const carteJournee = document.createElement("article");
   carteJournee.classList.add("carte");
   const titreJournee = document.createElement("h2");
@@ -325,14 +325,35 @@ function afficherVueJour() {
   carteJournee.appendChild(titreJournee);
 
   const evenements = evenementsDuJour(jourChoisi);
-  if (evenements.length === 0) {
-    carteJournee.appendChild(
-      creerMessageVide("Rien de prévu. Un peu d'air, c'est bien aussi."),
-    );
-  }
-  evenements.forEach((ev) =>
-    carteJournee.appendChild(creerLigneElement(ev, { date: jourChoisi })),
-  );
+  const maintenant = new Date().toTimeString().slice(0, 5); // "16:20"
+  const estAujourdhui = jourChoisi === aujourdhui;
+
+  MOMENTS.forEach((moment) => {
+    const duMoment = evenements.filter((ev) => momentDe(ev.heure) === moment.code);
+    // « Toute la journée » n'apparaît que s'il y a quelque chose dedans
+    if (moment.code === "journee" && duMoment.length === 0) return;
+
+    const titre = document.createElement("p");
+    titre.classList.add("titre-moment");
+    titre.textContent = moment.nom;
+    carteJournee.appendChild(titre);
+
+    // Le trait « maintenant », seulement aujourd'hui, dans le bon moment
+    const ici = estAujourdhui && moment.code !== "journee" && momentDe(maintenant) === moment.code;
+    let traitPlace = false;
+    duMoment.forEach((ev) => {
+      if (ici && !traitPlace && ev.heure > maintenant) {
+        carteJournee.appendChild(creerTraitMaintenant());
+        traitPlace = true;
+      }
+      carteJournee.appendChild(creerLigneElement(ev, { date: jourChoisi }));
+    });
+    if (duMoment.length === 0) {
+      carteJournee.appendChild(creerMessageVide(moment.vide));
+    }
+    if (ici && !traitPlace) carteJournee.appendChild(creerTraitMaintenant());
+  });
+
   carteJournee.appendChild(
     creerBoutonAjouter("Ajouter un événement", () =>
       ouvrirFeuilleElement(null, { type: "evenement", date: jourChoisi }),
@@ -340,6 +361,58 @@ function afficherVueJour() {
   );
   contenuAgenda.appendChild(carteJournee);
 }
+
+// Les moments de la journée
+const MOMENTS = [
+  { code: "journee", nom: "Toute la journée", vide: "" },
+  { code: "matin", nom: "Matin", vide: "Rien de prévu ce matin." },
+  { code: "apres-midi", nom: "Après-midi", vide: "Libre, un moment pour souffler." },
+  { code: "soir", nom: "Soir", vide: "Soirée tranquille." },
+];
+
+// "09:30" → "matin" ; "" (sans heure) → "journee"
+function momentDe(heure) {
+  if (!heure) return "journee";
+  if (heure < "12:00") return "matin";
+  if (heure < "18:00") return "apres-midi";
+  return "soir";
+}
+
+// Le petit trait « maintenant »
+function creerTraitMaintenant() {
+  const trait = document.createElement("div");
+  trait.classList.add("trait-maintenant");
+  trait.textContent = "maintenant";
+  return trait;
+}
+
+// Glisser l'agenda vers la gauche ou la droite : jour (semaine, mois) suivant
+(function activerGlissementAgenda() {
+  let departX = null;
+  let departY = null;
+  contenuAgenda.addEventListener(
+    "touchstart",
+    (e) => {
+      // Sur une tâche, le geste sert à « Demain » : on laisse faire
+      if (e.target.closest(".ligne-glissable")) {
+        departX = null;
+        return;
+      }
+      departX = e.touches[0].clientX;
+      departY = e.touches[0].clientY;
+    },
+    { passive: true },
+  );
+  contenuAgenda.addEventListener("touchend", (e) => {
+    if (departX === null) return;
+    const dx = e.changedTouches[0].clientX - departX;
+    const dy = e.changedTouches[0].clientY - departY;
+    departX = null;
+    if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      deplacer(dx < 0 ? 1 : -1);
+    }
+  });
+})();
 
 // ---------- 5. Le pense-bête ----------
 
