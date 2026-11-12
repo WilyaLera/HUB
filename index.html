@@ -20,12 +20,12 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=27" />
-    <link rel="stylesheet" href="css/navigation.css?v=27" />
-    <link rel="stylesheet" href="css/budget.css?v=27" />
-    <link rel="stylesheet" href="css/agenda.css?v=27" />
-    <link rel="stylesheet" href="css/confort.css?v=27" />
-    <link rel="stylesheet" href="css/ordinateur.css?v=27" />
+    <link rel="stylesheet" href="css/base.css?v=28" />
+    <link rel="stylesheet" href="css/navigation.css?v=28" />
+    <link rel="stylesheet" href="css/budget.css?v=28" />
+    <link rel="stylesheet" href="css/agenda.css?v=28" />
+    <link rel="stylesheet" href="css/confort.css?v=28" />
+    <link rel="stylesheet" href="css/ordinateur.css?v=28" />
   </head>
 
   <body>
@@ -73,6 +73,12 @@
             <i data-lucide="plus"></i>
           </button>
           <div id="liste-demain"></div>
+        </article>
+
+        <!-- Carte Cadeaux : seulement quand une occasion approche (envies.js) -->
+        <article class="carte carte-accueil carte-touchable" data-carte="cadeaux" data-ecran="envies">
+          <h2>Cadeaux</h2>
+          <p id="accueil-cadeaux" class="sous-titre"></p>
         </article>
 
         <!-- Carte Courses : ce qu'il reste à prendre -->
@@ -199,6 +205,16 @@
           </span>
           <i data-lucide="chevron-right"></i>
         </button>
+
+        <!-- Carte qui mène aux Envies -->
+        <button class="carte carte-lien" data-ecran="envies">
+          <span class="carte-lien-icone"><i data-lucide="gift"></i></span>
+          <span class="carte-lien-texte">
+            <strong>Envies</strong>
+            <span id="foyer-envies-resume" class="sous-titre">Cadeaux, achats et idées à vivre</span>
+          </span>
+          <i data-lucide="chevron-right"></i>
+        </button>
       </section>
 
       <!-- ===================== Courses ===================== -->
@@ -262,6 +278,76 @@
         <!-- Les réglages des courses sont dans Moi -->
         <button type="button" class="lien-reglages" data-reglages="carte-rayons">
           <i data-lucide="settings-2"></i> Tes rayons se modifient dans Moi › Réglages des courses
+        </button>
+      </section>
+
+      <!-- ===================== Envies ===================== -->
+      <section id="envies" class="ecran" data-parent="foyer">
+        <button class="retour" data-ecran="foyer">
+          <i data-lucide="chevron-left"></i> Foyer
+        </button>
+        <h1>Envies</h1>
+
+        <!-- Les 3 onglets -->
+        <div class="onglets-budget onglets-envies">
+          <button class="onglet-envies" data-panneau-envies="panneau-acheter">À acheter</button>
+          <button class="onglet-envies" data-panneau-envies="panneau-vivre">À vivre</button>
+          <button class="onglet-envies actif" data-panneau-envies="panneau-cadeaux">Cadeaux</button>
+        </div>
+
+        <div id="panneau-acheter" class="panneau-envies" hidden>
+          <article class="carte">
+            <h2>Bientôt</h2>
+            <p class="sous-titre">
+              Ici, tes envies d'achat pourront mûrir tranquillement avant de devenir un projet dans ton budget. Ça arrive dans une prochaine version.
+            </p>
+          </article>
+        </div>
+
+        <div id="panneau-vivre" class="panneau-envies" hidden>
+          <article class="carte">
+            <h2>Bientôt</h2>
+            <p class="sous-titre">
+              Ici, les idées de sorties et d'expériences, pour qu'elles ne dorment plus. Ça arrive dans une prochaine version.
+            </p>
+          </article>
+        </div>
+
+        <div id="panneau-cadeaux" class="panneau-envies">
+          <!-- Les prochaines occasions, avec leur décompte -->
+          <article class="carte">
+            <h2>Prochaines occasions</h2>
+            <div id="liste-occasions"></div>
+          </article>
+
+          <!-- Pour les autres : une fiche par proche -->
+          <article class="carte">
+            <h2>Pour les autres</h2>
+            <div id="liste-personnes"></div>
+            <div id="suggestions-agenda"></div>
+            <button type="button" id="ajouter-personne" class="bouton-ajout">
+              <span class="plus-rond">+</span> Ajouter un proche
+            </button>
+          </article>
+
+          <!-- Pour moi -->
+          <article class="carte">
+            <h2>Ce qui me ferait plaisir</h2>
+            <div id="liste-pour-moi"></div>
+            <form id="form-pour-moi" class="form-idee">
+              <input id="pour-moi-nom" class="champ-note" type="text" placeholder="Une idée pour toi…" maxlength="60" required />
+              <input id="pour-moi-prix" class="champ-note" type="text" inputmode="numeric" placeholder="Prix (F)" maxlength="9" aria-label="Prix" />
+              <button type="submit" class="bouton-rond bouton-rond-plein" aria-label="Ajouter"><i data-lucide="plus"></i></button>
+            </form>
+            <button type="button" id="copier-pour-moi" class="lien lien-petit">
+              <i data-lucide="copy"></i> Copier ma liste pour la partager
+            </button>
+          </article>
+        </div>
+
+        <!-- Les réglages des envies sont dans Moi -->
+        <button type="button" class="lien-reglages" data-reglages="carte-reglages-envies">
+          <i data-lucide="settings-2"></i> Carte de l'accueil et Noël : dans Moi › Réglages des envies
         </button>
       </section>
 
@@ -1097,6 +1183,22 @@
           </form>
         </details>
 
+        <!-- Les réglages des envies (envies.js) -->
+        <details id="carte-reglages-envies" class="carte carte-repliable">
+          <summary><h2>Réglages des envies</h2></summary>
+          <p class="etiquette">La carte Cadeaux de l'accueil apparaît…</p>
+          <div class="choix">
+            <label class="pastille"><input type="radio" name="delai-cadeaux" value="7" /> 1 semaine avant</label>
+            <label class="pastille"><input type="radio" name="delai-cadeaux" value="14" /> 2 semaines</label>
+            <label class="pastille"><input type="radio" name="delai-cadeaux" value="21" /> 3 semaines</label>
+            <label class="pastille"><input type="radio" name="delai-cadeaux" value="30" /> 1 mois</label>
+          </div>
+          <label class="reglage-case reglage-espace">
+            <input type="checkbox" id="reglage-noel" />
+            Compter Noël parmi les occasions
+          </label>
+        </details>
+
         <!-- Mes données : sauvegarder et restaurer -->
         <article class="carte">
           <div class="titre-carte">
@@ -1308,6 +1410,66 @@
       </form>
     </div>
 
+    <!-- La fiche d'un proche (envies.js) -->
+    <div id="feuille-personne" class="feuille" hidden>
+      <div class="feuille-haut">
+        <h2 id="personne-titre">Léa</h2>
+        <button type="button" id="fermer-personne" class="bouton-supprimer" aria-label="Fermer"><i data-lucide="x"></i></button>
+      </div>
+      <p id="personne-occasion" class="sous-titre"></p>
+
+      <p class="etiquette">Idées</p>
+      <div id="personne-idees"></div>
+      <form id="form-idee" class="form-idee">
+        <input id="idee-nom" class="champ-note" type="text" placeholder="Une idée de cadeau…" maxlength="60" required />
+        <input id="idee-prix" class="champ-note" type="text" inputmode="numeric" placeholder="Prix (F)" maxlength="9" aria-label="Prix" />
+        <button type="submit" class="bouton-rond bouton-rond-plein" aria-label="Ajouter l'idée"><i data-lucide="plus"></i></button>
+        <select id="idee-occasion" class="champ-note idee-occasion" aria-label="Pour quelle occasion">
+          <option value="anniversaire">Pour son anniversaire</option>
+          <option value="noel">Pour Noël</option>
+          <option value="autre">Une autre occasion</option>
+        </select>
+      </form>
+
+      <!-- Après « C'est offert » : noter la dépense ? -->
+      <div id="offert-depense" class="carte-fin-courses offert-depense" hidden>
+        <p><strong>Joli cadeau 🌱</strong> Tu veux noter la dépense dans ton budget ?</p>
+        <div class="form-categorie-boutons">
+          <button type="button" id="offert-depense-non" class="lien">Pas cette fois</button>
+          <button type="button" id="offert-depense-oui" class="bouton">Noter la dépense</button>
+        </div>
+      </div>
+
+      <details id="personne-deja-offert" class="options">
+        <summary>Déjà offert</summary>
+        <div id="liste-deja-offert"></div>
+      </details>
+
+      <div class="form-categorie-boutons personne-actions">
+        <button type="button" id="supprimer-personne" class="lien lien-danger">Retirer ce proche</button>
+        <button type="button" id="modifier-personne" class="lien">Modifier</button>
+      </div>
+    </div>
+
+    <!-- Ajouter ou modifier un proche (envies.js) -->
+    <div id="feuille-form-personne" class="feuille" hidden>
+      <div class="feuille-haut">
+        <h2 id="form-personne-titre">Un proche</h2>
+        <button type="button" id="fermer-form-personne" class="bouton-supprimer" aria-label="Fermer"><i data-lucide="x"></i></button>
+      </div>
+      <form id="form-personne">
+        <label class="champ">Prénom<input id="personne-prenom" class="champ-note" type="text" maxlength="30" required /></label>
+        <label class="champ">
+          Son anniversaire (facultatif)
+          <input id="personne-anniv" class="champ-date" type="date" />
+        </label>
+        <p class="sous-titre petit">Il s'ajoute aussi à ton agenda, avec un rappel la veille.</p>
+        <p class="etiquette">Sa couleur</p>
+        <div id="personne-couleurs" class="choix-couleurs"></div>
+        <button type="submit" class="bouton bouton-large">Enregistrer</button>
+      </form>
+    </div>
+
     <!-- Choisir les cartes de l'accueil -->
     <div id="feuille-accueil" class="feuille" hidden>
       <div class="feuille-haut">
@@ -1450,28 +1612,29 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=27"></script>
-    <script src="js/outils/dates.js?v=27"></script>
-    <script src="js/outils/annuler.js?v=27"></script>
-    <script src="js/outils/icones.js?v=27"></script>
-    <script src="js/modules/navigation.js?v=27"></script>
-    <script src="js/modules/infos.js?v=27"></script>
-    <script src="js/modules/accueil.js?v=27"></script>
-    <script src="js/modules/budget.js?v=27"></script>
-    <script src="js/modules/budget-repartition.js?v=27"></script>
-    <script src="js/modules/budget-mois.js?v=27"></script>
-    <script src="js/modules/budget-raccourcis.js?v=27"></script>
-    <script src="js/modules/budget-epargne.js?v=27"></script>
-    <script src="js/modules/budget-point.js?v=27"></script>
-    <script src="js/donnees/sauvegarde.js?v=27"></script>
-    <script src="js/modules/agenda.js?v=27"></script>
-    <script src="js/modules/agenda-vues.js?v=27"></script>
-    <script src="js/modules/agenda-feuille.js?v=27"></script>
-    <script src="js/modules/agenda-reglages.js?v=27"></script>
-    <script src="js/modules/agenda-notifs.js?v=27"></script>
-    <script src="js/modules/accueil-cartes.js?v=27"></script>
-    <script src="js/modules/courses.js?v=27"></script>
-    <script src="js/modules/moi.js?v=27"></script>
-    <script src="js/app.js?v=27"></script>
+    <script src="js/donnees/stockage.js?v=28"></script>
+    <script src="js/outils/dates.js?v=28"></script>
+    <script src="js/outils/annuler.js?v=28"></script>
+    <script src="js/outils/icones.js?v=28"></script>
+    <script src="js/modules/navigation.js?v=28"></script>
+    <script src="js/modules/infos.js?v=28"></script>
+    <script src="js/modules/accueil.js?v=28"></script>
+    <script src="js/modules/budget.js?v=28"></script>
+    <script src="js/modules/budget-repartition.js?v=28"></script>
+    <script src="js/modules/budget-mois.js?v=28"></script>
+    <script src="js/modules/budget-raccourcis.js?v=28"></script>
+    <script src="js/modules/budget-epargne.js?v=28"></script>
+    <script src="js/modules/budget-point.js?v=28"></script>
+    <script src="js/donnees/sauvegarde.js?v=28"></script>
+    <script src="js/modules/agenda.js?v=28"></script>
+    <script src="js/modules/agenda-vues.js?v=28"></script>
+    <script src="js/modules/agenda-feuille.js?v=28"></script>
+    <script src="js/modules/agenda-reglages.js?v=28"></script>
+    <script src="js/modules/agenda-notifs.js?v=28"></script>
+    <script src="js/modules/accueil-cartes.js?v=28"></script>
+    <script src="js/modules/courses.js?v=28"></script>
+    <script src="js/modules/envies.js?v=28"></script>
+    <script src="js/modules/moi.js?v=28"></script>
+    <script src="js/app.js?v=28"></script>
   </body>
 </html>

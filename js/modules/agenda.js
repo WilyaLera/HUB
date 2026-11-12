@@ -97,6 +97,7 @@ function rafraichirAgenda() {
   afficherCarteAujourdhui(); // dans accueil.js
   afficherReglagesAgenda(); // dans agenda-reglages.js
   if (typeof preparerResume === "function") preparerResume(); // agenda-notifs.js
+  if (typeof afficherEnvies === "function") afficherEnvies(); // envies.js (les anniversaires)
 }
 
 // ---------- 3. Les éléments d'un jour ----------

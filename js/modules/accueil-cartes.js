@@ -9,6 +9,7 @@ const CARTES_ACCUEIL = [
   { code: "idee", nom: "Une idée du pense-bête", detail: "Une tâche sans date, piochée au hasard" },
   { code: "budget", nom: "Mon mois", detail: "Ce qu'il te reste pour vivre" },
   { code: "courses", nom: "Courses", detail: "Ce qu'il reste à prendre" },
+  { code: "cadeaux", nom: "Cadeaux", detail: "Quand une occasion approche (Noël, anniversaires)" },
 ];
 
 let reglagesAccueil = charger("accueil", {
@@ -34,6 +35,7 @@ function placerCartesAccueil() {
     carte.style.order = position + 1;
     let cachee = reglagesAccueil.masquees.includes(code);
     if (code === "demain" && !leSoir) cachee = true; // Demain : seulement le soir
+    if (carte.dataset.vide === "true") cachee = true; // une carte qui n'a rien à dire (ex. Cadeaux)
     carte.hidden = cachee;
   });
 }
