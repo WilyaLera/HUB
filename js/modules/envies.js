@@ -1,5 +1,6 @@
 // =====================================================
-// Module Envies (pour l'instant : l'onglet Cadeaux)
+// Module Envies : les onglets Cadeaux et À acheter
+// (À acheter est à la fin du fichier : partie 10)
 //   1. le tiroir « envies »
 //   2. les onglets
 //   3. les dates : anniversaires (tirés de l'Agenda) et Noël
@@ -19,11 +20,17 @@
 //             occasion : "anniversaire", "noel" ou "autre"
 //             statut : "notee" ou "offerte"
 //             (les types « achat » et « vivre » arriveront avec les deux autres onglets)
-// reglages  : { delaiAccueil: 21, noel: true }
+//             + pour les envies d'achat (type "achat") : voir la partie 10
+// reglages  : { delaiAccueil: 21, noel: true, delai: { actif, seuil1, jours1, seuil2, jours2 } }
 
 let envies = charger("envies", null);
 if (!envies) {
   envies = { personnes: [], envies: [], reglages: { delaiAccueil: 21, noel: true } };
+}
+
+// Le délai de réflexion (ajouté en v29)
+if (!envies.reglages.delai) {
+  envies.reglages.delai = { actif: true, seuil1: 5000, jours1: 7, seuil2: 30000, jours2: 30 };
 }
 
 function sauvegarderEnvies() {
@@ -205,38 +212,13 @@ function afficherPersonnes() {
     zone.appendChild(ligne);
   });
 
-  // Les anniversaires de l'agenda qui n'ont pas encore de fiche
-  const suggestions = document.getElementById("suggestions-agenda");
-  suggestions.replaceChildren();
+}
+
+// Les anniversaires de l'agenda qui n'ont pas encore de fiche
+// (on ne les propose pas tous d'office : tu choisis qui ajouter, dans la feuille)
+function anniversairesLibres() {
   const relies = envies.personnes.map((p) => p.anniversaireId);
-  const libres = agenda.elements.filter((el) => el.anniversaire && !relies.includes(el.id));
-  if (libres.length > 0) {
-    const titre = document.createElement("p");
-    titre.classList.add("sous-titre", "petit");
-    titre.textContent = "Depuis ton agenda :";
-    suggestions.appendChild(titre);
-    const choix = document.createElement("div");
-    choix.classList.add("choix");
-    libres.forEach((anniv) => {
-      const bouton = document.createElement("button");
-      bouton.type = "button";
-      bouton.classList.add("pastille-date");
-      bouton.textContent = `+ ${anniv.titre}`;
-      bouton.addEventListener("click", () => {
-        envies.personnes.push({
-          id: String(nouvelId()),
-          prenom: anniv.titre,
-          couleur: couleurLibre(),
-          anniversaireId: anniv.id,
-        });
-        sauvegarderEnvies();
-        afficherEnvies();
-        montrerPetitMessage(`${anniv.titre} est ajouté·e 🌱`);
-      });
-      choix.appendChild(bouton);
-    });
-    suggestions.appendChild(choix);
-  }
+  return agenda.elements.filter((el) => el.anniversaire && !relies.includes(el.id));
 }
 
 // La première couleur pas encore prise par un proche
@@ -453,6 +435,20 @@ document.getElementById("supprimer-personne").addEventListener("click", () => {
 const feuilleFormPersonne = document.getElementById("feuille-form-personne");
 let personneEnModification = null;
 let couleurPersonne = COULEURS_CATEGORIES[0];
+let anniversaireChoisi = null; // l'anniversaire de l'agenda choisi dans le menu
+const menuDepuisAgenda = document.getElementById("personne-depuis-agenda");
+
+// Choisir quelqu'un dans le menu : on remplit le prénom et la date
+menuDepuisAgenda.addEventListener("change", () => {
+  const anniv = agenda.elements.find((el) => String(el.id) === menuDepuisAgenda.value);
+  anniversaireChoisi = anniv ? anniv.id : null;
+  if (anniv) {
+    document.getElementById("personne-prenom").value = anniv.titre;
+    document.getElementById("personne-anniv").value = anniv.anneeNaissance
+      ? `${anniv.anneeNaissance}-${anniv.date.slice(5)}`
+      : anniv.date;
+  }
+});
 
 function afficherCouleursPersonne() {
   const zone = document.getElementById("personne-couleurs");
@@ -485,6 +481,22 @@ function ouvrirFormPersonne(personne) {
     : "";
   couleurPersonne = personne ? personne.couleur : couleurLibre();
   afficherCouleursPersonne();
+
+  // Le menu « Depuis mon agenda » : seulement pour un nouveau proche
+  anniversaireChoisi = null;
+  const libres = anniversairesLibres();
+  document.getElementById("bloc-depuis-agenda").hidden = Boolean(personne) || libres.length === 0;
+  menuDepuisAgenda.replaceChildren();
+  const vide = document.createElement("option");
+  vide.value = "";
+  vide.textContent = "Choisir un anniversaire…";
+  menuDepuisAgenda.appendChild(vide);
+  libres.forEach((anniv) => {
+    const option = document.createElement("option");
+    option.value = anniv.id;
+    option.textContent = `${anniv.titre} (${formaterDate(prochaineDate(anniv.date.slice(5)), false)})`;
+    menuDepuisAgenda.appendChild(option);
+  });
   feuilleFormPersonne.hidden = false;
   voile.hidden = false;
   document.getElementById("personne-prenom").focus();
@@ -515,7 +527,8 @@ document.getElementById("form-personne").addEventListener("submit", (evenement) 
 
   let personne = personneDe(personneEnModification);
   if (!personne) {
-    personne = { id: String(nouvelId()), prenom, couleur: couleurPersonne, anniversaireId: null };
+    // Choisi dans le menu de l'agenda : on se relie à cet anniversaire (pas de doublon)
+    personne = { id: String(nouvelId()), prenom, couleur: couleurPersonne, anniversaireId: anniversaireChoisi };
     envies.personnes.push(personne);
   }
   personne.prenom = prenom;
@@ -644,14 +657,346 @@ caseNoel.addEventListener("change", () => {
 // ---------- Tout réafficher ----------
 
 function afficherEnvies() {
+  afficherAchats();
   afficherOccasions();
   afficherPersonnes();
   afficherPourMoi();
   afficherCarteCadeaux();
   if (personneOuverte && !feuillePersonne.hidden) afficherFichePersonne();
-  const nombre = envies.envies.filter((e) => e.statut === "notee" && e.pourQui !== "moi").length;
+  const nombre = envies.envies.filter(
+    (e) => e.type === "cadeau" && e.statut === "notee" && e.pourQui !== "moi",
+  ).length;
   document.getElementById("foyer-envies-resume").textContent =
     nombre === 0 ? "Cadeaux, achats et idées à vivre" : `${nombre} idée${nombre > 1 ? "s" : ""} de cadeau notée${nombre > 1 ? "s" : ""}`;
 }
+
+// ---------- 10. À acheter ----------
+// Une envie d'achat : { id, type: "achat", nom, prix, coeurs (1 à 3), note, lien,
+//   statut, dateAjout, finDelai, projetId, chemin, eueLe }
+// Le parcours : "murir" (le délai) → "prete" (toujours envie ?) →
+//   "epargne" (un projet dans le Budget) → "eue" (je l'ai !) ou "non" (finalement non)
+// chemin : comment on l'a eue : "direct", "reflexion" ou "projet"
+
+// Combien de jours de réflexion pour ce prix ? (0 : pas de délai)
+function joursDeReflexion(prix) {
+  const d = envies.reglages.delai;
+  if (!d.actif || prix < d.seuil1) return 0;
+  return prix < d.seuil2 ? d.jours1 : d.jours2;
+}
+
+function achats(statut) {
+  return envies.envies
+    .filter((e) => e.type === "achat" && e.statut === statut)
+    .sort((a, b) => b.coeurs - a.coeurs); // les plus grosses envies d'abord
+}
+
+// Le délai est fini : l'envie est « prête » (on vérifie à chaque affichage)
+function murirLesEnvies() {
+  let change = false;
+  envies.envies.forEach((e) => {
+    if (e.type === "achat" && e.statut === "murir" && e.finDelai <= aujourdhuiEnTexte()) {
+      e.statut = "prete";
+      change = true;
+    }
+  });
+  if (change) sauvegarderEnvies();
+}
+
+// Le bocal « Plaisirs » (ou un bocal qui y ressemble), s'il existe
+function bocalPlaisirs() {
+  return budget.bocaux.find((b) => /plaisir|loisir|envie/i.test(b.nom)) || null;
+}
+
+// Ce que le Budget en pense : « ça tient dans tes Plaisirs » ou un projet
+function conseilBudget(envie) {
+  if (!envie.prix) return "";
+  const bocal = bocalPlaisirs();
+  if (bocal && bocal.montant > 0) {
+    const reste = bocal.montant - depenseDansBocal(bocal, depensesDeLaPeriode(periodeEnCours()));
+    if (reste >= envie.prix) {
+      return `Ça tient dans ton bocal ${bocal.nom} ce mois-ci (il reste ${formaterMontant(reste)}).`;
+    }
+  }
+  // Sinon : un projet sur 3 mois, arrondi à 500 F
+  const parMois = Math.ceil(envie.prix / 3 / 500) * 500;
+  return `En mettant ${formaterMontant(parMois)} de côté par mois, tu l'as dans 3 mois.`;
+}
+
+function creerCoeurs(nombre) {
+  const zone = document.createElement("span");
+  zone.classList.add("coeurs");
+  zone.setAttribute("aria-label", `${nombre} cœur${nombre > 1 ? "s" : ""}`);
+  for (let i = 0; i < nombre; i++) zone.appendChild(creerIcone("heart"));
+  return zone;
+}
+
+function creerBoutonEnvie(texte, quandOnTouche, principal) {
+  const bouton = document.createElement("button");
+  bouton.type = "button";
+  bouton.classList.add(principal ? "bouton" : "bouton-demain");
+  bouton.textContent = texte;
+  bouton.addEventListener("click", quandOnTouche);
+  return bouton;
+}
+
+// Une carte d'envie : nom, cœurs, prix, détail, et les boutons de l'étape
+function creerCarteAchat(envie) {
+  const carte = document.createElement("div");
+  carte.classList.add("envie-achat");
+
+  const haut = document.createElement("div");
+  haut.classList.add("envie-achat-haut");
+  const nom = document.createElement("strong");
+  nom.textContent = envie.nom;
+  haut.append(nom, creerCoeurs(envie.coeurs));
+  carte.appendChild(haut);
+
+  const infos = [];
+  if (envie.prix) infos.push(formaterMontant(envie.prix));
+  if (envie.note) infos.push(envie.note);
+  if (infos.length > 0) {
+    const detail = document.createElement("p");
+    detail.classList.add("sous-titre", "petit");
+    detail.textContent = infos.join(" · ");
+    carte.appendChild(detail);
+  }
+  if (envie.lien) {
+    const lien = document.createElement("a");
+    lien.href = envie.lien;
+    lien.target = "_blank";
+    lien.rel = "noopener";
+    lien.classList.add("lien", "lien-petit");
+    lien.textContent = "Voir le lien";
+    carte.appendChild(lien);
+  }
+
+  const etape = document.createElement("p");
+  etape.classList.add("envie-etape");
+  const boutons = document.createElement("div");
+  boutons.classList.add("envie-boutons");
+
+  if (envie.statut === "murir") {
+    const jours = joursAvant(envie.finDelai);
+    etape.textContent = `Ça mûrit… encore ${jours} jour${jours > 1 ? "s" : ""} avant de décider.`;
+    boutons.append(
+      creerBoutonEnvie("Je suis sûre, pas besoin d'attendre", () => changerEnvie(envie, "prete")),
+      creerBoutonEnvie("Finalement non", () => changerEnvie(envie, "non")),
+    );
+  } else if (envie.statut === "prete") {
+    etape.textContent = conseilBudget(envie) || "Toujours envie ?";
+    boutons.append(
+      creerBoutonEnvie("Je l'ai !", () => changerEnvie(envie, "eue"), true),
+      creerBoutonEnvie("J'économise", () => economiser(envie)),
+      creerBoutonEnvie("Finalement non", () => changerEnvie(envie, "non")),
+      creerBoutonEnvie("À m'offrir", () => aOffrir(envie)),
+    );
+  } else if (envie.statut === "epargne") {
+    const projet = budget.epargne.projets.find((p) => p.id === envie.projetId);
+    etape.textContent = projet
+      ? `Projet : ${formaterMontant(projet.dejaDeCote)} sur ${formaterMontant(projet.objectif)} · ${etatDuProjet(projet).texte}`
+      : "Le projet a été retiré du budget.";
+    boutons.append(
+      creerBoutonEnvie("Je l'ai !", () => changerEnvie(envie, "eue"), true),
+      creerBoutonEnvie("Finalement non", () => changerEnvie(envie, "non")),
+    );
+  }
+  carte.append(etape, boutons);
+
+  // Retirer (sans passer par « Finalement non »)
+  const supprimer = document.createElement("button");
+  supprimer.type = "button";
+  supprimer.classList.add("bouton-supprimer", "envie-supprimer");
+  supprimer.setAttribute("aria-label", `Retirer ${envie.nom}`);
+  supprimer.appendChild(creerIcone("x"));
+  supprimer.addEventListener("click", () => {
+    agirAvecAnnuler({
+      tiroir: envies,
+      message: `« ${envie.nom} » retirée`,
+      action: () => {
+        envies.envies = envies.envies.filter((e) => e.id !== envie.id);
+      },
+      apres: () => {
+        sauvegarderEnvies();
+        afficherEnvies();
+      },
+    });
+  });
+  carte.appendChild(supprimer);
+  return carte;
+}
+
+function creerSectionAchats(titre, liste) {
+  const carte = document.createElement("article");
+  carte.classList.add("carte");
+  const h2 = document.createElement("h2");
+  h2.textContent = titre;
+  carte.appendChild(h2);
+  liste.forEach((envie) => carte.appendChild(creerCarteAchat(envie)));
+  return carte;
+}
+
+function afficherAchats() {
+  murirLesEnvies();
+  const zone = document.getElementById("liste-achats");
+  zone.replaceChildren();
+  const pretes = achats("prete");
+  const murir = achats("murir");
+  const epargne = achats("epargne");
+  if (pretes.length) zone.appendChild(creerSectionAchats("Toujours envie ?", pretes));
+  if (murir.length) zone.appendChild(creerSectionAchats("Ça mûrit", murir));
+  if (epargne.length) zone.appendChild(creerSectionAchats("J'économise", epargne));
+
+  // Les deux bocaux du bas
+  const non = achats("non");
+  document.getElementById("total-finalement-non").textContent = formaterMontant(
+    non.reduce((total, e) => total + (e.prix || 0), 0),
+  );
+  const eues = achats("eue").sort((a, b) => b.eueLe.localeCompare(a.eueLe));
+  document.getElementById("nombre-realisees").textContent = eues.length;
+  const liste = document.getElementById("liste-realisees");
+  liste.replaceChildren();
+  const chemins = { direct: "sans délai", reflexion: "après réflexion", projet: "après un projet" };
+  eues.forEach((e) => {
+    const ligne = document.createElement("p");
+    ligne.classList.add("sous-titre", "petit");
+    ligne.textContent = `${e.nom} · ${formaterDate(e.eueLe, false)}${e.prix ? ` · ${formaterMontant(e.prix)}` : ""} · ${chemins[e.chemin]}`;
+    liste.appendChild(ligne);
+  });
+}
+
+// Noter une nouvelle envie
+document.getElementById("form-achat").addEventListener("submit", (evenement) => {
+  evenement.preventDefault();
+  const nom = document.getElementById("achat-nom").value.trim();
+  if (!nom) return;
+  const prix = Number(document.getElementById("achat-prix").value.replace(/\s/g, "")) || 0;
+  const jours = joursDeReflexion(prix);
+  envies.envies.push({
+    id: String(nouvelId()),
+    type: "achat",
+    nom: nom,
+    prix: prix,
+    coeurs: Number(document.querySelector('input[name="achat-coeurs"]:checked').value),
+    note: document.getElementById("achat-note").value.trim(),
+    lien: document.getElementById("achat-lien").value.trim(),
+    statut: jours > 0 ? "murir" : "prete",
+    dateAjout: aujourdhuiEnTexte(),
+    finDelai: ajouterJours(aujourdhuiEnTexte(), jours),
+    projetId: null,
+    chemin: jours > 0 ? "reflexion" : "direct",
+    eueLe: "",
+  });
+  sauvegarderEnvies();
+  evenement.target.reset();
+  afficherEnvies();
+  montrerPetitMessage(jours > 0 ? `Notée. On en reparle dans ${jours} jours 🌱` : "C'est noté 🌱");
+});
+
+let achatDepense = null; // l'envie qu'on vient d'avoir (pour noter la dépense)
+
+// Passer une envie à une autre étape (avec « Annuler »)
+function changerEnvie(envie, statut) {
+  const messages = {
+    prete: "Elle est prête : à toi de voir 🌱",
+    non: "Finalement non : c'est de l'argent gardé 🌱",
+    eue: "Profite bien 🌱",
+  };
+  agirAvecAnnuler({
+    tiroir: envies,
+    message: messages[statut],
+    action: () => {
+      const e = envies.envies.find((x) => x.id === envie.id);
+      // « Je suis sûre » : on a sauté le délai
+      if (statut === "prete" && e.statut === "murir") e.chemin = "direct";
+      e.statut = statut;
+      if (statut === "eue") e.eueLe = aujourdhuiEnTexte();
+    },
+    apres: () => {
+      sauvegarderEnvies();
+      afficherEnvies();
+    },
+  });
+  // Achetée avec l'argent du mois (pas un projet) : on propose de noter la dépense
+  const depense = document.getElementById("achat-depense");
+  depense.hidden = !(statut === "eue" && envie.prix > 0 && envie.statut !== "epargne");
+  if (!depense.hidden) achatDepense = envie;
+}
+
+// « J'économise » : un projet dans Budget › Épargne & projets
+function economiser(envie) {
+  const parMois = Math.ceil((envie.prix || 0) / 3 / 500) * 500;
+  const projet = {
+    id: nouvelId(),
+    nom: envie.nom,
+    objectif: envie.prix || 0,
+    dejaDeCote: 0,
+    parMois: parMois,
+    date: "",
+  };
+  budget.epargne.projets.push(projet);
+  sauvegarderBudget();
+  afficherBudget();
+  const e = envies.envies.find((x) => x.id === envie.id);
+  e.statut = "epargne";
+  e.projetId = projet.id;
+  e.chemin = "projet";
+  sauvegarderEnvies();
+  afficherEnvies();
+  montrerPetitMessage("Projet créé dans ton budget 🌱");
+}
+
+// « À m'offrir » : elle part dans « Ce qui me ferait plaisir » (onglet Cadeaux)
+function aOffrir(envie) {
+  agirAvecAnnuler({
+    tiroir: envies,
+    message: "Elle est dans « Ce qui me ferait plaisir »",
+    action: () => {
+      const e = envies.envies.find((x) => x.id === envie.id);
+      e.type = "cadeau";
+      e.pourQui = "moi";
+      e.occasion = "autre";
+      e.statut = "notee";
+      e.offerteLe = "";
+    },
+    apres: () => {
+      sauvegarderEnvies();
+      afficherEnvies();
+    },
+  });
+}
+
+document.getElementById("achat-depense-non").addEventListener("click", () => {
+  document.getElementById("achat-depense").hidden = true;
+});
+
+document.getElementById("achat-depense-oui").addEventListener("click", () => {
+  document.getElementById("achat-depense").hidden = true;
+  ouvrirFeuilleDepense(null); // budget-mois.js
+  const bocal = bocalPlaisirs();
+  if (bocal) document.getElementById("depense-bocal").value = bocal.id;
+  document.getElementById("depense-montant").value = achatDepense.prix;
+  document.getElementById("depense-note").value = achatDepense.nom;
+});
+
+// Les réglages du délai (dans Moi › Réglages des envies)
+const caseDelai = document.getElementById("reglage-delai");
+const champsPaliers = ["seuil1", "jours1", "seuil2", "jours2"];
+caseDelai.checked = envies.reglages.delai.actif;
+document.getElementById("bloc-paliers").hidden = !caseDelai.checked;
+caseDelai.addEventListener("change", () => {
+  envies.reglages.delai.actif = caseDelai.checked;
+  document.getElementById("bloc-paliers").hidden = !caseDelai.checked;
+  sauvegarderEnvies();
+});
+champsPaliers.forEach((cle) => {
+  const champ = document.getElementById(`palier-${cle}`);
+  champ.value = envies.reglages.delai[cle];
+  champ.addEventListener("change", () => {
+    const valeur = Number(champ.value.replace(/\s/g, ""));
+    if (valeur >= 0) envies.reglages.delai[cle] = valeur;
+    champ.value = envies.reglages.delai[cle];
+    sauvegarderEnvies();
+  });
+});
 
 afficherEnvies();

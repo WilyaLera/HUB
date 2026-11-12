@@ -20,12 +20,12 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=28" />
-    <link rel="stylesheet" href="css/navigation.css?v=28" />
-    <link rel="stylesheet" href="css/budget.css?v=28" />
-    <link rel="stylesheet" href="css/agenda.css?v=28" />
-    <link rel="stylesheet" href="css/confort.css?v=28" />
-    <link rel="stylesheet" href="css/ordinateur.css?v=28" />
+    <link rel="stylesheet" href="css/base.css?v=30" />
+    <link rel="stylesheet" href="css/navigation.css?v=30" />
+    <link rel="stylesheet" href="css/budget.css?v=30" />
+    <link rel="stylesheet" href="css/agenda.css?v=30" />
+    <link rel="stylesheet" href="css/confort.css?v=30" />
+    <link rel="stylesheet" href="css/ordinateur.css?v=30" />
   </head>
 
   <body>
@@ -296,12 +296,53 @@
         </div>
 
         <div id="panneau-acheter" class="panneau-envies" hidden>
-          <article class="carte">
-            <h2>Bientôt</h2>
-            <p class="sous-titre">
-              Ici, tes envies d'achat pourront mûrir tranquillement avant de devenir un projet dans ton budget. Ça arrive dans une prochaine version.
-            </p>
-          </article>
+          <!-- Noter une envie d'achat -->
+          <form id="form-achat" class="carte form-achat">
+            <h2>Une envie ?</h2>
+            <input id="achat-nom" class="champ-note" type="text" placeholder="Ex. : Machine à coudre" maxlength="60" required />
+            <div class="form-achat-ligne">
+              <input id="achat-prix" class="champ-note" type="text" inputmode="numeric" placeholder="Prix (F)" maxlength="9" aria-label="Prix" />
+              <div class="choix-coeurs" role="radiogroup" aria-label="À quel point j'en ai envie">
+                <label><input type="radio" name="achat-coeurs" value="1" checked /><span>1</span></label>
+                <label><input type="radio" name="achat-coeurs" value="2" /><span>2</span></label>
+                <label><input type="radio" name="achat-coeurs" value="3" /><span>3</span></label>
+              </div>
+            </div>
+            <details class="options">
+              <summary>+ Ajouter une note ou un lien</summary>
+              <input id="achat-note" class="champ-note" type="text" placeholder="Ex. : la couleur, la taille, où la trouver…" maxlength="120" />
+              <input id="achat-lien" class="champ-note" type="url" placeholder="Lien (facultatif)" />
+            </details>
+            <button type="submit" class="bouton bouton-large">Noter cette envie</button>
+          </form>
+
+          <!-- Les envies, étape par étape (envies.js) -->
+          <div id="liste-achats"></div>
+
+          <!-- Ce qu'on vient d'acheter : noter la dépense ? -->
+          <div id="achat-depense" class="carte carte-fin-courses" hidden>
+            <p><strong>Profite bien 🌱</strong> Tu veux noter la dépense dans ton budget ?</p>
+            <div class="form-categorie-boutons">
+              <button type="button" id="achat-depense-non" class="lien">Pas cette fois</button>
+              <button type="button" id="achat-depense-oui" class="bouton">Noter la dépense</button>
+            </div>
+          </div>
+
+          <!-- Les deux bocaux du bas -->
+          <div class="bocaux-envies">
+            <article class="carte bocal-envie">
+              <p class="sous-titre petit">Grâce à « Finalement non »</p>
+              <p id="total-finalement-non" class="bocal-envie-chiffre">0 F</p>
+              <p class="sous-titre petit">pas dépensés</p>
+            </article>
+            <details id="bocal-realisees" class="carte bocal-envie carte-repliable">
+              <summary>
+                <span class="sous-titre petit">Mes envies réalisées</span>
+                <span id="nombre-realisees" class="bocal-envie-chiffre">0</span>
+              </summary>
+              <div id="liste-realisees"></div>
+            </details>
+          </div>
         </div>
 
         <div id="panneau-vivre" class="panneau-envies" hidden>
@@ -324,7 +365,6 @@
           <article class="carte">
             <h2>Pour les autres</h2>
             <div id="liste-personnes"></div>
-            <div id="suggestions-agenda"></div>
             <button type="button" id="ajouter-personne" class="bouton-ajout">
               <span class="plus-rond">+</span> Ajouter un proche
             </button>
@@ -347,7 +387,7 @@
 
         <!-- Les réglages des envies sont dans Moi -->
         <button type="button" class="lien-reglages" data-reglages="carte-reglages-envies">
-          <i data-lucide="settings-2"></i> Carte de l'accueil et Noël : dans Moi › Réglages des envies
+          <i data-lucide="settings-2"></i> Carte de l'accueil, Noël et délai de réflexion : dans Moi › Réglages des envies
         </button>
       </section>
 
@@ -1197,6 +1237,17 @@
             <input type="checkbox" id="reglage-noel" />
             Compter Noël parmi les occasions
           </label>
+
+          <p class="etiquette etiquette-espacee">Délai de réflexion (À acheter)</p>
+          <label class="reglage-case">
+            <input type="checkbox" id="reglage-delai" />
+            Laisser mûrir mes envies avant de les acheter
+          </label>
+          <div id="bloc-paliers" class="paliers">
+            <label>Pas de délai sous <input id="palier-seuil1" class="champ-note" type="text" inputmode="numeric" /> F</label>
+            <label><input id="palier-jours1" class="champ-note" type="text" inputmode="numeric" /> jours jusqu'à <input id="palier-seuil2" class="champ-note" type="text" inputmode="numeric" /> F</label>
+            <label><input id="palier-jours2" class="champ-note" type="text" inputmode="numeric" /> jours au-dessus</label>
+          </div>
         </details>
 
         <!-- Mes données : sauvegarder et restaurer -->
@@ -1458,6 +1509,11 @@
         <button type="button" id="fermer-form-personne" class="bouton-supprimer" aria-label="Fermer"><i data-lucide="x"></i></button>
       </div>
       <form id="form-personne">
+        <!-- Reprendre un anniversaire déjà noté dans l'agenda (envies.js) -->
+        <label id="bloc-depuis-agenda" class="champ">
+          Depuis mon agenda (facultatif)
+          <select id="personne-depuis-agenda" class="champ-note"></select>
+        </label>
         <label class="champ">Prénom<input id="personne-prenom" class="champ-note" type="text" maxlength="30" required /></label>
         <label class="champ">
           Son anniversaire (facultatif)
@@ -1612,29 +1668,29 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=28"></script>
-    <script src="js/outils/dates.js?v=28"></script>
-    <script src="js/outils/annuler.js?v=28"></script>
-    <script src="js/outils/icones.js?v=28"></script>
-    <script src="js/modules/navigation.js?v=28"></script>
-    <script src="js/modules/infos.js?v=28"></script>
-    <script src="js/modules/accueil.js?v=28"></script>
-    <script src="js/modules/budget.js?v=28"></script>
-    <script src="js/modules/budget-repartition.js?v=28"></script>
-    <script src="js/modules/budget-mois.js?v=28"></script>
-    <script src="js/modules/budget-raccourcis.js?v=28"></script>
-    <script src="js/modules/budget-epargne.js?v=28"></script>
-    <script src="js/modules/budget-point.js?v=28"></script>
-    <script src="js/donnees/sauvegarde.js?v=28"></script>
-    <script src="js/modules/agenda.js?v=28"></script>
-    <script src="js/modules/agenda-vues.js?v=28"></script>
-    <script src="js/modules/agenda-feuille.js?v=28"></script>
-    <script src="js/modules/agenda-reglages.js?v=28"></script>
-    <script src="js/modules/agenda-notifs.js?v=28"></script>
-    <script src="js/modules/accueil-cartes.js?v=28"></script>
-    <script src="js/modules/courses.js?v=28"></script>
-    <script src="js/modules/envies.js?v=28"></script>
-    <script src="js/modules/moi.js?v=28"></script>
-    <script src="js/app.js?v=28"></script>
+    <script src="js/donnees/stockage.js?v=30"></script>
+    <script src="js/outils/dates.js?v=30"></script>
+    <script src="js/outils/annuler.js?v=30"></script>
+    <script src="js/outils/icones.js?v=30"></script>
+    <script src="js/modules/navigation.js?v=30"></script>
+    <script src="js/modules/infos.js?v=30"></script>
+    <script src="js/modules/accueil.js?v=30"></script>
+    <script src="js/modules/budget.js?v=30"></script>
+    <script src="js/modules/budget-repartition.js?v=30"></script>
+    <script src="js/modules/budget-mois.js?v=30"></script>
+    <script src="js/modules/budget-raccourcis.js?v=30"></script>
+    <script src="js/modules/budget-epargne.js?v=30"></script>
+    <script src="js/modules/budget-point.js?v=30"></script>
+    <script src="js/donnees/sauvegarde.js?v=30"></script>
+    <script src="js/modules/agenda.js?v=30"></script>
+    <script src="js/modules/agenda-vues.js?v=30"></script>
+    <script src="js/modules/agenda-feuille.js?v=30"></script>
+    <script src="js/modules/agenda-reglages.js?v=30"></script>
+    <script src="js/modules/agenda-notifs.js?v=30"></script>
+    <script src="js/modules/accueil-cartes.js?v=30"></script>
+    <script src="js/modules/courses.js?v=30"></script>
+    <script src="js/modules/envies.js?v=30"></script>
+    <script src="js/modules/moi.js?v=30"></script>
+    <script src="js/app.js?v=30"></script>
   </body>
 </html>

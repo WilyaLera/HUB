@@ -505,10 +505,6 @@ svg.icone {
   color: var(--texte-doux);
 }
 
-#suggestions-agenda .choix {
-  margin: 6px 0 10px;
-}
-
 /* Le petit formulaire d'idée : nom, prix, + (et l'occasion en dessous) */
 .form-idee {
   display: grid;
@@ -567,4 +563,178 @@ svg.icone {
 
 .personne-actions .lien-danger {
   margin: 0;
+}
+
+/* ---------- v29 : Envies › À acheter ---------- */
+
+.form-achat {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-achat h2 {
+  margin: 0;
+}
+
+.form-achat-ligne {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.form-achat .options input {
+  margin-top: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Les cœurs (1 à 3) */
+.choix-coeurs {
+  display: flex;
+  gap: 4px;
+}
+
+.choix-coeurs label {
+  position: relative;
+}
+
+.choix-coeurs input {
+  position: absolute;
+  opacity: 0;
+}
+
+.choix-coeurs span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--trait);
+  font-weight: 800;
+  color: var(--texte-doux);
+  cursor: pointer;
+}
+
+.choix-coeurs span::after {
+  content: " ♥";
+  margin-left: 2px;
+  font-size: 12px;
+}
+
+.choix-coeurs input:checked + span {
+  background: color-mix(in srgb, var(--accent) 14%, var(--carte));
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.coeurs {
+  display: inline-flex;
+  gap: 2px;
+  color: var(--accent);
+}
+
+.coeurs svg {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  fill: currentColor;
+}
+
+/* Une envie d'achat */
+.envie-achat {
+  position: relative;
+  padding: 12px 40px 12px 0;
+  border-bottom: 1px solid var(--trait);
+}
+
+.envie-achat:last-child {
+  border-bottom: none;
+}
+
+.envie-achat-haut {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.envie-achat p {
+  margin: 4px 0 0;
+}
+
+.envie-etape {
+  font-size: 14px;
+  color: var(--texte);
+  background: var(--fond);
+  border-radius: 12px;
+  padding: 8px 10px;
+  margin-top: 8px !important;
+}
+
+.envie-boutons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.envie-boutons .bouton {
+  min-height: 40px;
+  padding: 0 16px;
+}
+
+.envie-supprimer {
+  position: absolute;
+  top: 4px;
+  right: -6px;
+}
+
+/* Les deux bocaux du bas */
+.bocaux-envies {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.bocal-envie {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.bocal-envie p {
+  margin: 0;
+}
+
+.bocal-envie summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bocal-envie-chiffre {
+  font-family: var(--police-titre);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+#liste-realisees {
+  text-align: left;
+  margin-top: 8px;
+}
+
+/* Les paliers du délai (dans Moi) */
+.paliers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.paliers input {
+  width: 72px;
+  padding: 6px 8px;
+  text-align: center;
 }

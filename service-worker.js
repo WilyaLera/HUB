@@ -8,7 +8,7 @@
 // Comme ça, une mise à jour ne mélange jamais l'ancien et le nouveau code.
 // =====================================================
 
-const VERSION = "mon-hub-v28";
+const VERSION = "mon-hub-v30";
 const CACHE_RESUME = "hub-resume"; // le résumé préparé par l'appli (agenda-notifs.js)
 
 // Installation : la nouvelle version prend la main tout de suite
