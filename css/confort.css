@@ -390,3 +390,29 @@ svg.icone {
   padding-bottom: 6px;
   margin-top: 10px;
 }
+
+/* ---------- v24 : les petits liens vers les réglages ---------- */
+
+.lien-reglages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 24px;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  color: var(--texte-doux);
+  font: inherit;
+  font-size: 13px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.lien-reglages svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}

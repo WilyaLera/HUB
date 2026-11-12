@@ -20,12 +20,12 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=23" />
-    <link rel="stylesheet" href="css/navigation.css?v=23" />
-    <link rel="stylesheet" href="css/budget.css?v=23" />
-    <link rel="stylesheet" href="css/agenda.css?v=23" />
-    <link rel="stylesheet" href="css/confort.css?v=23" />
-    <link rel="stylesheet" href="css/ordinateur.css?v=23" />
+    <link rel="stylesheet" href="css/base.css?v=24" />
+    <link rel="stylesheet" href="css/navigation.css?v=24" />
+    <link rel="stylesheet" href="css/budget.css?v=24" />
+    <link rel="stylesheet" href="css/agenda.css?v=24" />
+    <link rel="stylesheet" href="css/confort.css?v=24" />
+    <link rel="stylesheet" href="css/ordinateur.css?v=24" />
   </head>
 
   <body>
@@ -138,6 +138,11 @@
 
         <!-- Ici s'affiche la vue choisie -->
         <div id="agenda-contenu"></div>
+
+        <!-- Les réglages de l'agenda sont dans Moi -->
+        <button type="button" class="lien-reglages" data-reglages="carte-reglages-agenda">
+          <i data-lucide="settings-2"></i> Catégories, jours fériés et résumé du jour : dans Moi › Réglages de l'agenda
+        </button>
         </div>
 
         <aside class="agenda-cote">
@@ -233,20 +238,10 @@
           </div>
         </div>
 
-        <!-- Mes rayons -->
-        <details id="carte-rayons" class="carte carte-repliable">
-          <summary><h2>Mes rayons</h2></summary>
-          <p class="sous-titre petit">
-            Range-les dans l'ordre de ton magasin, renomme-les, ajoute les tiens.
-          </p>
-          <div id="liste-rayons"></div>
-          <form id="form-rayon" class="form-categorie">
-            <input id="rayon-nom" class="champ-note" type="text" placeholder="Nouveau rayon (ex. Bio)" maxlength="30" required />
-            <div class="form-categorie-boutons">
-              <button type="submit" class="bouton">Ajouter le rayon</button>
-            </div>
-          </form>
-        </details>
+        <!-- Les réglages des courses sont dans Moi -->
+        <button type="button" class="lien-reglages" data-reglages="carte-rayons">
+          <i data-lucide="settings-2"></i> Tes rayons se modifient dans Moi › Réglages des courses
+        </button>
       </section>
 
       <!-- Module Budget (pas d'onglet à lui : il s'allume sous Foyer) -->
@@ -871,6 +866,10 @@
             <div id="liste-reserve" class="resume-detail"></div>
           </article>
         </div>
+        <!-- Les réglages du budget sont dans Moi -->
+        <button type="button" class="lien-reglages" data-reglages="carte-reglages">
+          <i data-lucide="settings-2"></i> Début du mois, seul·e ou à deux, coup de pouce : dans Moi › Réglages du budget
+        </button>
       </section>
 
       <!-- Module Moi -->
@@ -1060,6 +1059,21 @@
               </div>
             </div>
           </div>
+        </details>
+
+        <!-- Les réglages des courses : les rayons -->
+        <details id="carte-rayons" class="carte carte-repliable">
+          <summary><h2>Réglages des courses</h2></summary>
+          <p class="sous-titre petit">
+            Range tes rayons dans l'ordre de ton magasin, renomme-les, ajoute les tiens.
+          </p>
+          <div id="liste-rayons"></div>
+          <form id="form-rayon" class="form-categorie">
+            <input id="rayon-nom" class="champ-note" type="text" placeholder="Nouveau rayon (ex. Bio)" maxlength="30" required />
+            <div class="form-categorie-boutons">
+              <button type="submit" class="bouton">Ajouter le rayon</button>
+            </div>
+          </form>
         </details>
 
         <!-- Mes données : sauvegarder et restaurer -->
@@ -1398,28 +1412,28 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=23"></script>
-    <script src="js/outils/dates.js?v=23"></script>
-    <script src="js/outils/annuler.js?v=23"></script>
-    <script src="js/outils/icones.js?v=23"></script>
-    <script src="js/modules/navigation.js?v=23"></script>
-    <script src="js/modules/infos.js?v=23"></script>
-    <script src="js/modules/accueil.js?v=23"></script>
-    <script src="js/modules/budget.js?v=23"></script>
-    <script src="js/modules/budget-repartition.js?v=23"></script>
-    <script src="js/modules/budget-mois.js?v=23"></script>
-    <script src="js/modules/budget-raccourcis.js?v=23"></script>
-    <script src="js/modules/budget-epargne.js?v=23"></script>
-    <script src="js/modules/budget-point.js?v=23"></script>
-    <script src="js/donnees/sauvegarde.js?v=23"></script>
-    <script src="js/modules/agenda.js?v=23"></script>
-    <script src="js/modules/agenda-vues.js?v=23"></script>
-    <script src="js/modules/agenda-feuille.js?v=23"></script>
-    <script src="js/modules/agenda-reglages.js?v=23"></script>
-    <script src="js/modules/agenda-notifs.js?v=23"></script>
-    <script src="js/modules/accueil-cartes.js?v=23"></script>
-    <script src="js/modules/courses.js?v=23"></script>
-    <script src="js/modules/moi.js?v=23"></script>
-    <script src="js/app.js?v=23"></script>
+    <script src="js/donnees/stockage.js?v=24"></script>
+    <script src="js/outils/dates.js?v=24"></script>
+    <script src="js/outils/annuler.js?v=24"></script>
+    <script src="js/outils/icones.js?v=24"></script>
+    <script src="js/modules/navigation.js?v=24"></script>
+    <script src="js/modules/infos.js?v=24"></script>
+    <script src="js/modules/accueil.js?v=24"></script>
+    <script src="js/modules/budget.js?v=24"></script>
+    <script src="js/modules/budget-repartition.js?v=24"></script>
+    <script src="js/modules/budget-mois.js?v=24"></script>
+    <script src="js/modules/budget-raccourcis.js?v=24"></script>
+    <script src="js/modules/budget-epargne.js?v=24"></script>
+    <script src="js/modules/budget-point.js?v=24"></script>
+    <script src="js/donnees/sauvegarde.js?v=24"></script>
+    <script src="js/modules/agenda.js?v=24"></script>
+    <script src="js/modules/agenda-vues.js?v=24"></script>
+    <script src="js/modules/agenda-feuille.js?v=24"></script>
+    <script src="js/modules/agenda-reglages.js?v=24"></script>
+    <script src="js/modules/agenda-notifs.js?v=24"></script>
+    <script src="js/modules/accueil-cartes.js?v=24"></script>
+    <script src="js/modules/courses.js?v=24"></script>
+    <script src="js/modules/moi.js?v=24"></script>
+    <script src="js/app.js?v=24"></script>
   </body>
 </html>

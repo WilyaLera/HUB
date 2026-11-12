@@ -59,3 +59,15 @@ caseCalme.addEventListener("change", () => {
 });
 
 appliquerApparence();
+
+// ---------- Les petits liens « … dans Moi » en bas des modules ----------
+// Chaque lien porte data-reglages="id de la carte" : on va sur Moi,
+// on ouvre la carte et on la fait venir à l'écran.
+document.querySelectorAll("[data-reglages]").forEach((lien) => {
+  lien.addEventListener("click", () => {
+    afficherEcran("moi"); // navigation.js
+    const carte = document.getElementById(lien.dataset.reglages);
+    carte.open = true;
+    carte.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+});
