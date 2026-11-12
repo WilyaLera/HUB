@@ -20,12 +20,12 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=22" />
-    <link rel="stylesheet" href="css/navigation.css?v=22" />
-    <link rel="stylesheet" href="css/budget.css?v=22" />
-    <link rel="stylesheet" href="css/agenda.css?v=22" />
-    <link rel="stylesheet" href="css/confort.css?v=22" />
-    <link rel="stylesheet" href="css/ordinateur.css?v=22" />
+    <link rel="stylesheet" href="css/base.css?v=23" />
+    <link rel="stylesheet" href="css/navigation.css?v=23" />
+    <link rel="stylesheet" href="css/budget.css?v=23" />
+    <link rel="stylesheet" href="css/agenda.css?v=23" />
+    <link rel="stylesheet" href="css/confort.css?v=23" />
+    <link rel="stylesheet" href="css/ordinateur.css?v=23" />
   </head>
 
   <body>
@@ -73,6 +73,12 @@
             <i data-lucide="plus"></i>
           </button>
           <div id="liste-demain"></div>
+        </article>
+
+        <!-- Carte Courses : ce qu'il reste à prendre -->
+        <article class="carte carte-accueil carte-touchable" data-carte="courses" data-ecran="courses">
+          <h2>Courses</h2>
+          <p id="accueil-courses" class="sous-titre"></p>
         </article>
 
         <!-- Carte Idée : une tâche du pense-bête, piochée au hasard -->
@@ -177,6 +183,70 @@
           </span>
           <i data-lucide="chevron-right"></i>
         </button>
+
+        <!-- Carte qui mène aux Courses -->
+        <button class="carte carte-lien" data-ecran="courses">
+          <span class="carte-lien-icone"><i data-lucide="shopping-basket"></i></span>
+          <span class="carte-lien-texte">
+            <strong>Courses</strong>
+            <span id="foyer-courses-resume" class="sous-titre">Ta liste, rangée par rayons</span>
+          </span>
+          <i data-lucide="chevron-right"></i>
+        </button>
+      </section>
+
+      <!-- ===================== Courses ===================== -->
+      <section id="courses" class="ecran" data-parent="foyer">
+        <h1>Courses</h1>
+        <p id="courses-resume" class="sous-titre"></p>
+
+        <!-- Ajouter un article -->
+        <form id="form-article" class="carte form-article">
+          <input
+            id="article-nom"
+            class="champ-note"
+            type="text"
+            placeholder="Ajouter un article…"
+            autocomplete="off"
+            list="articles-connus"
+            required
+          />
+          <datalist id="articles-connus"></datalist>
+          <div class="form-article-ligne">
+            <input id="article-quantite" class="champ-note" type="text" placeholder="Quantité" maxlength="20" />
+            <select id="article-rayon" class="champ-note" aria-label="Rayon"></select>
+            <button type="submit" class="bouton-rond bouton-rond-plein" aria-label="Ajouter">
+              <i data-lucide="plus"></i>
+            </button>
+          </div>
+        </form>
+
+        <!-- La liste, rayon par rayon (courses.js) -->
+        <div id="liste-courses"></div>
+
+        <!-- Une fois les courses faites -->
+        <div id="fin-courses" class="carte carte-fin-courses" hidden>
+          <p><strong>Bien joué 🌱</strong> Tu veux noter le total du ticket dans ton budget ?</p>
+          <div class="form-categorie-boutons">
+            <button type="button" id="fin-courses-non" class="lien">Pas cette fois</button>
+            <button type="button" id="fin-courses-oui" class="bouton">Noter le total</button>
+          </div>
+        </div>
+
+        <!-- Mes rayons -->
+        <details id="carte-rayons" class="carte carte-repliable">
+          <summary><h2>Mes rayons</h2></summary>
+          <p class="sous-titre petit">
+            Range-les dans l'ordre de ton magasin, renomme-les, ajoute les tiens.
+          </p>
+          <div id="liste-rayons"></div>
+          <form id="form-rayon" class="form-categorie">
+            <input id="rayon-nom" class="champ-note" type="text" placeholder="Nouveau rayon (ex. Bio)" maxlength="30" required />
+            <div class="form-categorie-boutons">
+              <button type="submit" class="bouton">Ajouter le rayon</button>
+            </div>
+          </form>
+        </details>
       </section>
 
       <!-- Module Budget (pas d'onglet à lui : il s'allume sous Foyer) -->
@@ -1162,10 +1232,28 @@
         <button type="button" id="plus-anniversaire" class="menu-plus-choix">
           <span class="menu-plus-icone"><i data-lucide="cake"></i></span> Un anniversaire
         </button>
+        <button type="button" id="plus-courses" class="menu-plus-choix">
+          <span class="menu-plus-icone"><i data-lucide="shopping-basket"></i></span> Un article de courses
+        </button>
         <button type="button" id="plus-depense" class="menu-plus-choix">
           <span class="menu-plus-icone"><i data-lucide="wallet"></i></span> Une dépense
         </button>
       </div>
+    </div>
+
+    <!-- Modifier un article de courses -->
+    <div id="feuille-article" class="feuille" hidden>
+      <div class="feuille-haut">
+        <h2>Modifier l'article</h2>
+        <button type="button" id="fermer-article" class="bouton-supprimer" aria-label="Fermer"><i data-lucide="x"></i></button>
+      </div>
+      <form id="form-modif-article">
+        <label class="champ">Article<input id="modif-article-nom" class="champ-note" type="text" required /></label>
+        <label class="champ">Quantité<input id="modif-article-quantite" class="champ-note" type="text" maxlength="20" /></label>
+        <label class="champ">Rayon<select id="modif-article-rayon" class="champ-note"></select></label>
+        <button type="submit" class="bouton bouton-large">Enregistrer</button>
+        <button type="button" id="supprimer-article" class="lien lien-danger">Retirer de la liste</button>
+      </form>
     </div>
 
     <!-- Choisir les cartes de l'accueil -->
@@ -1310,27 +1398,28 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=22"></script>
-    <script src="js/outils/dates.js?v=22"></script>
-    <script src="js/outils/annuler.js?v=22"></script>
-    <script src="js/outils/icones.js?v=22"></script>
-    <script src="js/modules/navigation.js?v=22"></script>
-    <script src="js/modules/infos.js?v=22"></script>
-    <script src="js/modules/accueil.js?v=22"></script>
-    <script src="js/modules/budget.js?v=22"></script>
-    <script src="js/modules/budget-repartition.js?v=22"></script>
-    <script src="js/modules/budget-mois.js?v=22"></script>
-    <script src="js/modules/budget-raccourcis.js?v=22"></script>
-    <script src="js/modules/budget-epargne.js?v=22"></script>
-    <script src="js/modules/budget-point.js?v=22"></script>
-    <script src="js/donnees/sauvegarde.js?v=22"></script>
-    <script src="js/modules/agenda.js?v=22"></script>
-    <script src="js/modules/agenda-vues.js?v=22"></script>
-    <script src="js/modules/agenda-feuille.js?v=22"></script>
-    <script src="js/modules/agenda-reglages.js?v=22"></script>
-    <script src="js/modules/agenda-notifs.js?v=22"></script>
-    <script src="js/modules/accueil-cartes.js?v=22"></script>
-    <script src="js/modules/moi.js?v=22"></script>
-    <script src="js/app.js?v=22"></script>
+    <script src="js/donnees/stockage.js?v=23"></script>
+    <script src="js/outils/dates.js?v=23"></script>
+    <script src="js/outils/annuler.js?v=23"></script>
+    <script src="js/outils/icones.js?v=23"></script>
+    <script src="js/modules/navigation.js?v=23"></script>
+    <script src="js/modules/infos.js?v=23"></script>
+    <script src="js/modules/accueil.js?v=23"></script>
+    <script src="js/modules/budget.js?v=23"></script>
+    <script src="js/modules/budget-repartition.js?v=23"></script>
+    <script src="js/modules/budget-mois.js?v=23"></script>
+    <script src="js/modules/budget-raccourcis.js?v=23"></script>
+    <script src="js/modules/budget-epargne.js?v=23"></script>
+    <script src="js/modules/budget-point.js?v=23"></script>
+    <script src="js/donnees/sauvegarde.js?v=23"></script>
+    <script src="js/modules/agenda.js?v=23"></script>
+    <script src="js/modules/agenda-vues.js?v=23"></script>
+    <script src="js/modules/agenda-feuille.js?v=23"></script>
+    <script src="js/modules/agenda-reglages.js?v=23"></script>
+    <script src="js/modules/agenda-notifs.js?v=23"></script>
+    <script src="js/modules/accueil-cartes.js?v=23"></script>
+    <script src="js/modules/courses.js?v=23"></script>
+    <script src="js/modules/moi.js?v=23"></script>
+    <script src="js/app.js?v=23"></script>
   </body>
 </html>

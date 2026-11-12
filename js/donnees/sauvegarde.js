@@ -6,7 +6,7 @@
 // =====================================================
 
 // Les tiroirs de l'appli (ajoute ici les futurs modules : "journal", "envies"…)
-const TIROIRS_A_SAUVEGARDER = ["budget", "agenda", "taches", "prenom", "accueil", "apparence"];
+const TIROIRS_A_SAUVEGARDER = ["budget", "agenda", "taches", "prenom", "accueil", "apparence", "courses"];
 
 // Fabrique le contenu de la sauvegarde
 function preparerSauvegarde() {

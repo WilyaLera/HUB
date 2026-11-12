@@ -274,3 +274,119 @@ svg.icone {
   width: 20px;
   height: 20px;
 }
+
+/* ---------- v23 : Courses ---------- */
+
+.form-article {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-article-ligne {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) 44px;
+  gap: 8px;
+  align-items: center;
+}
+
+.bouton-rond-plein {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.carte-rayon h2,
+.carte-panier h2 {
+  font-size: 17px;
+  margin-bottom: 4px;
+}
+
+.ligne-article {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--trait);
+}
+
+.ligne-article:last-child {
+  border-bottom: none;
+}
+
+.ligne-article input {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  accent-color: var(--sauge, #7e9c80);
+}
+
+.ligne-article-nom {
+  flex: 1;
+  min-height: 46px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--texte);
+  font: inherit;
+  font-size: 16px;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.ligne-article-quantite {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--texte-doux);
+}
+
+.ligne-article.est-coche .ligne-article-nom {
+  color: var(--texte-doux);
+  text-decoration: line-through;
+}
+
+.carte-panier .bouton-large {
+  margin-top: 14px;
+}
+
+.carte-fin-courses p {
+  margin: 0 0 12px;
+}
+
+.champ-rayon {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  border: none;
+  border-bottom: 1px dashed var(--trait);
+  background: none;
+  color: var(--texte);
+  font: inherit;
+  font-size: 15px;
+}
+
+.lien-danger {
+  display: block;
+  margin: 12px auto 0;
+  min-height: 44px;
+  color: var(--texte-doux);
+}
+
+@media (min-width: 900px) {
+  #courses.actif {
+    max-width: 640px;
+  }
+
+  #courses .carte {
+    margin-top: 16px;
+  }
+}
+
+/* Des cartes de rayon plus compactes */
+.carte-rayon {
+  padding-top: 14px;
+  padding-bottom: 6px;
+  margin-top: 10px;
+}

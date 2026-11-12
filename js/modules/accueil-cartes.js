@@ -8,6 +8,7 @@ const CARTES_ACCUEIL = [
   { code: "demain", nom: "Demain", detail: "L'aperçu du lendemain, le soir à partir de 17 h" },
   { code: "idee", nom: "Une idée du pense-bête", detail: "Une tâche sans date, piochée au hasard" },
   { code: "budget", nom: "Mon mois", detail: "Ce qu'il te reste pour vivre" },
+  { code: "courses", nom: "Courses", detail: "Ce qu'il reste à prendre" },
 ];
 
 let reglagesAccueil = charger("accueil", {
