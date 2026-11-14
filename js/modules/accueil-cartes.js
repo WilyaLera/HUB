@@ -10,6 +10,7 @@ const CARTES_ACCUEIL = [
   { code: "budget", nom: "Mon mois", detail: "Ce qu'il te reste pour vivre" },
   { code: "courses", nom: "Courses", detail: "Ce qu'il reste à prendre" },
   { code: "cadeaux", nom: "Cadeaux", detail: "Quand une occasion approche (Noël, anniversaires)" },
+  { code: "vivre", nom: "Et si…", detail: "Une idée À vivre quand ton week-end est libre" },
 ];
 
 let reglagesAccueil = charger("accueil", {

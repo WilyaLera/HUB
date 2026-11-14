@@ -20,12 +20,12 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=30" />
-    <link rel="stylesheet" href="css/navigation.css?v=30" />
-    <link rel="stylesheet" href="css/budget.css?v=30" />
-    <link rel="stylesheet" href="css/agenda.css?v=30" />
-    <link rel="stylesheet" href="css/confort.css?v=30" />
-    <link rel="stylesheet" href="css/ordinateur.css?v=30" />
+    <link rel="stylesheet" href="css/base.css?v=32" />
+    <link rel="stylesheet" href="css/navigation.css?v=32" />
+    <link rel="stylesheet" href="css/budget.css?v=32" />
+    <link rel="stylesheet" href="css/agenda.css?v=32" />
+    <link rel="stylesheet" href="css/confort.css?v=32" />
+    <link rel="stylesheet" href="css/ordinateur.css?v=32" />
   </head>
 
   <body>
@@ -79,6 +79,16 @@
         <article class="carte carte-accueil carte-touchable" data-carte="cadeaux" data-ecran="envies">
           <h2>Cadeaux</h2>
           <p id="accueil-cadeaux" class="sous-titre"></p>
+        </article>
+
+        <!-- Carte « Et si… » : une idée À vivre quand le week-end est libre (envies.js) -->
+        <article class="carte carte-accueil" data-carte="vivre">
+          <h2>Et si…</h2>
+          <p id="accueil-vivre-texte"></p>
+          <div class="form-categorie-boutons accueil-vivre-boutons">
+            <button type="button" id="accueil-vivre-non" class="lien">Pas cette fois</button>
+            <button type="button" id="accueil-vivre-oui" class="bouton">Le planifier</button>
+          </div>
         </article>
 
         <!-- Carte Courses : ce qu'il reste à prendre -->
@@ -346,12 +356,92 @@
         </div>
 
         <div id="panneau-vivre" class="panneau-envies" hidden>
+          <!-- La pioche, repliée comme un menu -->
+          <details id="pioche-vivre" class="carte carte-repliable">
+            <summary><h2>Je ne sais pas quoi faire</h2></summary>
+            <p class="etiquette">J'ai…</p>
+            <div class="choix">
+              <label class="pastille"><input type="checkbox" name="pioche-moment" value="heure" /> 1 h devant moi</label>
+                <label class="pastille"><input type="checkbox" name="pioche-moment" value="weekend" /> Un week-end</label>
+                <label class="pastille"><input type="checkbox" name="pioche-moment" value="vacances" /> Des vacances</label>
+                <label class="pastille"><input type="checkbox" name="pioche-moment" value="pluie" /> Jour de pluie</label>
+                <label class="pastille"><input type="checkbox" name="pioche-moment" value="beau" /> Quand il fait beau</label>
+            </div>
+            <p class="etiquette">Avec…</p>
+            <div class="choix">
+              <label class="pastille"><input type="checkbox" name="pioche-qui" value="seule" /> Seule</label>
+                <label class="pastille"><input type="checkbox" name="pioche-qui" value="couple" /> En couple</label>
+                <label class="pastille"><input type="checkbox" name="pioche-qui" value="amis" /> Entre amis</label>
+                <label class="pastille"><input type="checkbox" name="pioche-qui" value="famille" /> En famille</label>
+            </div>
+            <button type="button" id="piocher-vivre" class="bouton bouton-large">Pioche-moi une idée</button>
+            <div id="resultat-pioche"></div>
+          </details>
+
+          <!-- Une idée qui dort depuis longtemps (le petit tri) -->
+          <div id="idee-qui-dort"></div>
+
+          <!-- Noter une idée -->
+          <form id="form-vivre" class="carte form-achat">
+            <h2>Une idée à vivre ?</h2>
+            <input id="vivre-nom" class="champ-note" type="text" placeholder="Ex. : Pique-nique à la plage" maxlength="80" required />
+            <details class="options">
+              <summary>+ Préciser quand (facultatif)</summary>
+              <p class="etiquette">Il me faut…</p>
+              <div class="choix">
+                <label class="pastille"><input type="checkbox" name="vivre-moment" value="heure" /> 1 h devant moi</label>
+                <label class="pastille"><input type="checkbox" name="vivre-moment" value="weekend" /> Un week-end</label>
+                <label class="pastille"><input type="checkbox" name="vivre-moment" value="vacances" /> Des vacances</label>
+                <label class="pastille"><input type="checkbox" name="vivre-moment" value="pluie" /> Jour de pluie</label>
+                <label class="pastille"><input type="checkbox" name="vivre-moment" value="beau" /> Quand il fait beau</label>
+              </div>
+              <p class="etiquette">Avec…</p>
+              <div class="choix">
+                <label class="pastille"><input type="checkbox" name="vivre-qui" value="seule" /> Seule</label>
+                <label class="pastille"><input type="checkbox" name="vivre-qui" value="couple" /> En couple</label>
+                <label class="pastille"><input type="checkbox" name="vivre-qui" value="amis" /> Entre amis</label>
+                <label class="pastille"><input type="checkbox" name="vivre-qui" value="famille" /> En famille</label>
+              </div>
+              <label class="champ">
+                Un mois en particulier ?
+                <select id="vivre-mois" class="champ-note">
+                  <option value="">N'importe quand</option>
+                <option value="01">janvier</option>
+                <option value="02">février</option>
+                <option value="03">mars</option>
+                <option value="04">avril</option>
+                <option value="05">mai</option>
+                <option value="06">juin</option>
+                <option value="07">juillet</option>
+                <option value="08">août</option>
+                <option value="09">septembre</option>
+                <option value="10">octobre</option>
+                <option value="11">novembre</option>
+                <option value="12">décembre</option>
+                </select>
+              </label>
+            </details>
+            <details class="options">
+              <summary>+ Ajouter une note</summary>
+              <input id="vivre-note" class="champ-note" type="text" placeholder="Ex. : le lieu, ce qu'il faut emporter…" maxlength="120" />
+            </details>
+            <button type="submit" class="bouton bouton-large">Noter cette idée</button>
+          </form>
+
+          <!-- Mes idées (envies.js) -->
           <article class="carte">
-            <h2>Bientôt</h2>
-            <p class="sous-titre">
-              Ici, les idées de sorties et d'expériences, pour qu'elles ne dorment plus. Ça arrive dans une prochaine version.
-            </p>
+            <h2>Mes idées</h2>
+            <div id="liste-vivre"></div>
           </article>
+
+          <!-- Le bocal à souvenirs -->
+          <details id="bocal-souvenirs" class="carte bocal-envie carte-repliable">
+            <summary>
+              <span class="sous-titre petit">Mon bocal à souvenirs</span>
+              <span id="nombre-souvenirs" class="bocal-envie-chiffre">0</span>
+            </summary>
+            <div id="liste-souvenirs"></div>
+          </details>
         </div>
 
         <div id="panneau-cadeaux" class="panneau-envies">
@@ -1502,6 +1592,37 @@
       </div>
     </div>
 
+    <!-- Modifier une envie ou une idée de cadeau (envies.js) -->
+    <div id="feuille-envie" class="feuille" hidden>
+      <div class="feuille-haut">
+        <h2>Modifier</h2>
+        <button type="button" id="fermer-envie" class="bouton-supprimer" aria-label="Fermer"><i data-lucide="x"></i></button>
+      </div>
+      <form id="form-envie">
+        <label class="champ">Nom<input id="envie-nom" class="champ-note" type="text" maxlength="60" required /></label>
+        <label class="champ">Prix (F)<input id="envie-prix" class="champ-note" type="text" inputmode="numeric" maxlength="9" /></label>
+        <div id="bloc-envie-coeurs">
+          <p class="etiquette">À quel point j'en ai envie</p>
+          <div class="choix-coeurs">
+            <label><input type="radio" name="envie-coeurs" value="1" /><span>1</span></label>
+            <label><input type="radio" name="envie-coeurs" value="2" /><span>2</span></label>
+            <label><input type="radio" name="envie-coeurs" value="3" /><span>3</span></label>
+          </div>
+        </div>
+        <label id="bloc-envie-occasion" class="champ">
+          Pour quelle occasion
+          <select id="envie-occasion" class="champ-note">
+            <option value="anniversaire">Son anniversaire</option>
+            <option value="noel">Noël</option>
+            <option value="autre">Une autre occasion</option>
+          </select>
+        </label>
+        <label id="bloc-envie-note" class="champ">Note<input id="envie-note" class="champ-note" type="text" maxlength="120" /></label>
+        <label id="bloc-envie-lien" class="champ">Lien<input id="envie-lien" class="champ-note" type="url" /></label>
+        <button type="submit" class="bouton bouton-large">Enregistrer</button>
+      </form>
+    </div>
+
     <!-- Ajouter ou modifier un proche (envies.js) -->
     <div id="feuille-form-personne" class="feuille" hidden>
       <div class="feuille-haut">
@@ -1668,29 +1789,29 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=30"></script>
-    <script src="js/outils/dates.js?v=30"></script>
-    <script src="js/outils/annuler.js?v=30"></script>
-    <script src="js/outils/icones.js?v=30"></script>
-    <script src="js/modules/navigation.js?v=30"></script>
-    <script src="js/modules/infos.js?v=30"></script>
-    <script src="js/modules/accueil.js?v=30"></script>
-    <script src="js/modules/budget.js?v=30"></script>
-    <script src="js/modules/budget-repartition.js?v=30"></script>
-    <script src="js/modules/budget-mois.js?v=30"></script>
-    <script src="js/modules/budget-raccourcis.js?v=30"></script>
-    <script src="js/modules/budget-epargne.js?v=30"></script>
-    <script src="js/modules/budget-point.js?v=30"></script>
-    <script src="js/donnees/sauvegarde.js?v=30"></script>
-    <script src="js/modules/agenda.js?v=30"></script>
-    <script src="js/modules/agenda-vues.js?v=30"></script>
-    <script src="js/modules/agenda-feuille.js?v=30"></script>
-    <script src="js/modules/agenda-reglages.js?v=30"></script>
-    <script src="js/modules/agenda-notifs.js?v=30"></script>
-    <script src="js/modules/accueil-cartes.js?v=30"></script>
-    <script src="js/modules/courses.js?v=30"></script>
-    <script src="js/modules/envies.js?v=30"></script>
-    <script src="js/modules/moi.js?v=30"></script>
-    <script src="js/app.js?v=30"></script>
+    <script src="js/donnees/stockage.js?v=32"></script>
+    <script src="js/outils/dates.js?v=32"></script>
+    <script src="js/outils/annuler.js?v=32"></script>
+    <script src="js/outils/icones.js?v=32"></script>
+    <script src="js/modules/navigation.js?v=32"></script>
+    <script src="js/modules/infos.js?v=32"></script>
+    <script src="js/modules/accueil.js?v=32"></script>
+    <script src="js/modules/budget.js?v=32"></script>
+    <script src="js/modules/budget-repartition.js?v=32"></script>
+    <script src="js/modules/budget-mois.js?v=32"></script>
+    <script src="js/modules/budget-raccourcis.js?v=32"></script>
+    <script src="js/modules/budget-epargne.js?v=32"></script>
+    <script src="js/modules/budget-point.js?v=32"></script>
+    <script src="js/donnees/sauvegarde.js?v=32"></script>
+    <script src="js/modules/agenda.js?v=32"></script>
+    <script src="js/modules/agenda-vues.js?v=32"></script>
+    <script src="js/modules/agenda-feuille.js?v=32"></script>
+    <script src="js/modules/agenda-reglages.js?v=32"></script>
+    <script src="js/modules/agenda-notifs.js?v=32"></script>
+    <script src="js/modules/accueil-cartes.js?v=32"></script>
+    <script src="js/modules/courses.js?v=32"></script>
+    <script src="js/modules/envies.js?v=32"></script>
+    <script src="js/modules/moi.js?v=32"></script>
+    <script src="js/app.js?v=32"></script>
   </body>
 </html>

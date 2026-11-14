@@ -738,3 +738,69 @@ svg.icone {
   padding: 6px 8px;
   text-align: center;
 }
+
+/* ---------- v31 : modifier une envie ---------- */
+
+/* Les zones qu'on touche pour modifier : on garde l'apparence du texte */
+.zone-modifier {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+button.envie-achat-haut {
+  width: 100%;
+  min-height: 32px;
+}
+
+#feuille-envie .choix-coeurs {
+  margin-bottom: 12px;
+}
+
+/* ---------- v32 : Envies › À vivre ---------- */
+
+#panneau-vivre .choix {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#pioche-vivre .bouton-large {
+  margin-top: 16px;
+}
+
+.resultat-pioche {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 18px;
+  background: var(--fond);
+  text-align: center;
+}
+
+.resultat-pioche-nom {
+  margin: 0 0 6px;
+  font-family: var(--police-titre);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.resultat-pioche .envie-boutons {
+  justify-content: center;
+}
+
+#bocal-souvenirs {
+  margin-top: 16px;
+}
+
+#liste-souvenirs {
+  text-align: left;
+  margin-top: 8px;
+}
+
+.accueil-vivre-boutons {
+  margin-top: 8px;
+}

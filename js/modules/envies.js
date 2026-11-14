@@ -1,6 +1,6 @@
 // =====================================================
-// Module Envies : les onglets Cadeaux et À acheter
-// (À acheter est à la fin du fichier : partie 10)
+// Module Envies : les onglets Cadeaux, À acheter et À vivre
+// (À acheter : partie 10 ; modifier : partie 11 ; À vivre : partie 12)
 //   1. le tiroir « envies »
 //   2. les onglets
 //   3. les dates : anniversaires (tirés de l'Agenda) et Noël
@@ -259,8 +259,11 @@ function creerLigneIdee(idee, avecOffert) {
   const ligne = document.createElement("div");
   ligne.classList.add("ligne-idee");
 
-  const texte = document.createElement("span");
-  texte.classList.add("ligne-occasion-texte");
+  // Toucher l'idée : la modifier
+  const texte = document.createElement("button");
+  texte.type = "button";
+  texte.classList.add("ligne-occasion-texte", "zone-modifier");
+  texte.addEventListener("click", () => ouvrirFeuilleEnvie(idee));
   const nom = document.createElement("span");
   nom.textContent = idee.nom;
   texte.appendChild(nom);
@@ -658,6 +661,7 @@ caseNoel.addEventListener("change", () => {
 
 function afficherEnvies() {
   afficherAchats();
+  afficherVivre();
   afficherOccasions();
   afficherPersonnes();
   afficherPourMoi();
@@ -744,8 +748,11 @@ function creerCarteAchat(envie) {
   const carte = document.createElement("div");
   carte.classList.add("envie-achat");
 
-  const haut = document.createElement("div");
-  haut.classList.add("envie-achat-haut");
+  // Toucher le nom : modifier l'envie
+  const haut = document.createElement("button");
+  haut.type = "button";
+  haut.classList.add("envie-achat-haut", "zone-modifier");
+  haut.addEventListener("click", () => ouvrirFeuilleEnvie(envie));
   const nom = document.createElement("strong");
   nom.textContent = envie.nom;
   haut.append(nom, creerCoeurs(envie.coeurs));
@@ -978,6 +985,72 @@ document.getElementById("achat-depense-oui").addEventListener("click", () => {
   document.getElementById("depense-note").value = achatDepense.nom;
 });
 
+// ---------- 11. Modifier une envie ou une idée de cadeau ----------
+
+const feuilleEnvie = document.getElementById("feuille-envie");
+let envieEnModification = null;
+let ficheARouvrir = null; // si on venait de la fiche d'un proche, on y retourne
+
+function ouvrirFeuilleEnvie(envie) {
+  envieEnModification = envie.id;
+  // On vient de la fiche d'un proche : on la cache le temps de modifier
+  ficheARouvrir = feuillePersonne.hidden ? null : personneOuverte;
+  feuillePersonne.hidden = true;
+
+  const achat = envie.type === "achat";
+  const pourUnProche = envie.type === "cadeau" && envie.pourQui !== "moi";
+  document.getElementById("envie-nom").value = envie.nom;
+  document.getElementById("envie-prix").value = envie.prix || "";
+  document.getElementById("envie-prix").closest("label").hidden = envie.type === "vivre";
+  document.getElementById("bloc-envie-coeurs").hidden = !achat;
+  document.querySelectorAll('input[name="envie-coeurs"]').forEach((bouton) => {
+    bouton.checked = Number(bouton.value) === (envie.coeurs || 1);
+  });
+  document.getElementById("bloc-envie-occasion").hidden = !pourUnProche;
+  document.getElementById("envie-occasion").value = envie.occasion || "autre";
+  document.getElementById("bloc-envie-note").hidden = !achat && envie.type !== "vivre";
+  document.getElementById("bloc-envie-lien").hidden = !achat;
+  document.getElementById("envie-note").value = envie.note || "";
+  document.getElementById("envie-lien").value = envie.lien || "";
+
+  feuilleEnvie.hidden = false;
+  voile.hidden = false;
+}
+
+function fermerFeuilleEnvie() {
+  feuilleEnvie.hidden = true;
+  voile.hidden = true;
+  envieEnModification = null;
+  if (ficheARouvrir) ouvrirFichePersonne(ficheARouvrir);
+  ficheARouvrir = null;
+}
+
+document.getElementById("fermer-envie").addEventListener("click", fermerFeuilleEnvie);
+voile.addEventListener("click", () => {
+  if (!feuilleEnvie.hidden) fermerFeuilleEnvie();
+});
+
+document.getElementById("form-envie").addEventListener("submit", (evenement) => {
+  evenement.preventDefault();
+  const envie = envies.envies.find((e) => e.id === envieEnModification);
+  if (!envie) return;
+  envie.nom = document.getElementById("envie-nom").value.trim() || envie.nom;
+  envie.prix = Number(document.getElementById("envie-prix").value.replace(/\s/g, "")) || 0;
+  if (envie.type === "achat") {
+    envie.coeurs = Number(document.querySelector('input[name="envie-coeurs"]:checked').value);
+    envie.note = document.getElementById("envie-note").value.trim();
+    envie.lien = document.getElementById("envie-lien").value.trim();
+  } else if (envie.type === "vivre") {
+    envie.note = document.getElementById("envie-note").value.trim();
+  } else if (envie.pourQui !== "moi") {
+    envie.occasion = document.getElementById("envie-occasion").value;
+  }
+  sauvegarderEnvies();
+  afficherEnvies();
+  fermerFeuilleEnvie();
+  montrerPetitMessage("C'est modifié 🌱");
+});
+
 // Les réglages du délai (dans Moi › Réglages des envies)
 const caseDelai = document.getElementById("reglage-delai");
 const champsPaliers = ["seuil1", "jours1", "seuil2", "jours2"];
@@ -997,6 +1070,309 @@ champsPaliers.forEach((cle) => {
     champ.value = envies.reglages.delai[cle];
     sauvegarderEnvies();
   });
+});
+
+// ---------- 12. À vivre ----------
+// Une idée à vivre : { id, type: "vivre", nom, note, moments: [...], avecQui: [...], mois,
+//   statut: "notee" | "vecue" | "partie", dateAjout, triee, planifieeLe, vecueLe }
+// moments : "heure", "weekend", "vacances", "pluie", "beau" ; avecQui : "seule", "couple", "amis", "famille"
+// mois : "" (n'importe quand) ou "07" (juillet)
+
+const NOMS_MOMENTS = {
+  heure: "1 h",
+  weekend: "week-end",
+  vacances: "vacances",
+  pluie: "pluie",
+  beau: "beau temps",
+  seule: "seule",
+  couple: "en couple",
+  amis: "entre amis",
+  famille: "en famille",
+};
+
+function casesCochees(nom) {
+  return [...document.querySelectorAll(`input[name="${nom}"]:checked`)].map((c) => c.value);
+}
+
+function ideesAVivre() {
+  return envies.envies.filter((e) => e.type === "vivre" && e.statut === "notee");
+}
+
+// Une idée correspond-elle à ce qu'on a choisi ?
+// Ce que l'idée ne précise pas ne l'empêche jamais d'être proposée.
+function correspond(idee, moments, avecQui) {
+  const ok = (siIdee, choisis) =>
+    siIdee.length === 0 || choisis.length === 0 || siIdee.some((x) => choisis.includes(x));
+  const moisOk = !idee.mois || idee.mois === aujourdhuiEnTexte().slice(5, 7);
+  return ok(idee.moments, moments) && ok(idee.avecQui, avecQui) && moisOk;
+}
+
+function piocherAuHasard(liste, sauf) {
+  const choix = liste.length > 1 ? liste.filter((e) => e.id !== sauf) : liste;
+  return choix[Math.floor(Math.random() * choix.length)] || null;
+}
+
+// Les petites étiquettes d'une idée : « week-end · en couple · en juillet »
+function etiquettesIdee(idee) {
+  const morceaux = [...idee.moments, ...idee.avecQui].map((x) => NOMS_MOMENTS[x]);
+  if (idee.mois) {
+    morceaux.push(`en ${texteEnDate(`2000-${idee.mois}-01`).toLocaleDateString("fr-FR", { month: "long" })}`);
+  }
+  return morceaux.join(" · ");
+}
+
+// « Le planifier » : la feuille de l'Agenda, avec le titre et le prochain samedi
+function planifierIdee(idee) {
+  ouvrirFeuilleElement(null, { type: "evenement", date: prochainWeekend() }); // agenda-feuille.js
+  document.getElementById("element-titre").value = idee.nom;
+  const e = envies.envies.find((x) => x.id === idee.id);
+  e.planifieeLe = aujourdhuiEnTexte();
+  sauvegarderEnvies();
+  afficherEnvies();
+}
+
+// « C'est vécu ! » : l'idée part dans le bocal à souvenirs
+function vivre(idee) {
+  agirAvecAnnuler({
+    tiroir: envies,
+    message: "Un joli souvenir de plus 🌱",
+    action: () => {
+      const e = envies.envies.find((x) => x.id === idee.id);
+      e.statut = "vecue";
+      e.vecueLe = aujourdhuiEnTexte();
+    },
+    apres: () => {
+      sauvegarderEnvies();
+      afficherEnvies();
+    },
+  });
+}
+
+function creerLigneVivre(idee) {
+  const carte = document.createElement("div");
+  carte.classList.add("envie-achat");
+
+  const haut = document.createElement("button");
+  haut.type = "button";
+  haut.classList.add("envie-achat-haut", "zone-modifier");
+  haut.addEventListener("click", () => ouvrirFeuilleEnvie(idee));
+  const nom = document.createElement("strong");
+  nom.textContent = idee.nom;
+  haut.appendChild(nom);
+  carte.appendChild(haut);
+
+  const infos = [etiquettesIdee(idee), idee.note].filter(Boolean);
+  if (idee.planifieeLe) infos.push("dans ton agenda");
+  if (infos.length) {
+    const detail = document.createElement("p");
+    detail.classList.add("sous-titre", "petit");
+    detail.textContent = infos.join(" · ");
+    carte.appendChild(detail);
+  }
+
+  const boutons = document.createElement("div");
+  boutons.classList.add("envie-boutons");
+  boutons.append(
+    creerBoutonEnvie("Le planifier", () => planifierIdee(idee)),
+    creerBoutonEnvie("C'est vécu !", () => vivre(idee)),
+  );
+  carte.appendChild(boutons);
+
+  const supprimer = document.createElement("button");
+  supprimer.type = "button";
+  supprimer.classList.add("bouton-supprimer", "envie-supprimer");
+  supprimer.setAttribute("aria-label", `Retirer ${idee.nom}`);
+  supprimer.appendChild(creerIcone("x"));
+  supprimer.addEventListener("click", () => {
+    agirAvecAnnuler({
+      tiroir: envies,
+      message: `« ${idee.nom} » retirée`,
+      action: () => {
+        envies.envies = envies.envies.filter((e) => e.id !== idee.id);
+      },
+      apres: () => {
+        sauvegarderEnvies();
+        afficherEnvies();
+      },
+    });
+  });
+  carte.appendChild(supprimer);
+  return carte;
+}
+
+function afficherVivre() {
+  const zone = document.getElementById("liste-vivre");
+  zone.replaceChildren();
+  const idees = ideesAVivre();
+  if (idees.length === 0) {
+    zone.appendChild(
+      creerMessageVide("Note ici les sorties et les petites aventures qui te font envie, pour qu'elles ne dorment plus."),
+    );
+  }
+  idees.forEach((idee) => zone.appendChild(creerLigneVivre(idee)));
+
+  // Le petit tri : une seule idée qui dort depuis plus de 3 mois remonte
+  const dort = document.getElementById("idee-qui-dort");
+  dort.replaceChildren();
+  const vieille = idees.find((e) => !e.triee && joursAvant(e.dateAjout) <= -90);
+  if (vieille) {
+    const carte = document.createElement("article");
+    carte.classList.add("carte", "carte-fin-courses");
+    const texte = document.createElement("p");
+    texte.textContent = `« ${vieille.nom} » attend depuis un moment. Toujours envie ?`;
+    const boutons = document.createElement("div");
+    boutons.classList.add("form-categorie-boutons");
+    const partir = document.createElement("button");
+    partir.type = "button";
+    partir.classList.add("lien");
+    partir.textContent = "Laisser partir";
+    partir.addEventListener("click", () => {
+      agirAvecAnnuler({
+        tiroir: envies,
+        message: "Elle est partie, en douceur 🌱",
+        action: () => {
+          envies.envies.find((e) => e.id === vieille.id).statut = "partie";
+        },
+        apres: () => {
+          sauvegarderEnvies();
+          afficherEnvies();
+        },
+      });
+    });
+    const garder = document.createElement("button");
+    garder.type = "button";
+    garder.classList.add("bouton");
+    garder.textContent = "Garder";
+    garder.addEventListener("click", () => {
+      envies.envies.find((e) => e.id === vieille.id).triee = true; // on ne la redemande plus
+      sauvegarderEnvies();
+      afficherEnvies();
+    });
+    boutons.append(partir, garder);
+    carte.append(texte, boutons);
+    dort.appendChild(carte);
+  }
+
+  // Le bocal à souvenirs
+  const vecues = envies.envies
+    .filter((e) => e.type === "vivre" && e.statut === "vecue")
+    .sort((a, b) => b.vecueLe.localeCompare(a.vecueLe));
+  document.getElementById("nombre-souvenirs").textContent = vecues.length;
+  const souvenirs = document.getElementById("liste-souvenirs");
+  souvenirs.replaceChildren();
+  vecues.forEach((e) => {
+    const ligne = document.createElement("p");
+    ligne.classList.add("sous-titre", "petit");
+    ligne.textContent = `${e.nom} · ${formaterDate(e.vecueLe)}`;
+    souvenirs.appendChild(ligne);
+  });
+
+  afficherCarteVivre();
+}
+
+// Noter une idée
+document.getElementById("form-vivre").addEventListener("submit", (evenement) => {
+  evenement.preventDefault();
+  const nom = document.getElementById("vivre-nom").value.trim();
+  if (!nom) return;
+  envies.envies.push({
+    id: String(nouvelId()),
+    type: "vivre",
+    nom: nom,
+    note: document.getElementById("vivre-note").value.trim(),
+    moments: casesCochees("vivre-moment"),
+    avecQui: casesCochees("vivre-qui"),
+    mois: document.getElementById("vivre-mois").value,
+    statut: "notee",
+    dateAjout: aujourdhuiEnTexte(),
+    triee: false,
+    planifieeLe: "",
+    vecueLe: "",
+  });
+  sauvegarderEnvies();
+  evenement.target.reset();
+  evenement.target.querySelectorAll("details").forEach((d) => (d.open = false));
+  afficherEnvies();
+  montrerPetitMessage("C'est noté 🌱");
+});
+
+// La pioche
+let ideeTireeVivre = null;
+
+function afficherPioche() {
+  const zone = document.getElementById("resultat-pioche");
+  zone.replaceChildren();
+  const possibles = ideesAVivre().filter((e) =>
+    correspond(e, casesCochees("pioche-moment"), casesCochees("pioche-qui")),
+  );
+  ideeTireeVivre = piocherAuHasard(possibles, ideeTireeVivre ? ideeTireeVivre.id : null);
+  if (!ideeTireeVivre) {
+    zone.appendChild(creerMessageVide("Rien ne correspond pour l'instant. Et si tu notais une nouvelle idée ?"));
+    return;
+  }
+  const carte = document.createElement("div");
+  carte.classList.add("resultat-pioche");
+  const nom = document.createElement("p");
+  nom.classList.add("resultat-pioche-nom");
+  nom.textContent = ideeTireeVivre.nom;
+  const boutons = document.createElement("div");
+  boutons.classList.add("envie-boutons");
+  const idee = ideeTireeVivre;
+  boutons.append(
+    creerBoutonEnvie("Le planifier", () => planifierIdee(idee), true),
+    creerBoutonEnvie("Une autre", afficherPioche),
+  );
+  carte.append(nom, boutons);
+  zone.appendChild(carte);
+}
+
+document.getElementById("piocher-vivre").addEventListener("click", afficherPioche);
+
+// ---------- La carte « Et si… » de l'accueil ----------
+// Le vendredi après-midi, le samedi et le dimanche : si le jour du week-end
+// à venir est libre dans l'agenda, on propose une idée (une seule, discrète).
+
+let ideeAccueilVivre = null;
+
+function jourLibreDuWeekend() {
+  const maintenant = new Date();
+  const jour = maintenant.getDay(); // 5 = vendredi, 6 = samedi, 0 = dimanche
+  const aujourdhui = aujourdhuiEnTexte();
+  let candidats = [];
+  if (jour === 5 && maintenant.getHours() >= 12) candidats = [ajouterJours(aujourdhui, 1), ajouterJours(aujourdhui, 2)];
+  if (jour === 6) candidats = [aujourdhui, ajouterJours(aujourdhui, 1)];
+  if (jour === 0) candidats = [aujourdhui];
+  return candidats.find((date) => elementsDuJour(date).length === 0) || null;
+}
+
+function afficherCarteVivre() {
+  const carte = document.querySelector('.carte-accueil[data-carte="vivre"]');
+  const date = jourLibreDuWeekend();
+  // Pas cette fois : on ne la remontre pas avant le week-end suivant
+  const masquee = envies.reglages.vivreMasqueJusqua && envies.reglages.vivreMasqueJusqua >= aujourdhuiEnTexte();
+  const possibles = ideesAVivre().filter((e) => correspond(e, ["weekend"], []));
+  if (!date || masquee || possibles.length === 0) {
+    carte.dataset.vide = true;
+  } else {
+    if (!ideeAccueilVivre || !possibles.includes(ideeAccueilVivre)) {
+      ideeAccueilVivre = piocherAuHasard(possibles, null);
+    }
+    const quel = texteEnDate(date).toLocaleDateString("fr-FR", { weekday: "long" });
+    document.getElementById("accueil-vivre-texte").textContent =
+      `Ton ${quel} est libre. Et si : ${ideeAccueilVivre.nom} ?`;
+    carte.dataset.vide = false;
+  }
+  placerCartesAccueil(); // accueil-cartes.js
+}
+
+document.getElementById("accueil-vivre-oui").addEventListener("click", () => {
+  if (ideeAccueilVivre) planifierIdee(ideeAccueilVivre);
+});
+document.getElementById("accueil-vivre-non").addEventListener("click", () => {
+  // Masquée jusqu'à la fin de ce week-end
+  envies.reglages.vivreMasqueJusqua = ajouterJours(aujourdhuiEnTexte(), 2);
+  sauvegarderEnvies();
+  afficherCarteVivre();
 });
 
 afficherEnvies();
