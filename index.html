@@ -20,12 +20,12 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=32" />
-    <link rel="stylesheet" href="css/navigation.css?v=32" />
-    <link rel="stylesheet" href="css/budget.css?v=32" />
-    <link rel="stylesheet" href="css/agenda.css?v=32" />
-    <link rel="stylesheet" href="css/confort.css?v=32" />
-    <link rel="stylesheet" href="css/ordinateur.css?v=32" />
+    <link rel="stylesheet" href="css/base.css?v=33" />
+    <link rel="stylesheet" href="css/navigation.css?v=33" />
+    <link rel="stylesheet" href="css/budget.css?v=33" />
+    <link rel="stylesheet" href="css/agenda.css?v=33" />
+    <link rel="stylesheet" href="css/confort.css?v=33" />
+    <link rel="stylesheet" href="css/ordinateur.css?v=33" />
   </head>
 
   <body>
@@ -479,6 +479,40 @@
         <button type="button" class="lien-reglages" data-reglages="carte-reglages-envies">
           <i data-lucide="settings-2"></i> Carte de l'accueil, Noël et délai de réflexion : dans Moi › Réglages des envies
         </button>
+      </section>
+
+      <!-- ===================== Atelier découverte ===================== -->
+      <section id="atelier" class="ecran" data-parent="moi">
+        <button class="retour" data-ecran="moi">
+          <i data-lucide="chevron-left"></i> Moi
+        </button>
+        <h1>Atelier découverte</h1>
+        <p class="sous-titre">Essayer, c'est déjà réussir. « Pas pour moi » compte aussi.</p>
+
+        <!-- Le bocal à idées : noter une idée en 5 secondes -->
+        <form id="form-atelier" class="carte form-article">
+          <h2>Le bocal à idées</h2>
+          <div class="form-article-ligne">
+            <input id="atelier-titre" class="champ-note" type="text" placeholder="Ex. : Crochet, aquarelle, poterie…" maxlength="60" required />
+            <button type="submit" class="bouton-rond bouton-rond-plein" aria-label="Ajouter l'idée"><i data-lucide="plus"></i></button>
+          </div>
+        </form>
+
+        <!-- La pioche -->
+        <article class="carte">
+          <button type="button" id="piocher-atelier" class="bouton bouton-large">Pioche-moi une idée</button>
+          <div id="resultat-atelier"></div>
+        </article>
+
+        <!-- Les idées, par étape (atelier.js) -->
+        <div id="liste-atelier"></div>
+
+        <!-- Ce que j'ai déjà essayé -->
+        <article class="carte bocal-envie">
+          <p class="sous-titre petit">J'ai déjà essayé</p>
+          <p id="nombre-essais" class="bocal-envie-chiffre">0</p>
+          <p id="detail-essais" class="sous-titre petit">nouvelles choses</p>
+        </article>
       </section>
 
       <!-- Module Budget (pas d'onglet à lui : il s'allume sous Foyer) -->
@@ -1113,6 +1147,18 @@
       <section id="moi" class="ecran">
         <h1>Moi</h1>
 
+        <!-- Mes espaces (les modules « à moi ») -->
+        <button class="carte carte-lien" data-ecran="atelier">
+          <span class="carte-lien-icone"><i data-lucide="palette"></i></span>
+          <span class="carte-lien-texte">
+            <strong>Atelier découverte</strong>
+            <span id="moi-atelier-resume" class="sous-titre">Les loisirs que tu as envie d'essayer</span>
+          </span>
+          <i data-lucide="chevron-right"></i>
+        </button>
+
+        <h2 class="titre-section">Réglages</h2>
+
         <!-- Mon prénom -->
         <article class="carte">
           <h2>Moi</h2>
@@ -1592,6 +1638,51 @@
       </div>
     </div>
 
+    <!-- La fiche d'une idée de l'atelier (atelier.js) -->
+    <div id="feuille-atelier" class="feuille" hidden>
+      <div class="feuille-haut">
+        <h2 id="fiche-atelier-titre">Crochet</h2>
+        <button type="button" id="fermer-atelier" class="bouton-supprimer" aria-label="Fermer"><i data-lucide="x"></i></button>
+      </div>
+      <p id="fiche-atelier-etat" class="sous-titre"></p>
+
+      <label class="champ">
+        Le premier petit pas (15 minutes maximum)
+        <input id="fiche-premier-pas" class="champ-note" type="text" maxlength="80" placeholder="Ex. : regarder un tuto, acheter une pelote…" />
+      </label>
+      <label id="bloc-pas-fait" class="reglage-case">
+        <input type="checkbox" id="fiche-pas-fait" />
+        Premier petit pas fait
+      </label>
+
+      <p class="etiquette">Où j'en suis</p>
+      <div class="choix" id="fiche-statuts">
+        <label class="pastille"><input type="radio" name="statut-atelier" value="idee" /> Une idée</label>
+        <label class="pastille"><input type="radio" name="statut-atelier" value="essaye" /> J'essaie</label>
+        <label class="pastille"><input type="radio" name="statut-atelier" value="adopte" /> Adopté</label>
+        <label class="pastille"><input type="radio" name="statut-atelier" value="pas_pour_moi" /> Pas pour moi</label>
+      </div>
+
+      <label class="champ">
+        Ce que j'en pense (facultatif)
+        <input id="fiche-note-atelier" class="champ-note" type="text" maxlength="120" />
+      </label>
+
+      <p class="etiquette">Le matériel</p>
+      <div id="fiche-materiel"></div>
+      <form id="form-materiel" class="form-idee">
+        <input id="materiel-nom" class="champ-note" type="text" placeholder="Ex. : crochet 4 mm" maxlength="60" required />
+        <input id="materiel-prix" class="champ-note" type="text" inputmode="numeric" placeholder="Prix (F)" maxlength="9" aria-label="Prix" />
+        <button type="submit" class="bouton-rond bouton-rond-plein" aria-label="Ajouter au matériel"><i data-lucide="plus"></i></button>
+      </form>
+      <p class="sous-titre petit">Le matériel part dans Envies › À acheter.</p>
+
+      <div class="form-categorie-boutons personne-actions">
+        <button type="button" id="supprimer-atelier" class="lien lien-danger">Retirer cette idée</button>
+        <button type="button" id="planifier-atelier" class="bouton">Planifier un moment</button>
+      </div>
+    </div>
+
     <!-- Modifier une envie ou une idée de cadeau (envies.js) -->
     <div id="feuille-envie" class="feuille" hidden>
       <div class="feuille-haut">
@@ -1789,29 +1880,30 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=32"></script>
-    <script src="js/outils/dates.js?v=32"></script>
-    <script src="js/outils/annuler.js?v=32"></script>
-    <script src="js/outils/icones.js?v=32"></script>
-    <script src="js/modules/navigation.js?v=32"></script>
-    <script src="js/modules/infos.js?v=32"></script>
-    <script src="js/modules/accueil.js?v=32"></script>
-    <script src="js/modules/budget.js?v=32"></script>
-    <script src="js/modules/budget-repartition.js?v=32"></script>
-    <script src="js/modules/budget-mois.js?v=32"></script>
-    <script src="js/modules/budget-raccourcis.js?v=32"></script>
-    <script src="js/modules/budget-epargne.js?v=32"></script>
-    <script src="js/modules/budget-point.js?v=32"></script>
-    <script src="js/donnees/sauvegarde.js?v=32"></script>
-    <script src="js/modules/agenda.js?v=32"></script>
-    <script src="js/modules/agenda-vues.js?v=32"></script>
-    <script src="js/modules/agenda-feuille.js?v=32"></script>
-    <script src="js/modules/agenda-reglages.js?v=32"></script>
-    <script src="js/modules/agenda-notifs.js?v=32"></script>
-    <script src="js/modules/accueil-cartes.js?v=32"></script>
-    <script src="js/modules/courses.js?v=32"></script>
-    <script src="js/modules/envies.js?v=32"></script>
-    <script src="js/modules/moi.js?v=32"></script>
-    <script src="js/app.js?v=32"></script>
+    <script src="js/donnees/stockage.js?v=33"></script>
+    <script src="js/outils/dates.js?v=33"></script>
+    <script src="js/outils/annuler.js?v=33"></script>
+    <script src="js/outils/icones.js?v=33"></script>
+    <script src="js/modules/navigation.js?v=33"></script>
+    <script src="js/modules/infos.js?v=33"></script>
+    <script src="js/modules/accueil.js?v=33"></script>
+    <script src="js/modules/budget.js?v=33"></script>
+    <script src="js/modules/budget-repartition.js?v=33"></script>
+    <script src="js/modules/budget-mois.js?v=33"></script>
+    <script src="js/modules/budget-raccourcis.js?v=33"></script>
+    <script src="js/modules/budget-epargne.js?v=33"></script>
+    <script src="js/modules/budget-point.js?v=33"></script>
+    <script src="js/donnees/sauvegarde.js?v=33"></script>
+    <script src="js/modules/agenda.js?v=33"></script>
+    <script src="js/modules/agenda-vues.js?v=33"></script>
+    <script src="js/modules/agenda-feuille.js?v=33"></script>
+    <script src="js/modules/agenda-reglages.js?v=33"></script>
+    <script src="js/modules/agenda-notifs.js?v=33"></script>
+    <script src="js/modules/accueil-cartes.js?v=33"></script>
+    <script src="js/modules/courses.js?v=33"></script>
+    <script src="js/modules/envies.js?v=33"></script>
+    <script src="js/modules/atelier.js?v=33"></script>
+    <script src="js/modules/moi.js?v=33"></script>
+    <script src="js/app.js?v=33"></script>
   </body>
 </html>

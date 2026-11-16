@@ -804,3 +804,48 @@ button.envie-achat-haut {
 .accueil-vivre-boutons {
   margin-top: 8px;
 }
+
+/* ---------- v33 : Atelier découverte ---------- */
+
+/* Le titre « Réglages » dans Moi, sous les espaces */
+.titre-section {
+  margin: 28px 0 0;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texte-doux);
+}
+
+#feuille-atelier .choix {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+#feuille-atelier .reglage-case {
+  margin: 4px 0 12px;
+}
+
+#resultat-atelier .resultat-pioche .bouton {
+  margin-top: 10px;
+}
+
+@media (min-width: 900px) {
+  #atelier.actif {
+    max-width: 640px;
+  }
+
+  #atelier .carte {
+    margin-top: 16px;
+  }
+}
+
+#feuille-atelier .champ {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  margin-bottom: 8px;
+}

@@ -1175,6 +1175,7 @@ function creerLigneVivre(idee) {
   boutons.append(
     creerBoutonEnvie("Le planifier", () => planifierIdee(idee)),
     creerBoutonEnvie("C'est vécu !", () => vivre(idee)),
+    creerBoutonEnvie("Un loisir à tester", () => versAtelier(idee)), // atelier.js
   );
   carte.appendChild(boutons);
 
