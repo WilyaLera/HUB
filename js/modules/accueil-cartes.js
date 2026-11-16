@@ -37,6 +37,8 @@ function placerCartesAccueil() {
     let cachee = reglagesAccueil.masquees.includes(code);
     if (code === "demain" && !leSoir) cachee = true; // Demain : seulement le soir
     if (carte.dataset.vide === "true") cachee = true; // une carte qui n'a rien à dire (ex. Cadeaux)
+    // Journée difficile : l'accueil ne montre que la carte douceur (soin.js)
+    if (typeof journeeDifficile === "function" && journeeDifficile()) cachee = true;
     carte.hidden = cachee;
   });
 }

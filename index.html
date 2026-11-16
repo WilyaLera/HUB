@@ -17,15 +17,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Kalam:wght@400;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=34" />
-    <link rel="stylesheet" href="css/navigation.css?v=34" />
-    <link rel="stylesheet" href="css/budget.css?v=34" />
-    <link rel="stylesheet" href="css/agenda.css?v=34" />
-    <link rel="stylesheet" href="css/confort.css?v=34" />
-    <link rel="stylesheet" href="css/ordinateur.css?v=34" />
+    <link rel="stylesheet" href="css/base.css?v=35" />
+    <link rel="stylesheet" href="css/navigation.css?v=35" />
+    <link rel="stylesheet" href="css/budget.css?v=35" />
+    <link rel="stylesheet" href="css/agenda.css?v=35" />
+    <link rel="stylesheet" href="css/confort.css?v=35" />
+    <link rel="stylesheet" href="css/ordinateur.css?v=35" />
   </head>
 
   <body>
@@ -40,11 +40,25 @@
               <i data-lucide="plant-pot"></i>
             </h1>
           </div>
+          <div class="entete-boutons">
+          <!-- Journée difficile : l'accueil s'allège (soin.js) -->
+          <button type="button" id="ouvrir-journee" class="bouton-rond" aria-label="Journée difficile ?">
+            <i data-lucide="cloud-sun"></i>
+          </button>
           <!-- Choisir les cartes de l'accueil et leur ordre (accueil-cartes.js) -->
           <button type="button" id="modifier-accueil" class="bouton-rond" aria-label="Modifier l'accueil">
             <i data-lucide="sliders-horizontal"></i>
           </button>
+          </div>
         </div>
+
+        <!-- Le mode « Journée difficile » : quand il est là, l'accueil ne montre que lui -->
+        <article id="carte-douceur" class="carte carte-douceur" hidden>
+          <h2 id="douceur-titre">Aujourd'hui, en douceur</h2>
+          <p id="douceur-message"></p>
+          <div id="douceur-contenu"></div>
+          <button type="button" id="douceur-fin" class="lien lien-petit">Ça va mieux, revenir à mon accueil</button>
+        </article>
 
         <!-- Carte Aujourd'hui -->
         <article class="carte carte-accueil" data-carte="aujourdhui">
@@ -487,32 +501,86 @@
           <i data-lucide="chevron-left"></i> Moi
         </button>
         <h1>Atelier découverte</h1>
-        <p class="sous-titre">Essayer, c'est déjà réussir. « Pas pour moi » compte aussi.</p>
+        <p class="sous-titre">Tu as le droit d'essayer, d'aimer, de laisser tomber ou d'y revenir.</p>
 
-        <!-- Le bocal à idées : noter une idée en 5 secondes -->
-        <form id="form-atelier" class="carte form-article">
-          <h2>Le bocal à idées</h2>
-          <div class="form-article-ligne">
-            <input id="atelier-titre" class="champ-note" type="text" placeholder="Ex. : Crochet, aquarelle, poterie…" maxlength="60" required />
-            <button type="submit" class="bouton-rond bouton-rond-plein" aria-label="Ajouter l'idée"><i data-lucide="plus"></i></button>
-          </div>
-        </form>
+        <!-- Filtrer : caché tant qu'on ne le demande pas -->
+        <div class="barre-filtre">
+          <button type="button" id="ouvrir-filtre-atelier" class="bouton-demain">
+            <i data-lucide="sliders-horizontal"></i> Filtrer
+          </button>
+          <span id="resume-filtre-atelier" class="sous-titre petit"></span>
+          <button type="button" id="effacer-filtre-atelier" class="lien lien-petit" hidden>Effacer</button>
+        </div>
+        <div id="panneau-filtre-atelier" class="carte" hidden>
+          <p class="etiquette">Étape</p>
+          <div id="filtre-etapes" class="choix"></div>
+          <p class="etiquette">Type</p>
+          <div id="filtre-types" class="choix"></div>
+        </div>
 
-        <!-- La pioche -->
-        <article class="carte">
-          <button type="button" id="piocher-atelier" class="bouton bouton-large">Pioche-moi une idée</button>
-          <div id="resultat-atelier"></div>
-        </article>
+        <!-- Le meuble à tiroirs : un tiroir par loisir (atelier.js) -->
+        <div id="meuble-atelier" class="meuble"></div>
 
-        <!-- Les idées, par étape (atelier.js) -->
-        <div id="liste-atelier"></div>
+        <!-- La roue des loisirs (repliée) -->
+        <details id="roue-atelier" class="carte carte-repliable">
+          <summary><h2>La roue des loisirs</h2></summary>
+          <p class="sous-titre petit">Elle tire un loisir parmi tes envies d'essayer.</p>
+          <button type="button" id="tourner-roue" class="bouton bouton-large">Faire tourner la roue</button>
+          <div id="resultat-roue"></div>
+        </details>
+      </section>
 
-        <!-- Ce que j'ai déjà essayé -->
+      <!-- ===================== Prendre soin de moi ===================== -->
+      <section id="soin" class="ecran" data-parent="moi">
+        <button class="retour" data-ecran="moi">
+          <i data-lucide="chevron-left"></i> Moi
+        </button>
+        <h1>Mon coin douceur</h1>
+        <p class="sous-titre">Un menu, pas une liste d'obligations : pioche ce qui te fait envie aujourd'hui.</p>
+
         <article class="carte bocal-envie">
-          <p class="sous-titre petit">J'ai déjà essayé</p>
-          <p id="nombre-essais" class="bocal-envie-chiffre">0</p>
-          <p id="detail-essais" class="sous-titre petit">nouvelles choses</p>
+          <p id="nombre-moments" class="bocal-envie-chiffre">0</p>
+          <p id="detail-moments" class="sous-titre petit">douceurs cette semaine</p>
         </article>
+
+        <article class="carte">
+          <h2>La boîte à douceurs</h2>
+          <p class="sous-titre petit">J'ai combien de temps ?</p>
+          <div class="choix-temps">
+            <button type="button" class="pastille-temps" data-temps="5">5 min</button>
+            <button type="button" class="pastille-temps" data-temps="15">15 min</button>
+            <button type="button" class="pastille-temps" data-temps="30">Plus</button>
+          </div>
+          <div id="resultat-boite"></div>
+        </article>
+
+        <details class="carte carte-repliable">
+          <summary><h2>Mon menu de douceurs</h2></summary>
+          <div id="menu-soin"></div>
+          <details class="zone-modifier">
+            <summary>Ajouter une douceur</summary>
+            <form id="form-soin" class="form-soin">
+              <input id="soin-nom" class="champ-note" type="text" placeholder="Ex. : un bain, un carré de chocolat" maxlength="50" required />
+              <div class="form-soin-choix">
+                <select id="soin-famille" class="champ-note" aria-label="Famille">
+                  <option value="pause">Pause</option>
+                  <option value="proches">Proches</option>
+                  <option value="ecouter">Écouter</option>
+                  <option value="creer">Créer</option>
+                  <option value="cocon">Cocon</option>
+                  <option value="dehors">Dehors</option>
+                  <option value="bouger">Bouger</option>
+                </select>
+                <select id="soin-duree" class="champ-note" aria-label="Durée">
+                  <option value="5">5 min</option>
+                  <option value="15">15 min</option>
+                  <option value="30">Plus</option>
+                </select>
+              </div>
+              <button type="submit" class="bouton bouton-large">Ajouter à mon menu</button>
+            </form>
+          </details>
+        </details>
       </section>
 
       <!-- Module Budget (pas d'onglet à lui : il s'allume sous Foyer) -->
@@ -1154,6 +1222,15 @@
         </div>
 
         <!-- Mes espaces (les modules « à moi ») -->
+        <button class="carte carte-lien" data-ecran="soin">
+          <span class="carte-lien-icone"><i data-lucide="flower-2"></i></span>
+          <span class="carte-lien-texte">
+            <strong>Mon coin douceur</strong>
+            <span id="moi-soin-resume" class="sous-titre">Un petit menu de douceurs</span>
+          </span>
+          <i data-lucide="chevron-right"></i>
+        </button>
+
         <button class="carte carte-lien" data-ecran="atelier">
           <span class="carte-lien-icone"><i data-lucide="palette"></i></span>
           <span class="carte-lien-texte">
@@ -1399,6 +1476,26 @@
           </div>
         </details>
 
+        <!-- Les réglages de l'atelier (atelier.js) -->
+        <details id="carte-reglages-atelier" class="carte carte-repliable">
+          <summary><h2>Réglages de l'atelier</h2></summary>
+          <p class="etiquette">Le budget de mes loisirs</p>
+          <div class="choix">
+            <label class="pastille"><input type="radio" name="budget-atelier" value="aucun" /> Aucun</label>
+            <label class="pastille"><input type="radio" name="budget-atelier" value="indicatif" /> Indicatif</label>
+            <label class="pastille"><input type="radio" name="budget-atelier" value="suivi" /> Suivi</label>
+          </div>
+          <p class="sous-titre petit">
+            Indicatif : un coût estimé par loisir, et si ça tient dans tes Plaisirs. Suivi : tu relies tes dépenses à un loisir pour voir ce qu'il coûte vraiment.
+          </p>
+          <p class="etiquette etiquette-espacee">Mes types de loisirs</p>
+          <div id="liste-types-loisirs"></div>
+          <form id="form-type-loisir" class="form-article-ligne">
+            <input id="type-loisir-nom" class="champ-note" type="text" placeholder="Nouveau type (ex. Musique)" maxlength="25" required />
+            <button type="submit" class="bouton-rond bouton-rond-plein" aria-label="Ajouter le type"><i data-lucide="plus"></i></button>
+          </form>
+        </details>
+
         <!-- Mes données : sauvegarder et restaurer -->
         <article class="carte">
           <div class="titre-carte">
@@ -1514,6 +1611,12 @@
             type="text"
             placeholder="Ex. : marché du samedi"
           />
+
+          <!-- Relier la dépense à un loisir (Atelier, budget « suivi ») -->
+          <label id="bloc-depense-loisir" class="champ" hidden>
+            Pour un loisir de l'atelier ?
+            <select id="depense-loisir" class="champ-note"></select>
+          </label>
 
           <div id="depense-options-a-deux">
             <p id="etiquette-paye-par" class="etiquette">Payé par</p>
@@ -1651,48 +1754,114 @@
       </div>
     </div>
 
-    <!-- La fiche d'une idée de l'atelier (atelier.js) -->
-    <div id="feuille-atelier" class="feuille" hidden>
+    <!-- Journée difficile : de quoi as-tu besoin ? (soin.js) -->
+    <div id="feuille-journee" class="feuille" hidden>
       <div class="feuille-haut">
-        <h2 id="fiche-atelier-titre">Crochet</h2>
-        <button type="button" id="fermer-atelier" class="bouton-supprimer" aria-label="Fermer"><i data-lucide="x"></i></button>
+        <h2>De quoi as-tu besoin aujourd'hui ?</h2>
+        <button type="button" id="fermer-journee" class="bouton-supprimer" aria-label="Fermer"><i data-lucide="x"></i></button>
       </div>
-      <p id="fiche-atelier-etat" class="sous-titre"></p>
-
-      <label class="champ">
-        Le premier petit pas (15 minutes maximum)
-        <input id="fiche-premier-pas" class="champ-note" type="text" maxlength="80" placeholder="Ex. : regarder un tuto, acheter une pelote…" />
-      </label>
-      <label id="bloc-pas-fait" class="reglage-case">
-        <input type="checkbox" id="fiche-pas-fait" />
-        Premier petit pas fait
-      </label>
-
-      <p class="etiquette">Où j'en suis</p>
-      <div class="choix" id="fiche-statuts">
-        <label class="pastille"><input type="radio" name="statut-atelier" value="idee" /> Une idée</label>
-        <label class="pastille"><input type="radio" name="statut-atelier" value="essaye" /> J'essaie</label>
-        <label class="pastille"><input type="radio" name="statut-atelier" value="adopte" /> Adopté</label>
-        <label class="pastille"><input type="radio" name="statut-atelier" value="pas_pour_moi" /> Pas pour moi</label>
+      <p class="sous-titre">Rien n'est obligatoire. Ton accueil s'allège juste pour aujourd'hui.</p>
+      <div class="choix-besoins">
+        <button type="button" class="choix-besoin" data-besoin="reposer"><i data-lucide="moon"></i> Me reposer</button>
+        <button type="button" class="choix-besoin" data-besoin="soin"><i data-lucide="flower-2"></i> Prendre soin de moi</button>
+        <button type="button" class="choix-besoin" data-besoin="idees"><i data-lucide="wind"></i> Me changer les idées</button>
+        <button type="button" class="choix-besoin" data-besoin="evader"><i data-lucide="sparkles"></i> M'évader</button>
+        <button type="button" class="choix-besoin" data-besoin="avancer"><i data-lucide="footprints"></i> Avancer un tout petit peu</button>
       </div>
+    </div>
 
-      <label class="champ">
-        Ce que j'en pense (facultatif)
-        <input id="fiche-note-atelier" class="champ-note" type="text" maxlength="120" />
-      </label>
-
-      <p class="etiquette">Le matériel</p>
-      <div id="fiche-materiel"></div>
-      <form id="form-materiel" class="form-idee">
-        <input id="materiel-nom" class="champ-note" type="text" placeholder="Ex. : crochet 4 mm" maxlength="60" required />
-        <input id="materiel-prix" class="champ-note" type="text" inputmode="numeric" placeholder="Prix (F)" maxlength="9" aria-label="Prix" />
-        <button type="submit" class="bouton-rond bouton-rond-plein" aria-label="Ajouter au matériel"><i data-lucide="plus"></i></button>
+    <!-- Ajouter un loisir (atelier.js) -->
+    <div id="feuille-nouveau-loisir" class="feuille" hidden>
+      <div class="feuille-haut">
+        <h2>Un loisir à essayer</h2>
+        <button type="button" id="fermer-nouveau-loisir" class="bouton-supprimer" aria-label="Fermer"><i data-lucide="x"></i></button>
+      </div>
+      <form id="form-nouveau-loisir">
+        <input id="nouveau-loisir-nom" class="champ-note" type="text" placeholder="Ex. : Crochet, poterie, japonais…" maxlength="50" required />
+        <p class="etiquette">Son type</p>
+        <div id="nouveau-loisir-types" class="choix"></div>
+        <button type="submit" class="bouton bouton-large">Ranger dans un tiroir</button>
       </form>
-      <p class="sous-titre petit">Le matériel part dans Envies › À acheter.</p>
+    </div>
+
+    <!-- La fiche d'un loisir (atelier.js) -->
+    <div id="feuille-loisir" class="feuille feuille-haute" hidden>
+      <div class="feuille-haut">
+        <h2 id="loisir-titre">Crochet</h2>
+        <button type="button" id="fermer-loisir" class="bouton-supprimer" aria-label="Fermer"><i data-lucide="x"></i></button>
+      </div>
+      <!-- Le statut, qu'on change d'un tap -->
+      <div class="loisir-statut">
+        <select id="loisir-etape" class="champ-note" aria-label="Où j'en suis">
+          <option value="envie">Envie d'essayer</option>
+          <option value="test">En test</option>
+          <option value="adopte">Adopté</option>
+          <option value="range">Pas pour moi</option>
+        </select>
+        <select id="loisir-type" class="champ-note" aria-label="Type de loisir"></select>
+      </div>
+      <input id="loisir-raison" class="champ-note" type="text" maxlength="100" placeholder="Pourquoi pas pour toi ? (facultatif)" hidden />
+
+      <!-- 3 essais déjà : une seule fois -->
+      <div id="loisir-bravo" class="carte-fin-courses offert-depense" hidden>
+        <p><strong>3 essais déjà, bravo !</strong> Quand tu as assez testé, tu décides, sans pression.</p>
+        <div class="envie-boutons">
+          <button type="button" class="bouton" data-decision="adopte">Je l'adopte</button>
+          <button type="button" class="bouton-demain" data-decision="range">Je laisse</button>
+          <button type="button" class="bouton-demain" data-decision="encore">Pas encore, je continue</button>
+        </div>
+      </div>
+
+      <details class="section-loisir">
+        <summary>Carnet d'essais <span id="compte-essais" class="sous-titre petit"></span></summary>
+        <div id="liste-essais"></div>
+        <form id="form-essai" class="form-essai">
+          <input id="essai-date" class="champ-date" type="date" />
+          <div id="essai-ressentis" class="choix"></div>
+          <input id="essai-note" class="champ-note" type="text" maxlength="120" placeholder="Ce que tu as fait, ce que tu en retiens…" />
+          <button type="submit" class="bouton">Noter cet essai</button>
+        </form>
+      </details>
+
+      <details class="section-loisir">
+        <summary>Étapes <span id="compte-etapes" class="sous-titre petit"></span></summary>
+        <div id="liste-etapes-loisir"></div>
+        <form id="form-etape-loisir" class="form-article-ligne">
+          <input id="etape-loisir-nom" class="champ-note" type="text" maxlength="80" placeholder="Ex. : regarder un tuto débutant" required />
+          <button type="submit" class="bouton-rond bouton-rond-plein" aria-label="Ajouter l'étape"><i data-lucide="plus"></i></button>
+        </form>
+      </details>
+
+      <details class="section-loisir">
+        <summary>Ressources <span id="compte-ressources" class="sous-titre petit"></span></summary>
+        <div id="liste-ressources"></div>
+        <form id="form-ressource" class="form-ressource">
+          <input id="ressource-titre" class="champ-note" type="text" maxlength="60" placeholder="Titre (ex. : tuto chaînette)" required />
+          <input id="ressource-url" class="champ-note" type="url" placeholder="Lien" required />
+          <button type="submit" class="bouton-rond bouton-rond-plein" aria-label="Ajouter la ressource"><i data-lucide="plus"></i></button>
+        </form>
+      </details>
+
+      <details class="section-loisir">
+        <summary>Matériel <span id="compte-materiel" class="sous-titre petit"></span></summary>
+        <p id="materiel-deja" class="sous-titre petit"></p>
+        <div id="liste-materiel"></div>
+        <form id="form-materiel" class="form-ressource">
+          <input id="materiel-nom" class="champ-note" type="text" placeholder="Ex. : crochet 4 mm" maxlength="60" required />
+          <input id="materiel-prix" class="champ-note" type="text" inputmode="numeric" placeholder="Prix (F)" maxlength="9" aria-label="Prix" />
+          <button type="submit" class="bouton-rond bouton-rond-plein" aria-label="Ajouter au matériel"><i data-lucide="plus"></i></button>
+          <label class="reglage-case materiel-jai"><input type="checkbox" id="materiel-jai" /> Je l'ai déjà</label>
+        </form>
+      </details>
+
+      <details id="section-budget-loisir" class="section-loisir">
+        <summary>Budget</summary>
+        <div id="budget-loisir"></div>
+      </details>
 
       <div class="form-categorie-boutons personne-actions">
-        <button type="button" id="supprimer-atelier" class="lien lien-danger">Retirer cette idée</button>
-        <button type="button" id="planifier-atelier" class="bouton">Planifier un moment</button>
+        <button type="button" id="supprimer-loisir" class="lien lien-danger">Retirer ce loisir</button>
+        <button type="button" id="planifier-loisir" class="bouton">Planifier un moment</button>
       </div>
     </div>
 
@@ -1893,30 +2062,31 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=34"></script>
-    <script src="js/outils/dates.js?v=34"></script>
-    <script src="js/outils/annuler.js?v=34"></script>
-    <script src="js/outils/icones.js?v=34"></script>
-    <script src="js/modules/navigation.js?v=34"></script>
-    <script src="js/modules/infos.js?v=34"></script>
-    <script src="js/modules/accueil.js?v=34"></script>
-    <script src="js/modules/budget.js?v=34"></script>
-    <script src="js/modules/budget-repartition.js?v=34"></script>
-    <script src="js/modules/budget-mois.js?v=34"></script>
-    <script src="js/modules/budget-raccourcis.js?v=34"></script>
-    <script src="js/modules/budget-epargne.js?v=34"></script>
-    <script src="js/modules/budget-point.js?v=34"></script>
-    <script src="js/donnees/sauvegarde.js?v=34"></script>
-    <script src="js/modules/agenda.js?v=34"></script>
-    <script src="js/modules/agenda-vues.js?v=34"></script>
-    <script src="js/modules/agenda-feuille.js?v=34"></script>
-    <script src="js/modules/agenda-reglages.js?v=34"></script>
-    <script src="js/modules/agenda-notifs.js?v=34"></script>
-    <script src="js/modules/accueil-cartes.js?v=34"></script>
-    <script src="js/modules/courses.js?v=34"></script>
-    <script src="js/modules/envies.js?v=34"></script>
-    <script src="js/modules/atelier.js?v=34"></script>
-    <script src="js/modules/moi.js?v=34"></script>
-    <script src="js/app.js?v=34"></script>
+    <script src="js/donnees/stockage.js?v=35"></script>
+    <script src="js/outils/dates.js?v=35"></script>
+    <script src="js/outils/annuler.js?v=35"></script>
+    <script src="js/outils/icones.js?v=35"></script>
+    <script src="js/modules/navigation.js?v=35"></script>
+    <script src="js/modules/infos.js?v=35"></script>
+    <script src="js/modules/accueil.js?v=35"></script>
+    <script src="js/modules/budget.js?v=35"></script>
+    <script src="js/modules/budget-repartition.js?v=35"></script>
+    <script src="js/modules/budget-mois.js?v=35"></script>
+    <script src="js/modules/budget-raccourcis.js?v=35"></script>
+    <script src="js/modules/budget-epargne.js?v=35"></script>
+    <script src="js/modules/budget-point.js?v=35"></script>
+    <script src="js/donnees/sauvegarde.js?v=35"></script>
+    <script src="js/modules/agenda.js?v=35"></script>
+    <script src="js/modules/agenda-vues.js?v=35"></script>
+    <script src="js/modules/agenda-feuille.js?v=35"></script>
+    <script src="js/modules/agenda-reglages.js?v=35"></script>
+    <script src="js/modules/agenda-notifs.js?v=35"></script>
+    <script src="js/modules/accueil-cartes.js?v=35"></script>
+    <script src="js/modules/courses.js?v=35"></script>
+    <script src="js/modules/envies.js?v=35"></script>
+    <script src="js/modules/atelier.js?v=35"></script>
+    <script src="js/modules/soin.js?v=35"></script>
+    <script src="js/modules/moi.js?v=35"></script>
+    <script src="js/app.js?v=35"></script>
   </body>
 </html>

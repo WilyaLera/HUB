@@ -136,7 +136,8 @@
   margin-bottom: 8px;
 }
 
-.pastille-date {
+.pastille-date,
+.pastille-temps {
   min-height: 44px;
   padding: 0 14px;
   border: 1.5px solid var(--trait);
@@ -149,7 +150,8 @@
   cursor: pointer;
 }
 
-.pastille-date.choisie {
+.pastille-date.choisie,
+.pastille-temps.choisie {
   background: var(--texte);
   border-color: var(--texte);
   color: var(--carte);
@@ -848,4 +850,219 @@ button.envie-achat-haut {
   align-items: stretch;
   gap: 6px;
   margin-bottom: 8px;
+}
+
+/* ---------- Atelier : le meuble à tiroirs ---------- */
+
+.barre-filtre {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 12px;
+}
+
+/* La pastille de filtre porte la couleur de son étape (point coloré) */
+.pastille-filtre {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.pastille-filtre[style*="--couleur-tiroir"]::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--couleur-tiroir);
+}
+
+.meuble {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 10px;
+  margin-bottom: 16px;
+  border-radius: 18px;
+  background: #d9c3a5;
+  box-shadow: inset 0 0 0 4px #c8ad8a;
+}
+
+.tiroir {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 104px;
+  padding: 12px 12px 10px;
+  border: none;
+  border-radius: 10px;
+  background: var(--couleur-tiroir, var(--carte));
+  box-shadow: inset 0 -4px 0 rgba(58, 46, 40, 0.12), 0 2px 4px rgba(58, 46, 40, 0.12);
+  color: #3a2e28;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.tiroir:active {
+  transform: translateY(1px);
+}
+
+/* L'étiquette écrite à la main */
+.tiroir-etiquette {
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255, 252, 247, 0.85);
+  font-family: "Kalam", var(--police-texte);
+  font-size: 17px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.tiroir-poignee {
+  align-self: center;
+  width: 36px;
+  height: 8px;
+  margin: 8px 0;
+  border-radius: 999px;
+  background: rgba(58, 46, 40, 0.35);
+}
+
+.tiroir-bas {
+  display: flex;
+  justify-content: space-between;
+  opacity: 0.75;
+}
+.tiroir-bas svg,
+.tiroir-bas i {
+  width: 18px;
+  height: 18px;
+}
+
+.tiroir-vide {
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 252, 247, 0.4);
+  border: 2px dashed rgba(58, 46, 40, 0.3);
+  box-shadow: none;
+}
+
+/* ---------- Atelier : la fiche d'un loisir ---------- */
+
+.feuille-haute {
+  max-height: 92vh;
+}
+
+.loisir-statut,
+.form-soin-choix {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.section-loisir {
+  border-top: 1px solid var(--trait);
+  padding: 4px 0;
+}
+.section-loisir > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.section-loisir[open] > summary {
+  margin-bottom: 6px;
+}
+
+.form-essai,
+.form-soin {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.form-ressource {
+  display: grid;
+  grid-template-columns: 1fr 1fr 44px;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+.materiel-jai {
+  grid-column: 1 / -1;
+}
+
+#essai-ressentis .choisie,
+.choix .choisie {
+  background: var(--texte);
+  border-color: var(--texte);
+  color: var(--carte);
+}
+
+/* ---------- Coin douceur ---------- */
+
+.choix-temps {
+  display: flex;
+  gap: 8px;
+  margin: 6px 0 10px;
+}
+.choix-temps .pastille-temps {
+  flex: 1;
+}
+
+.titre-famille {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.titre-famille svg,
+.titre-famille i {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------- Journée difficile ---------- */
+
+.entete-boutons {
+  display: flex;
+  gap: 8px;
+}
+
+.carte-douceur {
+  background: #f3e6dc;
+  border: 1.5px solid #e8cbb8;
+}
+
+.choix-besoins {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+}
+.choix-besoin {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1.5px solid var(--trait);
+  border-radius: 16px;
+  background: var(--carte);
+  color: var(--texte);
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Thèmes sombres doux : le meuble reste lisible */
+[data-calme="oui"] .tiroir {
+  box-shadow: none;
+}
+#menu-soin .ligne-article-quantite {
+  white-space: nowrap;
 }

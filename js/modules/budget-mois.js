@@ -923,6 +923,8 @@ function ouvrirFeuilleDepense(depense) {
     depenseMontant.value = depense.montant;
     depenseNote.value = depense.note;
   }
+  // Le menu des loisirs de l'atelier (atelier.js, seulement en budget « suivi »)
+  if (typeof remplirChoixLoisirs === "function") remplirChoixLoisirs(depense ? depense.loisirId : "");
   // Les options s'ouvrent seules si la dépense en utilise
   document.getElementById("depense-options").open =
     Boolean(depense) && (Boolean(depense.note) || quand !== "aujourdhui");
@@ -982,6 +984,8 @@ formDepense.addEventListener("submit", (evenement) => {
     note: depenseNote.value.trim(),
     payePar: budget.reglages.aDeux ? depensePayePar.value : "moi",
     type: rentree ? "rentree" : undefined,
+    // Le loisir de l'atelier (facultatif)
+    loisirId: document.getElementById("depense-loisir").value || undefined,
   };
 
   const etaitUneModification = Boolean(depenseEnModification);

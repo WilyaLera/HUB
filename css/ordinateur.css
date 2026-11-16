@@ -193,3 +193,13 @@
     margin-top: 16px;
   }
 }
+
+/* Sur grand écran : un meuble de 4 tiroirs de large */
+@media (min-width: 900px) {
+  #meuble-atelier {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  #soin {
+    max-width: 640px;
+  }
+}
