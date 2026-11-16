@@ -440,7 +440,7 @@ function afficherMessageVirements() {
 
 // « Changer l'organisation » : les réglages du budget vivent dans « Moi »
 document.getElementById("lien-reglages-commun").addEventListener("click", () => {
-  afficherEcran("moi"); // navigation.js
+  afficherEcran("reglages"); // navigation.js
   const carteReglages = document.getElementById("carte-reglages");
   carteReglages.open = true;
   carteReglages.scrollIntoView({ behavior: "smooth", block: "start" });

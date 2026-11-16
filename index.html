@@ -20,12 +20,12 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=33" />
-    <link rel="stylesheet" href="css/navigation.css?v=33" />
-    <link rel="stylesheet" href="css/budget.css?v=33" />
-    <link rel="stylesheet" href="css/agenda.css?v=33" />
-    <link rel="stylesheet" href="css/confort.css?v=33" />
-    <link rel="stylesheet" href="css/ordinateur.css?v=33" />
+    <link rel="stylesheet" href="css/base.css?v=34" />
+    <link rel="stylesheet" href="css/navigation.css?v=34" />
+    <link rel="stylesheet" href="css/budget.css?v=34" />
+    <link rel="stylesheet" href="css/agenda.css?v=34" />
+    <link rel="stylesheet" href="css/confort.css?v=34" />
+    <link rel="stylesheet" href="css/ordinateur.css?v=34" />
   </head>
 
   <body>
@@ -187,7 +187,7 @@
 
         <!-- Les réglages de l'agenda sont dans Moi -->
         <button type="button" class="lien-reglages" data-reglages="carte-reglages-agenda">
-          <i data-lucide="settings-2"></i> Catégories, jours fériés et résumé du jour : dans Moi › Réglages de l'agenda
+          <i data-lucide="settings-2"></i> Catégories, jours fériés et résumé du jour : dans les réglages de l'agenda
         </button>
       </section>
 
@@ -287,7 +287,7 @@
 
         <!-- Les réglages des courses sont dans Moi -->
         <button type="button" class="lien-reglages" data-reglages="carte-rayons">
-          <i data-lucide="settings-2"></i> Tes rayons se modifient dans Moi › Réglages des courses
+          <i data-lucide="settings-2"></i> Tes rayons se modifient dans les réglages des courses
         </button>
       </section>
 
@@ -477,7 +477,7 @@
 
         <!-- Les réglages des envies sont dans Moi -->
         <button type="button" class="lien-reglages" data-reglages="carte-reglages-envies">
-          <i data-lucide="settings-2"></i> Carte de l'accueil, Noël et délai de réflexion : dans Moi › Réglages des envies
+          <i data-lucide="settings-2"></i> Carte de l'accueil, Noël et délai de réflexion : dans les réglages des envies
         </button>
       </section>
 
@@ -1139,13 +1139,19 @@
         </div>
         <!-- Les réglages du budget sont dans Moi -->
         <button type="button" class="lien-reglages" data-reglages="carte-reglages">
-          <i data-lucide="settings-2"></i> Début du mois, seul·e ou à deux, coup de pouce : dans Moi › Réglages du budget
+          <i data-lucide="settings-2"></i> Début du mois, seul·e ou à deux, coup de pouce : dans les réglages du budget
         </button>
       </section>
 
       <!-- Module Moi -->
       <section id="moi" class="ecran">
-        <h1>Moi</h1>
+        <div class="accueil-entete">
+          <h1>Moi</h1>
+          <!-- Les réglages, derrière la petite roue -->
+          <button type="button" class="bouton-rond" data-ecran="reglages" aria-label="Réglages">
+            <i data-lucide="settings"></i>
+          </button>
+        </div>
 
         <!-- Mes espaces (les modules « à moi ») -->
         <button class="carte carte-lien" data-ecran="atelier">
@@ -1157,11 +1163,18 @@
           <i data-lucide="chevron-right"></i>
         </button>
 
-        <h2 class="titre-section">Réglages</h2>
+      </section>
+
+      <!-- ===================== Réglages ===================== -->
+      <section id="reglages" class="ecran" data-parent="moi">
+        <button class="retour" data-ecran="moi">
+          <i data-lucide="chevron-left"></i> Moi
+        </button>
+        <h1>Réglages</h1>
 
         <!-- Mon prénom -->
         <article class="carte">
-          <h2>Moi</h2>
+          <h2>Mon profil</h2>
           <label class="champ">
             Mon prénom
             <input id="champ-prenom" class="champ-note" type="text" maxlength="30" placeholder="Ton prénom" />
@@ -1880,30 +1893,30 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=33"></script>
-    <script src="js/outils/dates.js?v=33"></script>
-    <script src="js/outils/annuler.js?v=33"></script>
-    <script src="js/outils/icones.js?v=33"></script>
-    <script src="js/modules/navigation.js?v=33"></script>
-    <script src="js/modules/infos.js?v=33"></script>
-    <script src="js/modules/accueil.js?v=33"></script>
-    <script src="js/modules/budget.js?v=33"></script>
-    <script src="js/modules/budget-repartition.js?v=33"></script>
-    <script src="js/modules/budget-mois.js?v=33"></script>
-    <script src="js/modules/budget-raccourcis.js?v=33"></script>
-    <script src="js/modules/budget-epargne.js?v=33"></script>
-    <script src="js/modules/budget-point.js?v=33"></script>
-    <script src="js/donnees/sauvegarde.js?v=33"></script>
-    <script src="js/modules/agenda.js?v=33"></script>
-    <script src="js/modules/agenda-vues.js?v=33"></script>
-    <script src="js/modules/agenda-feuille.js?v=33"></script>
-    <script src="js/modules/agenda-reglages.js?v=33"></script>
-    <script src="js/modules/agenda-notifs.js?v=33"></script>
-    <script src="js/modules/accueil-cartes.js?v=33"></script>
-    <script src="js/modules/courses.js?v=33"></script>
-    <script src="js/modules/envies.js?v=33"></script>
-    <script src="js/modules/atelier.js?v=33"></script>
-    <script src="js/modules/moi.js?v=33"></script>
-    <script src="js/app.js?v=33"></script>
+    <script src="js/donnees/stockage.js?v=34"></script>
+    <script src="js/outils/dates.js?v=34"></script>
+    <script src="js/outils/annuler.js?v=34"></script>
+    <script src="js/outils/icones.js?v=34"></script>
+    <script src="js/modules/navigation.js?v=34"></script>
+    <script src="js/modules/infos.js?v=34"></script>
+    <script src="js/modules/accueil.js?v=34"></script>
+    <script src="js/modules/budget.js?v=34"></script>
+    <script src="js/modules/budget-repartition.js?v=34"></script>
+    <script src="js/modules/budget-mois.js?v=34"></script>
+    <script src="js/modules/budget-raccourcis.js?v=34"></script>
+    <script src="js/modules/budget-epargne.js?v=34"></script>
+    <script src="js/modules/budget-point.js?v=34"></script>
+    <script src="js/donnees/sauvegarde.js?v=34"></script>
+    <script src="js/modules/agenda.js?v=34"></script>
+    <script src="js/modules/agenda-vues.js?v=34"></script>
+    <script src="js/modules/agenda-feuille.js?v=34"></script>
+    <script src="js/modules/agenda-reglages.js?v=34"></script>
+    <script src="js/modules/agenda-notifs.js?v=34"></script>
+    <script src="js/modules/accueil-cartes.js?v=34"></script>
+    <script src="js/modules/courses.js?v=34"></script>
+    <script src="js/modules/envies.js?v=34"></script>
+    <script src="js/modules/atelier.js?v=34"></script>
+    <script src="js/modules/moi.js?v=34"></script>
+    <script src="js/app.js?v=34"></script>
   </body>
 </html>
