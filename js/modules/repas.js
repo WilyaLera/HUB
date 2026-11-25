@@ -548,7 +548,7 @@ function creerChoixNote(recette, quandChange) {
   menu.setAttribute("aria-label", "Ma note");
   const vide = document.createElement("option");
   vide.value = "0";
-  vide.textContent = "Pas encore noté";
+  vide.textContent = "–";
   menu.appendChild(vide);
   for (let n = 1; n <= 5; n += 0.5) {
     const option = document.createElement("option");
@@ -1067,6 +1067,30 @@ function creerLigneRecette(r) {
   return ligne;
 }
 
+// Les chapitres du carnet, dans l'ordre du sommaire de ton PDF
+const CHAPITRES_CARNET = ["Volaille", "Bœuf", "Porc & saucisses", "Poisson & mer", "Œufs & végétarien", "Cheat meals", "Desserts", "Petits-déjeuners"];
+
+function chapitreDe(r) {
+  if (r.categorie === "Cheat meal") return "Cheat meals";
+  if (r.categorie === "Dessert") return "Desserts";
+  if (r.categorie === "Petit-déjeuner") return "Petits-déjeuners";
+  const code = familleDe(r).code;
+  return { poulet: "Volaille", boeuf: "Bœuf", porc: "Porc & saucisses", poisson: "Poisson & mer" }[code] || "Œufs & végétarien";
+}
+
+// Le petit brin de feuilles sauge, comme dans le carnet
+function creerBrin() {
+  const brin = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  brin.setAttribute("viewBox", "0 0 80 20");
+  brin.setAttribute("aria-hidden", "true");
+  brin.classList.add("brin");
+  brin.innerHTML =
+    '<path d="M4 14 H76" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
+    [14, 28, 42, 56].map((x) => `<ellipse cx="${x}" cy="8" rx="4" ry="7" transform="rotate(25 ${x} 8)" fill="currentColor"/>`).join("") +
+    '<ellipse cx="70" cy="12" rx="6" ry="3" fill="currentColor"/>';
+  return brin;
+}
+
 const NOMS_CATEGORIES = { Plat: "Plats", "Cheat meal": "Repas plaisir", Dessert: "Desserts", "Petit-déjeuner": "Petits-déjeuners" };
 
 function afficherCarnet() {
@@ -1082,16 +1106,20 @@ function afficherCarnet() {
     zone.appendChild(creerMessageVide("Aucune recette ne correspond."));
     return;
   }
-  // Un chapitre par catégorie, comme dans un vrai carnet
-  const categories = [...CATEGORIES_RECETTE, ...new Set(visibles.map((r) => r.categorie).filter((c) => !CATEGORIES_RECETTE.includes(c)))];
-  categories.forEach((categorie) => {
-    const recettes = visibles.filter((r) => (r.categorie || "Plat") === categorie);
+  // Un chapitre par famille, comme le sommaire du carnet
+  CHAPITRES_CARNET.forEach((nomChapitre) => {
+    const recettes = visibles.filter((r) => chapitreDe(r) === nomChapitre);
     if (recettes.length === 0) return;
     const chapitre = document.createElement("details");
     chapitre.classList.add("chapitre-carnet");
     chapitre.open = true;
     const titre = document.createElement("summary");
-    titre.textContent = `${NOMS_CATEGORIES[categorie] || categorie} · ${recettes.length}`;
+    const nom = document.createElement("span");
+    nom.textContent = nomChapitre;
+    const nombre = document.createElement("span");
+    nombre.classList.add("chapitre-nombre");
+    nombre.textContent = recettes.length;
+    titre.append(nom, nombre);
     const contenu = document.createElement("div");
     contenu.classList.add(vue === "cartes" ? "grille-recettes" : "carte");
     recettes.forEach((r) => contenu.appendChild(vue === "cartes" ? creerCarteRecette(r) : creerLigneRecette(r)));
@@ -1138,27 +1166,89 @@ function creerSectionRecette(titre, contenu, ouverte) {
 function afficherFicheRecette() {
   const r = recetteDe(recetteOuverte);
   if (!r) return;
-  document.getElementById("recette-titre").textContent = r.nom;
+  document.getElementById("recette-titre").textContent = "";
   const zone = document.getElementById("recette-contenu");
   zone.replaceChildren();
 
   const famille = familleDe(r);
   feuilleRecette.style.setProperty("--couleur-recette", famille.couleur);
 
-  // Les infos, en petites étiquettes
+  // L'en-tête de la page : les étiquettes, le titre, le brin de feuilles
+  const etiquettes = document.createElement("div");
+  etiquettes.classList.add("fiche-etiquettes");
+  const categorie = document.createElement("span");
+  categorie.classList.add("fiche-etiquette", "fiche-etiquette-pleine");
+  categorie.textContent = r.categorie || "Plat";
+  etiquettes.appendChild(categorie);
+  if (r.proteine) {
+    const proteine = document.createElement("span");
+    proteine.classList.add("fiche-etiquette");
+    proteine.textContent = r.proteine;
+    etiquettes.appendChild(proteine);
+  }
+  if (aTester(r)) {
+    const test = document.createElement("span");
+    test.classList.add("fiche-etiquette", "fiche-etiquette-test");
+    test.textContent = "À tester";
+    etiquettes.appendChild(test);
+  }
+  const titre = document.createElement("h2");
+  titre.classList.add("fiche-titre");
+  titre.textContent = r.nom;
+  const separateur = document.createElement("div");
+  separateur.classList.add("fiche-separateur");
+  separateur.appendChild(creerBrin());
+  zone.append(etiquettes, titre, separateur);
+
+  // Temps, portions (réglables), prix
   const infos = document.createElement("div");
   infos.classList.add("fiche-infos");
   const ajouterInfo = (icone, texte) => {
-    if (!texte) return;
     const info = document.createElement("span");
     info.classList.add("fiche-info");
     info.append(creerIcone(icone), texte);
     infos.appendChild(info);
+    return info;
   };
-  ajouterInfo(famille.icone, r.proteine || NOMS_CATEGORIES[r.categorie] || r.categorie);
-  ajouterInfo("clock", r.temps ? `${r.temps} min` : "");
-  ajouterInfo("coins", r.prix ? `≈ ${formaterMontant(r.prix)}` : "");
-  ajouterInfo(r.derniere ? "calendar-check" : "flask-conical", r.derniere ? `fait le ${formaterDate(r.derniere, false)}` : "à tester");
+  if (r.temps) ajouterInfo("clock", `${r.temps} min`);
+  const infoPortions = ajouterInfo("circle-dot", "");
+  infoPortions.classList.add("fiche-portions");
+  const moins = document.createElement("button");
+  moins.type = "button";
+  moins.classList.add("fiche-plus-moins");
+  moins.setAttribute("aria-label", "Une portion de moins");
+  moins.textContent = "−";
+  moins.addEventListener("click", () => {
+    portionsFiche = Math.max(1, portionsFiche - 1);
+    afficherFicheRecette();
+  });
+  const combien = document.createElement("span");
+  combien.textContent = `${portionsFiche} portion${portionsFiche > 1 ? "s" : ""}`;
+  const plus = document.createElement("button");
+  plus.type = "button";
+  plus.classList.add("fiche-plus-moins");
+  plus.setAttribute("aria-label", "Une portion de plus");
+  plus.textContent = "+";
+  plus.addEventListener("click", () => {
+    portionsFiche += 1;
+    afficherFicheRecette();
+  });
+  infoPortions.append(moins, combien, plus);
+  // Le prix se modifie directement ici
+  const infoPrix = document.createElement("label");
+  infoPrix.classList.add("fiche-info", "fiche-prix");
+  const champPrix = document.createElement("input");
+  champPrix.type = "number";
+  champPrix.inputMode = "numeric";
+  champPrix.min = "0";
+  champPrix.value = r.prix || "";
+  champPrix.setAttribute("aria-label", "Prix de la recette en francs");
+  champPrix.addEventListener("change", () => {
+    r.prix = Number(champPrix.value) || null;
+    sauvegarderRepas();
+  });
+  infoPrix.append("Prix", champPrix, "F");
+  infos.appendChild(infoPrix);
   zone.appendChild(infos);
 
   const boutons = document.createElement("div");
@@ -1175,39 +1265,15 @@ function afficherFicheRecette() {
   );
   zone.appendChild(boutons);
 
-  // Les ingrédients, adaptés au nombre de portions choisi
-  if (lignes(r.ingredients).length) {
+  // Les ingrédients (adaptés aux portions), et les notes en dessous, comme dans le carnet
+  const facteur = portionsFiche / (r.portions || portionsFiche);
+  const colonnes = document.createElement("div");
+  colonnes.classList.add("fiche-colonnes");
+  if (lignes(r.ingredients).length || r.notes) {
     const bloc = document.createElement("section");
-    bloc.classList.add("fiche-bloc");
-    const entete = document.createElement("div");
-    entete.classList.add("fiche-bloc-entete");
-    const titre = document.createElement("h3");
-    titre.textContent = "Ingrédients";
-    const portions = document.createElement("div");
-    portions.classList.add("fiche-portions");
-    const moins = document.createElement("button");
-    moins.type = "button";
-    moins.classList.add("bouton-rond", "bouton-rond-petit");
-    moins.setAttribute("aria-label", "Une portion de moins");
-    moins.appendChild(creerIcone("minus"));
-    moins.addEventListener("click", () => {
-      portionsFiche = Math.max(1, portionsFiche - 1);
-      afficherFicheRecette();
-    });
-    const combien = document.createElement("span");
-    combien.textContent = `${portionsFiche} portion${portionsFiche > 1 ? "s" : ""}`;
-    const plus = document.createElement("button");
-    plus.type = "button";
-    plus.classList.add("bouton-rond", "bouton-rond-petit");
-    plus.setAttribute("aria-label", "Une portion de plus");
-    plus.appendChild(creerIcone("plus"));
-    plus.addEventListener("click", () => {
-      portionsFiche += 1;
-      afficherFicheRecette();
-    });
-    portions.append(moins, combien, plus);
-    entete.append(titre, portions);
-    const facteur = portionsFiche / (r.portions || portionsFiche);
+    bloc.classList.add("fiche-ingredients");
+    const titreIngredients = document.createElement("h3");
+    titreIngredients.textContent = "Ingrédients";
     const liste = document.createElement("ul");
     liste.classList.add("liste-ingredients");
     lignes(r.ingredients).forEach((l) => {
@@ -1215,20 +1281,27 @@ function afficherFicheRecette() {
       li.textContent = ligneAdaptee(l, facteur);
       liste.appendChild(li);
     });
-    bloc.append(entete, liste);
+    bloc.append(titreIngredients, liste);
     if (Math.abs(facteur - 1) > 0.01) {
-      const note = document.createElement("p");
-      note.classList.add("sous-titre", "petit");
-      note.textContent = `Recette écrite pour ${r.portions} portions, quantités recalculées.`;
-      bloc.appendChild(note);
+      const recalcule = document.createElement("p");
+      recalcule.classList.add("fiche-recalcule");
+      recalcule.textContent = `Écrite pour ${r.portions} portions, quantités recalculées.`;
+      bloc.appendChild(recalcule);
     }
-    zone.appendChild(bloc);
+    if (r.notes) {
+      const notes = document.createElement("p");
+      notes.classList.add("fiche-notes-texte");
+      notes.textContent = r.notes;
+      bloc.appendChild(notes);
+    }
+    colonnes.appendChild(bloc);
   }
+  zone.appendChild(colonnes);
 
   // La préparation, avec de gros numéros
   if (lignes(r.etapes).length) {
     const bloc = document.createElement("section");
-    bloc.classList.add("fiche-bloc");
+    bloc.classList.add("fiche-preparation");
     const titre = document.createElement("h3");
     titre.textContent = "Préparation";
     const liste = document.createElement("ol");
@@ -1239,27 +1312,58 @@ function afficherFicheRecette() {
       liste.appendChild(li);
     });
     bloc.append(titre, liste);
-    zone.appendChild(bloc);
+    colonnes.appendChild(bloc);
   }
 
-  // Mon avis
+  // Notre avis
   const avis = document.createElement("section");
-  avis.classList.add("fiche-bloc");
+  avis.classList.add("fiche-avis");
+  const enteteAvis = document.createElement("div");
+  enteteAvis.classList.add("fiche-avis-entete");
   const titreAvis = document.createElement("h3");
-  titreAvis.textContent = "Mon avis";
-  avis.append(titreAvis, creerChoixNote(r, afficherCarnet), creerChoixRefaire(r, afficherFicheRecette));
+  titreAvis.textContent = "Notre avis";
+  const etoiles = document.createElement("span");
+  etoiles.classList.add("fiche-etoiles");
+  etoiles.setAttribute("aria-label", r.etoiles ? `${r.etoiles} sur 5` : "Pas encore notée");
+  for (let i = 1; i <= 5; i++) {
+    const etoile = document.createElement("span");
+    etoile.textContent = "★";
+    etoile.classList.toggle("allumee", (r.etoiles || 0) >= i - 0.5);
+    etoiles.appendChild(etoile);
+  }
+  enteteAvis.append(titreAvis, etoiles);
+  const champs = document.createElement("div");
+  champs.classList.add("fiche-avis-champs");
+  const ajouterChamp = (texte, element) => {
+    const champ = document.createElement("label");
+    champ.classList.add("fiche-avis-champ");
+    const etiquette = document.createElement("span");
+    etiquette.textContent = texte;
+    champ.append(etiquette, element);
+    champs.appendChild(champ);
+  };
+  ajouterChamp("Note /5", creerChoixNote(r, () => {
+    afficherCarnet();
+    afficherFicheRecette();
+  }));
+  const derniere = document.createElement("input");
+  derniere.type = "date";
+  derniere.classList.add("champ-note");
+  derniere.value = r.derniere || "";
+  derniere.addEventListener("change", () => {
+    r.derniere = derniere.value;
+    sauvegarderRepas();
+    afficherRepas();
+    afficherFicheRecette();
+  });
+  ajouterChamp("Dernière fois", derniere);
+  const titreRefaire = document.createElement("span");
+  titreRefaire.classList.add("fiche-avis-etiquette");
+  titreRefaire.textContent = "À refaire ?";
+  avis.append(enteteAvis, champs, titreRefaire, creerChoixRefaire(r, afficherFicheRecette));
   zone.appendChild(avis);
 
-  if (r.notes) {
-    const bloc = document.createElement("section");
-    bloc.classList.add("fiche-bloc", "fiche-notes");
-    const titre = document.createElement("h3");
-    titre.textContent = "Notes";
-    const notes = document.createElement("p");
-    notes.textContent = r.notes;
-    bloc.append(titre, notes);
-    zone.appendChild(bloc);
-  }
+
 
   const supprimer = document.createElement("button");
   supprimer.type = "button";

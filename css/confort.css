@@ -1599,16 +1599,6 @@ body.en-cuisine .barre-nav {
   justify-content: flex-start;
 }
 
-/* La fiche, comme une page de carnet */
-#feuille-recette .feuille-haut {
-  margin: -18px -20px 0;
-  padding: 18px 20px 14px;
-  background: var(--couleur-recette, var(--carte));
-  border-radius: 24px 24px 0 0;
-}
-#feuille-recette .feuille-haut h2 {
-  color: #3a2e28;
-}
 .fiche-infos {
   display: flex;
   flex-wrap: wrap;
@@ -1691,4 +1681,261 @@ body.en-cuisine .barre-nav {
 }
 .fiche-notes {
   background: #fbf3dc;
+}
+
+/* ---------- La fiche recette, comme une page de ton carnet PDF ---------- */
+#feuille-recette {
+  background: #faf1e3;
+}
+#feuille-recette .feuille-haut {
+  min-height: 0;
+  margin-bottom: -8px;
+}
+#recette-contenu {
+  padding: 14px 14px 16px;
+  border: 1.5px solid #e8d5b5;
+  border-radius: 18px;
+  box-shadow: inset 0 0 0 4px #faf1e3, inset 0 0 0 5px #efe0c6;
+}
+.fiche-etiquettes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.fiche-etiquette {
+  padding: 3px 10px;
+  border: 1.5px solid #8fa37a;
+  border-radius: 999px;
+  color: #5d7148;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.fiche-etiquette-pleine {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+.fiche-etiquette-test {
+  border-color: #e3a07e;
+  color: #9a4a22;
+}
+.fiche-titre {
+  margin: 10px 0 2px;
+  font-family: var(--police-titre);
+  font-size: 26px;
+  line-height: 1.15;
+  color: #4a3326;
+}
+.fiche-separateur {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8fa37a;
+}
+.fiche-separateur::before,
+.fiche-separateur::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e8d5b5;
+}
+.brin {
+  width: 64px;
+  height: 16px;
+}
+#feuille-recette .fiche-infos {
+  margin: 12px 0;
+}
+#feuille-recette .fiche-info {
+  min-height: 36px;
+  border: 1.5px solid #e8d5b5;
+  background: #f3e6d2;
+  color: #4a3326;
+}
+#feuille-recette .fiche-info svg,
+#feuille-recette .fiche-info i {
+  color: var(--accent);
+}
+.fiche-plus-moins {
+  width: 44px;
+  height: 36px;
+  margin: -4px 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 20px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.fiche-prix {
+  gap: 8px;
+  color: #8a7466 !important;
+  font-size: 11px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.fiche-prix input {
+  width: 80px;
+  min-height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: #fdf3d6;
+  font: inherit;
+  font-size: 14px;
+  text-align: right;
+  color: #4a3326;
+}
+.fiche-colonnes {
+  display: grid;
+  gap: 14px;
+}
+.fiche-ingredients {
+  padding: 12px 14px;
+  border: 1.5px solid #e8d5b5;
+  border-radius: 14px;
+  background: #f3e6d2;
+}
+.fiche-ingredients h3,
+.fiche-preparation h3,
+.fiche-avis h3 {
+  margin: 0 0 8px;
+  font-family: var(--police-titre);
+  font-size: 18px;
+  color: var(--accent);
+}
+.fiche-ingredients .liste-ingredients {
+  margin: 0;
+  font-family: var(--police-titre);
+  font-size: 15px;
+}
+.fiche-recalcule {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #8a7466;
+}
+.fiche-notes-texte {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid #e3cfae;
+  font-family: var(--police-titre);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #8a7466;
+}
+.fiche-preparation h3 {
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e8d5b5;
+}
+.fiche-preparation .liste-etapes {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  counter-reset: etape;
+  font-family: var(--police-titre);
+  font-size: 15px;
+  line-height: 1.45;
+}
+.fiche-preparation .liste-etapes li {
+  position: relative;
+  margin-bottom: 12px;
+  padding-left: 32px;
+  counter-increment: etape;
+}
+.fiche-preparation .liste-etapes li::before {
+  content: counter(etape);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--police-texte);
+  font-size: 12px;
+  font-weight: 800;
+}
+.fiche-avis {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1.5px solid #e8d5b5;
+  border-radius: 14px;
+  background: #f3e6d2;
+}
+.fiche-avis-entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.fiche-etoiles {
+  color: #e3d3b8;
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+.fiche-etoiles .allumee {
+  color: var(--accent);
+}
+.fiche-avis-champs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.fiche-avis-champ,
+.fiche-avis-etiquette {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8a7466;
+}
+.fiche-avis-etiquette {
+  margin-top: 10px;
+}
+.fiche-avis .champ-note {
+  background: #fdf3d6;
+  border-color: #eedfb8;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+/* Le sommaire du carnet */
+.chapitre-carnet > summary {
+  justify-content: space-between;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e8d5b5;
+  color: var(--accent);
+}
+.chapitre-nombre {
+  font-family: var(--police-texte);
+  font-size: 13px;
+  color: var(--texte-doux);
+}
+.chapitre-carnet .grille-recettes,
+.chapitre-carnet > .carte {
+  margin-top: 10px;
+}
+
+/* Sur un grand écran : ingrédients à gauche, étapes à droite, comme le PDF */
+@media (min-width: 700px) {
+  .fiche-colonnes {
+    grid-template-columns: 2fr 3fr;
+    align-items: start;
+  }
+}
+#feuille-recette .feuille-haut h2:empty {
+  display: none;
+}
+#feuille-recette .feuille-haut {
+  justify-content: flex-end;
 }
