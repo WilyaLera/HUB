@@ -1491,3 +1491,204 @@ body.en-cuisine .barre-nav {
 #jour-repas-contenu .envie-boutons {
   margin: 8px 0;
 }
+
+/* ---------- Repas V37 : le carnet rangé et la fiche comme une page ---------- */
+.lien-cette-semaine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin: -4px auto 6px;
+}
+.lien-cette-semaine[hidden] {
+  display: none;
+}
+.carnet-entete .champ-note {
+  width: auto;
+  flex: 1;
+}
+.vue-carnet {
+  display: flex;
+  gap: 6px;
+}
+.vue-carnet .choisie {
+  background: var(--texte);
+  color: var(--carte);
+}
+.chapitre-carnet {
+  margin: 14px 0 6px;
+}
+.chapitre-carnet > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-family: var(--police-titre);
+  font-size: 20px;
+  cursor: pointer;
+}
+.grille-recettes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.carte-recette {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 0 12px;
+  border: 1px solid var(--trait);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--carte);
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.carte-recette-bandeau {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 6px 10px;
+  background: var(--couleur-recette);
+  color: #3a2e28;
+}
+.carte-recette-bandeau svg,
+.carte-recette-bandeau i {
+  width: 22px;
+  height: 22px;
+}
+.carte-recette-bandeau .pastille-repas {
+  background: rgba(255, 252, 247, 0.85);
+}
+.carte-recette-nom {
+  padding: 0 12px;
+  font-family: var(--police-titre);
+  font-size: 16px;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.carte-recette-detail {
+  padding: 0 12px;
+  font-size: 13px;
+  color: var(--texte-doux);
+}
+.ligne-recette-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--couleur-recette);
+}
+.ligne-recette-icone svg,
+.ligne-recette-icone i {
+  width: 18px;
+  height: 18px;
+}
+.ligne-recette-texte {
+  flex: 1;
+}
+#liste-recettes .carte .ligne-recette {
+  justify-content: flex-start;
+}
+
+/* La fiche, comme une page de carnet */
+#feuille-recette .feuille-haut {
+  margin: -18px -20px 0;
+  padding: 18px 20px 14px;
+  background: var(--couleur-recette, var(--carte));
+  border-radius: 24px 24px 0 0;
+}
+#feuille-recette .feuille-haut h2 {
+  color: #3a2e28;
+}
+.fiche-infos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0;
+}
+.fiche-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--fond);
+  font-size: 13px;
+  font-weight: 700;
+}
+.fiche-info svg,
+.fiche-info i {
+  width: 15px;
+  height: 15px;
+}
+.fiche-bloc {
+  margin: 14px 0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--fond);
+}
+.fiche-bloc h3 {
+  margin: 0 0 8px;
+  font-family: var(--police-titre);
+  font-size: 18px;
+}
+.fiche-bloc-entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.fiche-bloc-entete h3 {
+  margin: 0;
+}
+.fiche-portions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 14px;
+}
+.bouton-rond-petit {
+  background: var(--carte);
+}
+.fiche-bloc .liste-ingredients {
+  margin-top: 8px;
+}
+.fiche-bloc .liste-etapes {
+  list-style: none;
+  padding: 0;
+  counter-reset: etape;
+}
+.fiche-bloc .liste-etapes li {
+  position: relative;
+  padding-left: 40px;
+  margin-bottom: 12px;
+  counter-increment: etape;
+}
+.fiche-bloc .liste-etapes li::before {
+  content: counter(etape);
+  position: absolute;
+  left: 0;
+  top: -2px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--couleur-recette, var(--trait));
+  font-family: var(--police-titre);
+  font-weight: 700;
+}
+.fiche-notes {
+  background: #fbf3dc;
+}

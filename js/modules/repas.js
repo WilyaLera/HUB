@@ -18,7 +18,9 @@
 //              derniere ("AAAA-MM-JJ"), prix }]
 // jours    : { "AAAA-MM-JJ": { soir: repas, midi: repas } }
 //            un repas : { recetteId, texte, type ("cuisine" | "restaurant"), gamelle, plaisir, fait, envoye }
-// reglages : { personnes, gamelle: [jours 0-6], plaisir: [jours 0-6], dimancheMidi, rizMax, poissonParMois }
+// reglages : { personnes, moments: { matin, midi, soir }, gamelle: [jours 0-6], plaisir: [jours 0-6],
+//              dimancheMidi, rizMax, poissonParMois }
+// Les sortes de repas : "cuisine" (fait maison), "restaurant", "sortie" (chez quelqu'un, pique-nique…)
 
 const CATEGORIES_RECETTE = ["Plat", "Cheat meal", "Dessert", "Petit-déjeuner"];
 const NOMS_JOURS_COURTS = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
@@ -50,6 +52,20 @@ if (!repas) {
   }
   sauvegarder("repas", repas);
 }
+
+// Les repas qu'on peut prévoir dans une journée (le petit-déjeuner, pour qui le cuisine)
+const MOMENTS_REPAS = [
+  ["matin", "Petit-déjeuner", "matin"],
+  ["midi", "Déjeuner", "midi"],
+  ["soir", "Dîner", "soir"],
+];
+const SORTES_REPAS = [
+  ["cuisine", "Fait maison"],
+  ["restaurant", "Restaurant"],
+  ["sortie", "Sortie"],
+];
+// Reprise de la V36 : on ne prévoyait que le dîner
+if (!repas.reglages.moments) repas.reglages.moments = { matin: false, midi: false, soir: true };
 
 function sauvegarderRepas() {
   sauvegarder("repas", repas);
@@ -83,13 +99,16 @@ function repasDu(date, moment) {
 // Le nom à afficher pour un repas
 function nomDuRepas(leRepas) {
   if (!leRepas) return "";
-  if (leRepas.type === "restaurant") return "Restaurant";
+  if (leRepas.type === "restaurant" || leRepas.type === "sortie") {
+    const sorte = leRepas.type === "restaurant" ? "Restaurant" : "Sortie";
+    return leRepas.texte ? `${sorte} · ${leRepas.texte}` : sorte;
+  }
   const recette = recetteDe(leRepas.recetteId);
   return recette ? recette.nom : leRepas.texte;
 }
 
 function repasVide(leRepas) {
-  return !leRepas || (leRepas.type !== "restaurant" && !leRepas.recetteId && !leRepas.texte);
+  return !leRepas || (leRepas.type === "cuisine" && !leRepas.recetteId && !leRepas.texte);
 }
 
 // « mer. 25 »
@@ -103,13 +122,18 @@ function texteJourLong(date) {
   return majuscule(texteEnDate(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }));
 }
 
-// Les moments d'un jour : le soir, et le midi du dimanche (si activé) ou s'il est déjà prévu
+// Les moments d'un jour : ceux choisis dans les réglages, le midi du dimanche si activé,
+// et tout repas déjà prévu (pour ne jamais le cacher)
 function momentsDu(date) {
-  const moments = [];
+  const choisis = repas.reglages.moments;
   const dimanche = texteEnDate(date).getDay() === 0;
-  if ((dimanche && repas.reglages.dimancheMidi) || repasDu(date, "midi")) moments.push("midi");
-  moments.push("soir");
-  return moments;
+  return MOMENTS_REPAS.map(([code]) => code).filter(
+    (code) => choisis[code] || (code === "midi" && dimanche && repas.reglages.dimancheMidi) || repasDu(date, code),
+  );
+}
+
+function nomDuMoment(moment) {
+  return MOMENTS_REPAS.find(([code]) => code === moment)[2];
 }
 
 // Jamais cuisiné : une recette « à tester »
@@ -144,7 +168,7 @@ function joursDeLaSemaine(lundi) {
 function recettesDesJours(jours) {
   const liste = [];
   jours.forEach((date) => {
-    ["midi", "soir"].forEach((moment) => {
+    ["matin", "midi", "soir"].forEach((moment) => {
       const leRepas = repasDu(date, moment);
       const recette = leRepas && leRepas.type === "cuisine" ? recetteDe(leRepas.recetteId) : null;
       if (recette) liste.push(recette);
@@ -392,9 +416,9 @@ function creerLigneRepas(date, moment) {
   const jour = document.createElement("span");
   jour.classList.add("ligne-repas-jour");
   jour.textContent = texteJourCourt(date);
-  if (moment === "midi") {
+  if (momentsDu(date).length > 1) {
     const petit = document.createElement("small");
-    petit.textContent = "midi";
+    petit.textContent = nomDuMoment(moment);
     jour.appendChild(petit);
   }
 
@@ -428,8 +452,14 @@ function creerLigneRepas(date, moment) {
   return ligne;
 }
 
+document.getElementById("semaine-repas-aujourdhui").addEventListener("click", () => {
+  lundiRepas = lundiDe(aujourdhuiEnTexte());
+  afficherSemaineRepas();
+});
+
 function afficherSemaineRepas() {
   document.getElementById("semaine-repas-label").textContent = texteSemaine(lundiRepas);
+  document.getElementById("semaine-repas-aujourdhui").hidden = lundiRepas === lundiDe(aujourdhuiEnTexte());
   const zone = document.getElementById("liste-semaine-repas");
   zone.replaceChildren();
   const jours = joursDeLaSemaine(lundiRepas);
@@ -566,7 +596,7 @@ function afficherFeuilleJourRepas() {
   const { date, moment } = repasOuvert;
   const leRepas = repasDu(date, moment);
   document.getElementById("jour-repas-titre").textContent =
-    `${texteJourLong(date)}${moment === "midi" ? ", midi" : ""}`;
+    `${texteJourLong(date)}${momentsDu(date).length > 1 || moment !== "soir" ? `, ${nomDuMoment(moment)}` : ""}`;
   const zone = document.getElementById("jour-repas-contenu");
   zone.replaceChildren();
 
@@ -631,16 +661,38 @@ function afficherFeuilleJourRepas() {
   // Cuisiné ou restaurant
   const sorte = document.createElement("div");
   sorte.classList.add("choix-refaire");
-  [["cuisine", "Fait maison"], ["restaurant", "Restaurant"]].forEach(([valeur, texte]) => {
+  SORTES_REPAS.forEach(([valeur, texte]) => {
     const bouton = document.createElement("button");
     bouton.type = "button";
     bouton.classList.add("pastille-temps");
     bouton.classList.toggle("choisie", (leRepas ? leRepas.type : "cuisine") === valeur && !(valeur === "cuisine" && repasVide(leRepas)));
     bouton.textContent = texte;
-    bouton.addEventListener("click", () => changerRepas((r) => (r.type = valeur)));
+    bouton.addEventListener("click", () =>
+      changerRepas((r) => {
+        if (r.type !== valeur && valeur !== "cuisine") {
+          r.recetteId = null;
+          r.texte = "";
+          r.gamelle = false;
+        }
+        if (r.type !== valeur && valeur === "cuisine") r.texte = "";
+        r.type = valeur;
+      }),
+    );
     sorte.appendChild(bouton);
   });
   zone.appendChild(sorte);
+
+  // Restaurant ou sortie : où ? (facultatif)
+  if (leRepas && leRepas.type !== "cuisine") {
+    const ou = document.createElement("input");
+    ou.type = "text";
+    ou.classList.add("champ-note");
+    ou.placeholder = leRepas.type === "restaurant" ? "Où ? (facultatif)" : "Chez qui, où ? (facultatif)";
+    ou.maxLength = 60;
+    ou.value = leRepas.texte || "";
+    ou.addEventListener("change", () => changerRepas((r) => (r.texte = ou.value.trim())));
+    zone.appendChild(ou);
+  }
 
   // Choisir dans le carnet
   if (!leRepas || leRepas.type === "cuisine") {
@@ -818,7 +870,7 @@ document.getElementById("repas-vers-courses").addEventListener("click", () => {
   // Les 10 prochains jours, à partir d'aujourd'hui
   for (let i = 0; i < 10; i++) {
     const date = ajouterJours(aujourdhuiEnTexte(), i);
-    ["midi", "soir"].forEach((moment) => {
+    ["matin", "midi", "soir"].forEach((moment) => {
       const leRepas = repasDu(date, moment);
       const recette = leRepas && leRepas.type === "cuisine" && !leRepas.fait ? recetteDe(leRepas.recetteId) : null;
       if (!recette) return;
@@ -828,7 +880,7 @@ document.getElementById("repas-vers-courses").addEventListener("click", () => {
       caseACocher.type = "checkbox";
       caseACocher.value = `${date}|${moment}`;
       const texte = document.createElement("span");
-      texte.textContent = `${texteJourCourt(date)}${moment === "midi" ? " midi" : ""} · ${recette.nom}`;
+      texte.textContent = `${texteJourCourt(date)}${moment !== "soir" ? ` ${nomDuMoment(moment)}` : ""} · ${recette.nom}`;
       if (leRepas.envoye) {
         const deja = document.createElement("small");
         deja.textContent = "déjà dans les courses";
@@ -916,37 +968,135 @@ function recetteVisible(r) {
   return true;
 }
 
+// La famille d'une protéine : une couleur et une icône pour s'y retrouver d'un coup d'œil
+const FAMILLES_PROTEINE = [
+  { code: "poulet", motif: /poulet|volaille|dinde/i, icone: "drumstick", couleur: "#E8C66A" },
+  { code: "boeuf", motif: /b(œ|oe)uf|steak|veau/i, icone: "beef", couleur: "#D98B6A" },
+  { code: "porc", motif: /porc|lardon|bacon|jambon|chorizo|saucisse/i, icone: "ham", couleur: "#E6A9A0" },
+  { code: "poisson", motif: /poisson|saumon|thon|crevette|moule/i, icone: "fish", couleur: "#9CC0C4" },
+  { code: "oeuf", motif: /(œ|oe)uf/i, icone: "egg", couleur: "#F0D58C" },
+  { code: "vege", motif: /végé|vege/i, icone: "leaf", couleur: "#9DBB9F" },
+];
+
+function familleDe(recette) {
+  return (
+    FAMILLES_PROTEINE.find((f) => f.motif.test(recette.proteine || "")) ||
+    (recette.categorie === "Dessert" ? { code: "dessert", icone: "cake-slice", couleur: "#D7B8D6" } : null) ||
+    (recette.categorie === "Petit-déjeuner" ? { code: "matin", icone: "croissant", couleur: "#EBC9A0" } : null) ||
+    { code: "autre", icone: "utensils", couleur: "#D9CBB6" }
+  );
+}
+
+const TRIS_CARNET = [
+  ["nom", "De A à Z"],
+  ["note", "Les mieux notées"],
+  ["temps", "Les plus rapides"],
+  ["test", "À tester d'abord"],
+];
+let triCarnet = "nom";
+if (!repas.reglages.vueCarnet) repas.reglages.vueCarnet = "cartes";
+
+function trierRecettes(liste) {
+  const parNom = (a, b) => a.nom.localeCompare(b.nom, "fr");
+  return liste.sort((a, b) => {
+    if (triCarnet === "note") return (b.etoiles || 0) - (a.etoiles || 0) || parNom(a, b);
+    if (triCarnet === "temps") return (a.temps || 999) - (b.temps || 999) || parNom(a, b);
+    if (triCarnet === "test") return Number(aTester(b)) - Number(aTester(a)) || parNom(a, b);
+    return parNom(a, b);
+  });
+}
+
+document.getElementById("tri-carnet").addEventListener("change", (e) => {
+  triCarnet = e.target.value;
+  afficherCarnet();
+});
+document.querySelectorAll("[data-vue-carnet]").forEach((bouton) => {
+  bouton.addEventListener("click", () => {
+    repas.reglages.vueCarnet = bouton.dataset.vueCarnet;
+    sauvegarderRepas();
+    afficherCarnet();
+  });
+});
+
+function creerCarteRecette(r) {
+  const famille = familleDe(r);
+  const carte = document.createElement("button");
+  carte.type = "button";
+  carte.classList.add("carte-recette");
+  carte.style.setProperty("--couleur-recette", famille.couleur);
+  const bandeau = document.createElement("span");
+  bandeau.classList.add("carte-recette-bandeau");
+  bandeau.appendChild(creerIcone(famille.icone));
+  if (r.etoiles) bandeau.appendChild(creerPastilleRepas(`${String(r.etoiles).replace(".", ",")}/5`, "note"));
+  else if (aTester(r)) bandeau.appendChild(creerPastilleRepas("à tester", "test"));
+  const nom = document.createElement("span");
+  nom.classList.add("carte-recette-nom");
+  nom.textContent = r.nom;
+  const detail = document.createElement("span");
+  detail.classList.add("carte-recette-detail");
+  detail.textContent = [r.temps ? `${r.temps} min` : "", r.proteine].filter(Boolean).join(" · ");
+  carte.append(bandeau, nom, detail);
+  carte.addEventListener("click", () => ouvrirFicheRecette(r.id));
+  return carte;
+}
+
+function creerLigneRecette(r) {
+  const famille = familleDe(r);
+  const ligne = document.createElement("button");
+  ligne.type = "button";
+  ligne.classList.add("ligne-recette");
+  ligne.style.setProperty("--couleur-recette", famille.couleur);
+  const pastille = document.createElement("span");
+  pastille.classList.add("ligne-recette-icone");
+  pastille.appendChild(creerIcone(famille.icone));
+  const nom = document.createElement("span");
+  nom.classList.add("ligne-recette-nom");
+  nom.textContent = r.nom;
+  const detail = document.createElement("span");
+  detail.classList.add("sous-titre", "petit");
+  detail.textContent = [r.proteine, r.temps ? `${r.temps} min` : ""].filter(Boolean).join(" · ");
+  const texte = document.createElement("span");
+  texte.classList.add("ligne-recette-texte");
+  texte.append(nom, detail);
+  const droite = document.createElement("span");
+  droite.classList.add("ligne-repas-pastilles");
+  if (r.etoiles) droite.appendChild(creerPastilleRepas(`${String(r.etoiles).replace(".", ",")}/5`, "note"));
+  else if (aTester(r)) droite.appendChild(creerPastilleRepas("à tester", "test"));
+  ligne.append(pastille, texte, droite);
+  ligne.addEventListener("click", () => ouvrirFicheRecette(r.id));
+  return ligne;
+}
+
+const NOMS_CATEGORIES = { Plat: "Plats", "Cheat meal": "Repas plaisir", Dessert: "Desserts", "Petit-déjeuner": "Petits-déjeuners" };
+
 function afficherCarnet() {
   afficherFiltresCarnet();
+  const vue = repas.reglages.vueCarnet;
+  document.querySelectorAll("[data-vue-carnet]").forEach((b) => b.classList.toggle("choisie", b.dataset.vueCarnet === vue));
   const zone = document.getElementById("liste-recettes");
   zone.replaceChildren();
-  const visibles = repas.recettes.filter(recetteVisible).sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+  const visibles = trierRecettes(repas.recettes.filter(recetteVisible));
   document.getElementById("carnet-compte").textContent =
     `${visibles.length} recette${visibles.length > 1 ? "s" : ""}${visibles.length !== repas.recettes.length ? ` sur ${repas.recettes.length}` : ""}`;
   if (visibles.length === 0) {
     zone.appendChild(creerMessageVide("Aucune recette ne correspond."));
     return;
   }
-  visibles.forEach((r) => {
-    const ligne = document.createElement("button");
-    ligne.type = "button";
-    ligne.classList.add("ligne-recette");
-    const nom = document.createElement("span");
-    nom.classList.add("ligne-recette-nom");
-    nom.textContent = r.nom;
-    const detail = document.createElement("span");
-    detail.classList.add("sous-titre", "petit");
-    detail.textContent = [r.proteine, r.temps ? `${r.temps} min` : "", r.categorie !== "Plat" ? r.categorie : ""].filter(Boolean).join(" · ");
-    const texte = document.createElement("span");
-    texte.classList.add("ligne-recette-texte");
-    texte.append(nom, detail);
-    const droite = document.createElement("span");
-    droite.classList.add("ligne-repas-pastilles");
-    if (r.etoiles) droite.appendChild(creerPastilleRepas(`${String(r.etoiles).replace(".", ",")}/5`, "note"));
-    else if (aTester(r)) droite.appendChild(creerPastilleRepas("à tester", "test"));
-    ligne.append(texte, droite);
-    ligne.addEventListener("click", () => ouvrirFicheRecette(r.id));
-    zone.appendChild(ligne);
+  // Un chapitre par catégorie, comme dans un vrai carnet
+  const categories = [...CATEGORIES_RECETTE, ...new Set(visibles.map((r) => r.categorie).filter((c) => !CATEGORIES_RECETTE.includes(c)))];
+  categories.forEach((categorie) => {
+    const recettes = visibles.filter((r) => (r.categorie || "Plat") === categorie);
+    if (recettes.length === 0) return;
+    const chapitre = document.createElement("details");
+    chapitre.classList.add("chapitre-carnet");
+    chapitre.open = true;
+    const titre = document.createElement("summary");
+    titre.textContent = `${NOMS_CATEGORIES[categorie] || categorie} · ${recettes.length}`;
+    const contenu = document.createElement("div");
+    contenu.classList.add(vue === "cartes" ? "grille-recettes" : "carte");
+    recettes.forEach((r) => contenu.appendChild(vue === "cartes" ? creerCarteRecette(r) : creerLigneRecette(r)));
+    chapitre.append(titre, contenu);
+    zone.appendChild(chapitre);
   });
 }
 
@@ -954,8 +1104,12 @@ function afficherCarnet() {
 const feuilleRecette = document.getElementById("feuille-recette");
 let recetteOuverte = null;
 
+let portionsFiche = 2;
+
 function ouvrirFicheRecette(id) {
   recetteOuverte = id;
+  const r = recetteDe(id);
+  portionsFiche = (r && r.portions) || repas.reglages.personnes;
   afficherFicheRecette();
   feuilleRecette.hidden = false;
   voile.hidden = false;
@@ -988,19 +1142,31 @@ function afficherFicheRecette() {
   const zone = document.getElementById("recette-contenu");
   zone.replaceChildren();
 
-  const detail = document.createElement("p");
-  detail.classList.add("sous-titre");
-  detail.textContent = [r.categorie, r.proteine, r.temps ? `${r.temps} min` : "", r.portions ? `${r.portions} portions` : "", r.prix ? `≈ ${formaterMontant(r.prix)}` : ""]
-    .filter(Boolean)
-    .join(" · ");
-  zone.appendChild(detail);
+  const famille = familleDe(r);
+  feuilleRecette.style.setProperty("--couleur-recette", famille.couleur);
+
+  // Les infos, en petites étiquettes
+  const infos = document.createElement("div");
+  infos.classList.add("fiche-infos");
+  const ajouterInfo = (icone, texte) => {
+    if (!texte) return;
+    const info = document.createElement("span");
+    info.classList.add("fiche-info");
+    info.append(creerIcone(icone), texte);
+    infos.appendChild(info);
+  };
+  ajouterInfo(famille.icone, r.proteine || NOMS_CATEGORIES[r.categorie] || r.categorie);
+  ajouterInfo("clock", r.temps ? `${r.temps} min` : "");
+  ajouterInfo("coins", r.prix ? `≈ ${formaterMontant(r.prix)}` : "");
+  ajouterInfo(r.derniere ? "calendar-check" : "flask-conical", r.derniere ? `fait le ${formaterDate(r.derniere, false)}` : "à tester");
+  zone.appendChild(infos);
 
   const boutons = document.createElement("div");
   boutons.classList.add("envie-boutons");
   boutons.append(
     creerBoutonEnvie("Je cuisine", () => {
       fermerFicheRecette();
-      ouvrirModeCuisine(r.id, repas.reglages.personnes * 2, null);
+      ouvrirModeCuisine(r.id, portionsFiche, null);
     }, true),
     creerBoutonEnvie("Modifier", () => {
       fermerFicheRecette();
@@ -1009,26 +1175,62 @@ function afficherFicheRecette() {
   );
   zone.appendChild(boutons);
 
-  // Mon avis
-  const avis = document.createElement("div");
-  avis.classList.add("repas-noter");
-  const derniere = document.createElement("p");
-  derniere.classList.add("sous-titre", "petit");
-  derniere.textContent = r.derniere ? `Dernière fois : ${formaterDate(r.derniere, false)}` : "Pas encore testée";
-  avis.append(creerChoixNote(r, afficherCarnet), creerChoixRefaire(r, afficherFicheRecette), derniere);
-  zone.appendChild(avis);
-
+  // Les ingrédients, adaptés au nombre de portions choisi
   if (lignes(r.ingredients).length) {
+    const bloc = document.createElement("section");
+    bloc.classList.add("fiche-bloc");
+    const entete = document.createElement("div");
+    entete.classList.add("fiche-bloc-entete");
+    const titre = document.createElement("h3");
+    titre.textContent = "Ingrédients";
+    const portions = document.createElement("div");
+    portions.classList.add("fiche-portions");
+    const moins = document.createElement("button");
+    moins.type = "button";
+    moins.classList.add("bouton-rond", "bouton-rond-petit");
+    moins.setAttribute("aria-label", "Une portion de moins");
+    moins.appendChild(creerIcone("minus"));
+    moins.addEventListener("click", () => {
+      portionsFiche = Math.max(1, portionsFiche - 1);
+      afficherFicheRecette();
+    });
+    const combien = document.createElement("span");
+    combien.textContent = `${portionsFiche} portion${portionsFiche > 1 ? "s" : ""}`;
+    const plus = document.createElement("button");
+    plus.type = "button";
+    plus.classList.add("bouton-rond", "bouton-rond-petit");
+    plus.setAttribute("aria-label", "Une portion de plus");
+    plus.appendChild(creerIcone("plus"));
+    plus.addEventListener("click", () => {
+      portionsFiche += 1;
+      afficherFicheRecette();
+    });
+    portions.append(moins, combien, plus);
+    entete.append(titre, portions);
+    const facteur = portionsFiche / (r.portions || portionsFiche);
     const liste = document.createElement("ul");
     liste.classList.add("liste-ingredients");
     lignes(r.ingredients).forEach((l) => {
       const li = document.createElement("li");
-      li.textContent = l;
+      li.textContent = ligneAdaptee(l, facteur);
       liste.appendChild(li);
     });
-    zone.appendChild(creerSectionRecette("Ingrédients", liste, true));
+    bloc.append(entete, liste);
+    if (Math.abs(facteur - 1) > 0.01) {
+      const note = document.createElement("p");
+      note.classList.add("sous-titre", "petit");
+      note.textContent = `Recette écrite pour ${r.portions} portions, quantités recalculées.`;
+      bloc.appendChild(note);
+    }
+    zone.appendChild(bloc);
   }
+
+  // La préparation, avec de gros numéros
   if (lignes(r.etapes).length) {
+    const bloc = document.createElement("section");
+    bloc.classList.add("fiche-bloc");
+    const titre = document.createElement("h3");
+    titre.textContent = "Préparation";
     const liste = document.createElement("ol");
     liste.classList.add("liste-etapes");
     lignes(r.etapes).forEach((l) => {
@@ -1036,12 +1238,27 @@ function afficherFicheRecette() {
       li.textContent = l;
       liste.appendChild(li);
     });
-    zone.appendChild(creerSectionRecette("Préparation", liste, false));
+    bloc.append(titre, liste);
+    zone.appendChild(bloc);
   }
+
+  // Mon avis
+  const avis = document.createElement("section");
+  avis.classList.add("fiche-bloc");
+  const titreAvis = document.createElement("h3");
+  titreAvis.textContent = "Mon avis";
+  avis.append(titreAvis, creerChoixNote(r, afficherCarnet), creerChoixRefaire(r, afficherFicheRecette));
+  zone.appendChild(avis);
+
   if (r.notes) {
+    const bloc = document.createElement("section");
+    bloc.classList.add("fiche-bloc", "fiche-notes");
+    const titre = document.createElement("h3");
+    titre.textContent = "Notes";
     const notes = document.createElement("p");
     notes.textContent = r.notes;
-    zone.appendChild(creerSectionRecette("Notes", notes, false));
+    bloc.append(titre, notes);
+    zone.appendChild(bloc);
   }
 
   const supprimer = document.createElement("button");
@@ -1170,10 +1387,13 @@ document.addEventListener("visibilitychange", () => {
 // Adapter les quantités au nombre de portions (seulement le nombre en début de ligne)
 function ligneAdaptee(ligne, facteur) {
   if (Math.abs(facteur - 1) < 0.01) return ligne;
-  return ligne.replace(/^(\d+(?:[.,]\d+)?(?:\s*\/\s*\d+)?)/, (nombre) => {
+  const motif = /(?<![\d.,/])(\d+(?:[.,]\d+)?(?:\s*\/\s*\d+)?)(?![\d.,/])(?!\s*(?:%|°|cm|x\b|min|h\b|kcal))/g;
+  return ligne.replace(motif, (nombre) => {
     const valeur = lireNombre(nombre) * facteur;
     if (valeur < 1) return ecrireMesure(valeur, "pièce").quantite;
-    return String(Math.round(valeur * 10) / 10).replace(".", ",");
+    // Des chiffres ronds : 208 g → 210 g ; 13,4 → 13 ; 2,3 → 2,5
+    const arrondi = valeur >= 100 ? Math.round(valeur / 5) * 5 : valeur >= 10 ? Math.round(valeur) : Math.round(valeur * 2) / 2;
+    return String(arrondi).replace(".", ",");
   });
 }
 
@@ -1391,12 +1611,16 @@ function afficherCarteRepas() {
   const zone = document.getElementById("accueil-repas");
   zone.replaceChildren();
   const aujourdhui = aujourdhuiEnTexte();
+  // Le prochain repas de la journée : le matin avant 10 h, le midi avant 14 h, sinon le soir
+  const heure = new Date().getHours();
+  const dejaPasses = heure >= 14 ? ["matin", "midi"] : heure >= 10 ? ["matin"] : [];
   const prevus = momentsDu(aujourdhui)
+    .filter((moment) => !dejaPasses.includes(moment))
     .map((moment) => ({ moment, leRepas: repasDu(aujourdhui, moment) }))
     .filter((x) => !repasVide(x.leRepas) && !x.leRepas.fait);
   carte.dataset.vide = prevus.length === 0 ? "true" : "false";
-  document.getElementById("titre-carte-repas").textContent =
-    prevus.length && prevus[0].moment === "midi" ? "Ce midi" : "Ce soir";
+  const titres = { matin: "Ce matin", midi: "Ce midi", soir: "Ce soir" };
+  document.getElementById("titre-carte-repas").textContent = prevus.length ? titres[prevus[0].moment] : "Ce soir";
   prevus.slice(0, 1).forEach(({ moment, leRepas }) => {
     const nom = document.createElement("p");
     nom.classList.add("repas-prevu-nom");
@@ -1440,6 +1664,28 @@ function afficherReglagesRepas() {
   document.getElementById("repas-riz-max").value = r.rizMax;
   document.getElementById("repas-poisson").value = r.poissonParMois;
   document.getElementById("repas-dimanche-midi").checked = r.dimancheMidi;
+  document.getElementById("ligne-dimanche-midi").hidden = r.moments.midi;
+  const zoneMoments = document.getElementById("repas-moments");
+  zoneMoments.replaceChildren();
+  MOMENTS_REPAS.forEach(([code, nom]) => {
+    const bouton = document.createElement("button");
+    bouton.type = "button";
+    bouton.classList.add("pastille-temps");
+    bouton.classList.toggle("choisie", r.moments[code]);
+    bouton.textContent = nom;
+    bouton.addEventListener("click", () => {
+      const autres = MOMENTS_REPAS.filter(([c]) => c !== code && r.moments[c]);
+      if (r.moments[code] && autres.length === 0) {
+        montrerPetitMessage("Garde au moins un repas à prévoir");
+        return;
+      }
+      r.moments[code] = !r.moments[code];
+      sauvegarderRepas();
+      afficherReglagesRepas();
+      afficherRepas();
+    });
+    zoneMoments.appendChild(bouton);
+  });
   ["gamelle", "plaisir"].forEach((sorte) => {
     const zone = document.getElementById(`repas-jours-${sorte}`);
     zone.replaceChildren();

@@ -20,12 +20,12 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Kalam:wght@400;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=36" />
-    <link rel="stylesheet" href="css/navigation.css?v=36" />
-    <link rel="stylesheet" href="css/budget.css?v=36" />
-    <link rel="stylesheet" href="css/agenda.css?v=36" />
-    <link rel="stylesheet" href="css/confort.css?v=36" />
-    <link rel="stylesheet" href="css/ordinateur.css?v=36" />
+    <link rel="stylesheet" href="css/base.css?v=37" />
+    <link rel="stylesheet" href="css/navigation.css?v=37" />
+    <link rel="stylesheet" href="css/budget.css?v=37" />
+    <link rel="stylesheet" href="css/agenda.css?v=37" />
+    <link rel="stylesheet" href="css/confort.css?v=37" />
+    <link rel="stylesheet" href="css/ordinateur.css?v=37" />
   </head>
 
   <body>
@@ -275,6 +275,9 @@
             <p id="semaine-repas-label"></p>
             <button type="button" id="semaine-repas-suiv" class="bouton-rond" aria-label="Semaine suivante"><i data-lucide="chevron-right"></i></button>
           </div>
+          <button type="button" id="semaine-repas-aujourdhui" class="lien lien-cette-semaine" hidden>
+            <i data-lucide="calendar-check"></i> Revenir à cette semaine
+          </button>
           <div id="liste-semaine-repas" class="carte"></div>
           <div id="alertes-repas"></div>
           <button type="button" id="repas-vers-courses" class="bouton bouton-large">
@@ -289,10 +292,22 @@
           </div>
           <div id="filtres-recettes" class="barre-filtre" hidden></div>
           <div class="carnet-entete">
+            <select id="tri-carnet" class="champ-note" aria-label="Ranger par">
+              <option value="nom">De A à Z</option>
+              <option value="note">Les mieux notées</option>
+              <option value="temps">Les plus rapides</option>
+              <option value="test">À tester d'abord</option>
+            </select>
+            <div class="vue-carnet">
+              <button type="button" class="bouton-rond" data-vue-carnet="cartes" aria-label="Voir en cartes"><i data-lucide="layout-grid"></i></button>
+              <button type="button" class="bouton-rond" data-vue-carnet="liste" aria-label="Voir en liste"><i data-lucide="list"></i></button>
+            </div>
+          </div>
+          <div class="carnet-entete">
             <p id="carnet-compte" class="sous-titre petit"></p>
             <button type="button" id="nouvelle-recette" class="lien"><i data-lucide="plus"></i> Nouvelle recette</button>
           </div>
-          <div id="liste-recettes" class="carte"></div>
+          <div id="liste-recettes"></div>
         </div>
 
         <button type="button" class="lien-reglages" data-reglages="carte-reglages-repas">
@@ -1538,6 +1553,8 @@
         <!-- Les réglages des repas (repas.js) -->
         <details id="carte-reglages-repas" class="carte carte-repliable">
           <summary><h2>Réglages des repas</h2></summary>
+          <p class="etiquette">Les repas à prévoir chaque jour</p>
+          <div id="repas-moments" class="barre-filtre"></div>
           <label class="ligne-reglage">Nombre de personnes
             <input id="repas-personnes" class="champ-note champ-court" type="number" inputmode="numeric" min="1" max="12" />
           </label>
@@ -1545,7 +1562,7 @@
           <div id="repas-jours-gamelle" class="barre-filtre"></div>
           <p class="etiquette etiquette-espacee">Les soirs « repas plaisir »</p>
           <div id="repas-jours-plaisir" class="barre-filtre"></div>
-          <label class="case-repas"><input id="repas-dimanche-midi" type="checkbox" /> Un repas en plus le dimanche midi</label>
+          <label id="ligne-dimanche-midi" class="case-repas"><input id="repas-dimanche-midi" type="checkbox" /> Un repas en plus le dimanche midi</label>
           <label class="ligne-reglage">Repas avec du riz, au plus, par semaine
             <input id="repas-riz-max" class="champ-note champ-court" type="number" inputmode="numeric" min="0" max="14" />
           </label>
@@ -2216,33 +2233,33 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=36"></script>
-    <script src="js/outils/dates.js?v=36"></script>
-    <script src="js/outils/annuler.js?v=36"></script>
-    <script src="js/outils/icones.js?v=36"></script>
-    <script src="js/modules/navigation.js?v=36"></script>
-    <script src="js/modules/infos.js?v=36"></script>
-    <script src="js/modules/accueil.js?v=36"></script>
-    <script src="js/modules/budget.js?v=36"></script>
-    <script src="js/modules/budget-repartition.js?v=36"></script>
-    <script src="js/modules/budget-mois.js?v=36"></script>
-    <script src="js/modules/budget-raccourcis.js?v=36"></script>
-    <script src="js/modules/budget-epargne.js?v=36"></script>
-    <script src="js/modules/budget-point.js?v=36"></script>
-    <script src="js/donnees/sauvegarde.js?v=36"></script>
-    <script src="js/modules/agenda.js?v=36"></script>
-    <script src="js/modules/agenda-vues.js?v=36"></script>
-    <script src="js/modules/agenda-feuille.js?v=36"></script>
-    <script src="js/modules/agenda-reglages.js?v=36"></script>
-    <script src="js/modules/agenda-notifs.js?v=36"></script>
-    <script src="js/modules/accueil-cartes.js?v=36"></script>
-    <script src="js/modules/courses.js?v=36"></script>
-    <script src="js/modules/envies.js?v=36"></script>
-    <script src="js/modules/atelier.js?v=36"></script>
-    <script src="js/modules/soin.js?v=36"></script>
-    <script src="js/donnees/recettes-import.js?v=36"></script>
-    <script src="js/modules/repas.js?v=36"></script>
-    <script src="js/modules/moi.js?v=36"></script>
-    <script src="js/app.js?v=36"></script>
+    <script src="js/donnees/stockage.js?v=37"></script>
+    <script src="js/outils/dates.js?v=37"></script>
+    <script src="js/outils/annuler.js?v=37"></script>
+    <script src="js/outils/icones.js?v=37"></script>
+    <script src="js/modules/navigation.js?v=37"></script>
+    <script src="js/modules/infos.js?v=37"></script>
+    <script src="js/modules/accueil.js?v=37"></script>
+    <script src="js/modules/budget.js?v=37"></script>
+    <script src="js/modules/budget-repartition.js?v=37"></script>
+    <script src="js/modules/budget-mois.js?v=37"></script>
+    <script src="js/modules/budget-raccourcis.js?v=37"></script>
+    <script src="js/modules/budget-epargne.js?v=37"></script>
+    <script src="js/modules/budget-point.js?v=37"></script>
+    <script src="js/donnees/sauvegarde.js?v=37"></script>
+    <script src="js/modules/agenda.js?v=37"></script>
+    <script src="js/modules/agenda-vues.js?v=37"></script>
+    <script src="js/modules/agenda-feuille.js?v=37"></script>
+    <script src="js/modules/agenda-reglages.js?v=37"></script>
+    <script src="js/modules/agenda-notifs.js?v=37"></script>
+    <script src="js/modules/accueil-cartes.js?v=37"></script>
+    <script src="js/modules/courses.js?v=37"></script>
+    <script src="js/modules/envies.js?v=37"></script>
+    <script src="js/modules/atelier.js?v=37"></script>
+    <script src="js/modules/soin.js?v=37"></script>
+    <script src="js/donnees/recettes-import.js?v=37"></script>
+    <script src="js/modules/repas.js?v=37"></script>
+    <script src="js/modules/moi.js?v=37"></script>
+    <script src="js/app.js?v=37"></script>
   </body>
 </html>
