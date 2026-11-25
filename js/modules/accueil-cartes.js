@@ -5,6 +5,7 @@
 
 const CARTES_ACCUEIL = [
   { code: "aujourdhui", nom: "Aujourd'hui", detail: "Tes rendez-vous et tâches du jour" },
+  { code: "repas", nom: "Ce soir", detail: "Le repas prévu, et le mode cuisine" },
   { code: "demain", nom: "Demain", detail: "L'aperçu du lendemain, le soir à partir de 17 h" },
   { code: "idee", nom: "Une idée du pense-bête", detail: "Une tâche sans date, piochée au hasard" },
   { code: "budget", nom: "Mon mois", detail: "Ce qu'il te reste pour vivre" },
@@ -19,7 +20,11 @@ let reglagesAccueil = charger("accueil", {
 });
 // Une carte arrivée dans une nouvelle version : on l'ajoute à la fin
 CARTES_ACCUEIL.forEach((c) => {
-  if (!reglagesAccueil.ordre.includes(c.code)) reglagesAccueil.ordre.push(c.code);
+  if (reglagesAccueil.ordre.includes(c.code)) return;
+  // « Ce soir » se range juste après « Aujourd'hui », les autres à la fin
+  const apres = c.code === "repas" ? reglagesAccueil.ordre.indexOf("aujourdhui") : -1;
+  if (apres >= 0) reglagesAccueil.ordre.splice(apres + 1, 0, c.code);
+  else reglagesAccueil.ordre.push(c.code);
 });
 
 function nomCarte(code) {

@@ -203,3 +203,13 @@
     max-width: 640px;
   }
 }
+
+@media (min-width: 900px) {
+  #repas {
+    max-width: 640px;
+  }
+  #mode-cuisine {
+    padding-left: max(20px, calc(50% - 360px));
+    padding-right: max(20px, calc(50% - 360px));
+  }
+}

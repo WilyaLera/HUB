@@ -1066,3 +1066,428 @@ button.envie-achat-haut {
 #menu-soin .ligne-article-quantite {
   white-space: nowrap;
 }
+
+/* =====================================================
+   Repas
+   ===================================================== */
+
+.panneau-repas {
+  display: none;
+}
+.panneau-repas.actif {
+  display: block;
+}
+
+.nav-semaine-repas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 14px 0 8px;
+}
+.nav-semaine-repas p {
+  margin: 0;
+  font-weight: 700;
+}
+
+/* Une ligne par repas : le jour, le plat, les petites pastilles */
+.ligne-repas {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 0;
+  border: none;
+  border-bottom: 1px solid var(--trait);
+  background: none;
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ligne-repas:last-child {
+  border-bottom: none;
+}
+.ligne-repas-jour {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texte-doux);
+}
+.ligne-repas-jour small {
+  font-weight: 400;
+}
+.ligne-repas-aujourdhui .ligne-repas-jour {
+  color: var(--accent);
+}
+.ligne-repas-nom {
+  font-size: 15px;
+}
+.ligne-repas-vide {
+  color: var(--texte-doux);
+  font-style: italic;
+}
+.ligne-repas-fait {
+  color: var(--texte-doux);
+  text-decoration: line-through;
+}
+.ligne-repas-pastilles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  max-width: 130px;
+}
+.ligne-repas-panier {
+  width: 16px;
+  height: 16px;
+  color: var(--sauge);
+}
+
+.pastille-repas {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.pastille-repas-gamelle {
+  background: #dee7cf;
+  color: #3b4d2a;
+}
+.pastille-repas-test {
+  background: #f4dccb;
+  color: #7a3a18;
+}
+.pastille-repas-plaisir {
+  background: #f1e1b8;
+  color: #6b4a0a;
+}
+.pastille-repas-note {
+  background: none;
+  color: #a86f12;
+}
+
+.alerte-repas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #f3e6dc;
+  font-size: 14px;
+}
+.alerte-repas svg,
+.alerte-repas i {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+#repas-vers-courses {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* La feuille d'un repas */
+.repas-prevu {
+  padding: 12px 14px;
+  margin: 10px 0 14px;
+  border-radius: 16px;
+  background: var(--fond);
+}
+.repas-prevu-nom {
+  margin: 0 0 4px;
+  font-family: var(--police-titre);
+  font-size: 19px;
+}
+.repas-noter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.choix-refaire {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0;
+}
+.cases-repas {
+  display: flex;
+  flex-direction: column;
+  margin: 10px 0;
+}
+.case-repas {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+.case-repas input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+}
+.case-jour-courses {
+  border-bottom: 1px solid var(--trait);
+}
+.case-jour-courses small {
+  display: block;
+  color: var(--texte-doux);
+}
+.resultats-recettes {
+  display: flex;
+  flex-direction: column;
+}
+.resultat-recette {
+  min-height: 44px;
+  padding: 8px 4px;
+  border: none;
+  border-bottom: 1px solid var(--trait);
+  background: none;
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.resultat-libre {
+  color: var(--accent);
+  font-weight: 700;
+}
+.lien-vider-repas {
+  display: block;
+  margin: 16px auto 4px;
+  color: var(--texte-doux);
+}
+
+/* Le carnet */
+.barre-carnet {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 14px;
+}
+.barre-carnet .champ-note {
+  flex: 1;
+}
+.carnet-entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 6px 0;
+}
+.carnet-entete .lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+}
+.ligne-recette {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 0;
+  border: none;
+  border-bottom: 1px solid var(--trait);
+  background: none;
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ligne-recette:last-child {
+  border-bottom: none;
+}
+.ligne-recette-texte {
+  display: flex;
+  flex-direction: column;
+}
+.ligne-recette-nom {
+  font-weight: 700;
+}
+.liste-ingredients,
+.liste-etapes {
+  margin: 0;
+  padding-left: 20px;
+  line-height: 1.6;
+}
+.liste-etapes li {
+  margin-bottom: 6px;
+}
+.form-recette-chiffres {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.form-recette-chiffres label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--texte-doux);
+}
+#form-recette textarea {
+  width: 100%;
+  margin-top: 4px;
+  font: inherit;
+  resize: vertical;
+}
+
+/* Les courses venues d'un repas */
+.ligne-article-pour {
+  display: block;
+  font-size: 12px;
+  color: var(--texte-doux);
+}
+
+/* Réglages des repas */
+.ligne-reglage {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+}
+.champ-court {
+  width: 72px;
+  text-align: center;
+}
+
+/* ---------- Le mode cuisine : plein écran, gros texte ---------- */
+#mode-cuisine {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  padding: max(16px, env(safe-area-inset-top)) 20px max(16px, env(safe-area-inset-bottom));
+  background: var(--fond);
+  overflow-y: auto;
+}
+#mode-cuisine[hidden] {
+  display: none;
+}
+body.en-cuisine .barre-nav {
+  display: none;
+}
+.cuisine-haut {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cuisine-haut p {
+  margin: 0;
+  font-family: var(--police-titre);
+  font-size: 18px;
+}
+.cuisine-fil {
+  display: flex;
+  gap: 6px;
+  margin: 14px 0;
+}
+.fil-point {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--trait);
+}
+.fil-point.fil-fait {
+  background: var(--sauge);
+}
+.fil-point.fil-actuel {
+  background: var(--accent);
+}
+.cuisine-minuteurs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.minuteur {
+  min-height: 44px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--texte);
+  color: var(--carte);
+  font: inherit;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.minuteur-fini {
+  background: var(--accent);
+}
+.cuisine-contenu {
+  flex: 1;
+}
+.cuisine-contenu h2 {
+  font-size: 22px;
+}
+.cuisine-portions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  font-size: 18px;
+  font-weight: 700;
+}
+.cuisine-ingredient {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--trait);
+  font-size: 18px;
+  line-height: 1.4;
+}
+.cuisine-ingredient input {
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--sauge);
+}
+.cuisine-ingredient:has(input:checked) {
+  color: var(--texte-doux);
+  text-decoration: line-through;
+}
+.cuisine-numero {
+  margin: 10px 0 0;
+  font-weight: 700;
+  color: var(--accent);
+}
+.cuisine-etape {
+  font-size: 24px;
+  line-height: 1.45;
+}
+.cuisine-bas {
+  display: flex;
+  gap: 10px;
+  padding-top: 12px;
+}
+.cuisine-bas button {
+  flex: 1;
+  min-height: 56px;
+  font-size: 17px;
+}
+.cuisine-bas [hidden] {
+  display: none;
+}
+#jour-repas-contenu .zone-modifier {
+  margin-top: 12px;
+}
+#jour-repas-contenu .envie-boutons {
+  margin: 8px 0;
+}

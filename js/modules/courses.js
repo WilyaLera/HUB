@@ -162,7 +162,17 @@ function creerLigneArticle(article) {
   const zone = document.createElement("button");
   zone.type = "button";
   zone.classList.add("ligne-article-nom");
-  zone.textContent = article.nom;
+  // Le nom (et, en petit dessous, les jours de repas pour lesquels on l'achète)
+  const titre = document.createElement("span");
+  titre.classList.add("ligne-article-titre");
+  titre.textContent = article.nom;
+  if (article.pour && article.pour.length) {
+    const pour = document.createElement("span");
+    pour.classList.add("ligne-article-pour");
+    pour.textContent = `pour ${article.pour.join(", ")}`;
+    titre.appendChild(pour);
+  }
+  zone.appendChild(titre);
   if (article.quantite) {
     const quantite = document.createElement("span");
     quantite.classList.add("ligne-article-quantite");
