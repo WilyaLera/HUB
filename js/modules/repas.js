@@ -22,7 +22,7 @@
 //              dimancheMidi, rizMax, poissonParMois }
 // Les sortes de repas : "cuisine" (fait maison), "restaurant", "sortie" (chez quelqu'un, pique-nique…)
 
-const CATEGORIES_RECETTE = ["Plat", "Cheat meal", "Dessert", "Petit-déjeuner"];
+const CATEGORIES_RECETTE = ["Plat", "Cheat meal", "À partager", "Dessert", "Petit-déjeuner"];
 const NOMS_JOURS_COURTS = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
 
 let repas = charger("repas", null);
@@ -66,6 +66,29 @@ const SORTES_REPAS = [
   ["restes", "Restes"],
   ["commande", "On commande"],
 ];
+// Les nouvelles recettes de ton carnet (mises à jour du PDF) : on ajoute seulement celles jamais vues,
+// pour ne jamais faire revenir une recette que tu as retirée
+if (!repas.recettesVues) {
+  // Les 111 premières recettes du carnet étaient déjà là : celles retirées ne reviennent pas
+  const premieres = typeof RECETTES_IMPORT !== "undefined" ? RECETTES_IMPORT.slice(0, 111).map((r) => r.id) : [];
+  repas.recettesVues = [...new Set([...premieres, ...repas.recettes.map((r) => r.id)])];
+}
+if (typeof RECETTES_IMPORT !== "undefined") {
+  const nouvelles = RECETTES_IMPORT.filter(
+    (r) => !repas.recettesVues.includes(r.id) && !repas.recettes.some((x) => x.nom === r.nom),
+  );
+  nouvelles.forEach((r) => {
+    repas.recettes.push({ ...r });
+    repas.recettesVues.push(r.id);
+  });
+  if (nouvelles.length) {
+    sauvegarder("repas", repas);
+    window.addEventListener("load", () =>
+      montrerPetitMessage(`${nouvelles.length} nouvelles recettes dans ton carnet 🌱`),
+    );
+  }
+}
+
 // La réserve : des plats mis de côté, à replacer quand on veut (comme « En réserve » dans ton plan)
 if (!repas.reserve) repas.reserve = [];
 // Reprise de la V36 : on ne prévoyait que le dîner
@@ -1150,10 +1173,11 @@ function creerLigneRecette(r) {
 }
 
 // Les chapitres du carnet, dans l'ordre du sommaire de ton PDF
-const CHAPITRES_CARNET = ["Volaille", "Bœuf", "Porc & saucisses", "Poisson & mer", "Œufs & végétarien", "Cheat meals", "Desserts", "Petits-déjeuners"];
+const CHAPITRES_CARNET = ["Volaille", "Bœuf", "Porc & saucisses", "Poisson & mer", "Œufs & végétarien", "Cheat meals", "À partager", "Desserts", "Petits-déjeuners"];
 
 function chapitreDe(r) {
   if (r.categorie === "Cheat meal") return "Cheat meals";
+  if (r.categorie === "À partager") return "À partager";
   if (r.categorie === "Dessert") return "Desserts";
   if (r.categorie === "Petit-déjeuner") return "Petits-déjeuners";
   const code = familleDe(r).code;
@@ -1173,7 +1197,8 @@ function creerBrin() {
   return brin;
 }
 
-const NOMS_CATEGORIES = { Plat: "Plats", "Cheat meal": "Repas plaisir", Dessert: "Desserts", "Petit-déjeuner": "Petits-déjeuners" };
+const NOMS_CATEGORIES = {
+  "À partager": "À partager", Plat: "Plats", "Cheat meal": "Repas plaisir", Dessert: "Desserts", "Petit-déjeuner": "Petits-déjeuners" };
 
 function afficherCarnet() {
   afficherFiltresCarnet();
