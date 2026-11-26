@@ -255,6 +255,7 @@ function lireNombre(texte) {
 function nomCourt(nom) {
   let propre = nom.replace(/\(.*?\)/g, "").replace(/\s+/g, " ").trim();
   propre = propre.split(/\s+(?:en |pour |sans |bien |env\.|environ |à température)/)[0];
+  propre = propre.replace(/^(?:gros|grosse|grosses|petit|petite|petits|petites|beaux|belles?)\s+/i, "");
   const adjectifs = /\s+(émincée?s?|râpée?s?|égouttée?s?|coupée?s?|crue?s?|décortiquée?s?|sèche?s?|secs?|finement|fine?s?|frais|fraîche?s?|hachée?s? fin)$/i;
   while (adjectifs.test(propre)) propre = propre.replace(adjectifs, "");
   return propre.trim();
@@ -277,7 +278,8 @@ function cleIngredient(nom) {
 // Une ligne de recette → une liste d'ingrédients { nom, quantite, unite }
 function lireLigne(ligne) {
   // « Sauce : 2 c. à soupe de yaourt… » : on enlève l'étiquette avant les deux-points
-  let texte = ligne.replace(/^[^:\d]{1,40}:\s*/, "").trim();
+  // (les précisions entre parenthèses ne comptent pas : « sauce tomate (tomates, ail, herbes) »)
+  let texte = ligne.replace(/\([^)]*\)/g, "").replace(/^[^:\d]{1,40}:\s*/, "").trim();
   const resultats = [];
   // Plusieurs ingrédients sur une ligne : « Sauce soja, huile de sésame, ail »
   texte.split(/,\s+|\s*;\s*|\s+\+\s+|\s+et\s+(?=\D)/).forEach((morceau) => {
@@ -348,11 +350,12 @@ function envoyerAuxCourses(date, moment) {
   const recette = leRepas ? recetteDe(leRepas.recetteId) : null;
   if (!recette || leRepas.type !== "cuisine") return 0;
   const facteur = portionsDu(leRepas) / (recette.portions || portionsDu(leRepas));
-  const etiquette = texteJourCourt(date);
+  // Si ce repas était déjà dans les courses, on retire d'abord sa part (pas de doublon)
+  if (leRepas.envoye) retirerDesCourses(date, moment);
   let ajoutes = 0;
   lignes(recette.ingredients).forEach((ligne) => {
     lireLigne(ligne).forEach((ingredient) => {
-      ajouterIngredientAuxCourses(ingredient, facteur, etiquette);
+      ajouterIngredientAuxCourses(ingredient, facteur, `${date}|${moment}`);
       ajoutes++;
     });
   });
@@ -362,39 +365,116 @@ function envoyerAuxCourses(date, moment) {
   return ajoutes;
 }
 
-function ajouterIngredientAuxCourses(ingredient, facteur, etiquette) {
+// Chaque article venu d'un repas garde ses « apports » : { repas: "date|moment", valeur, base }.
+// Ainsi, si le repas change, on sait exactement quoi retirer.
+// quantiteManuelle : ce que tu avais noté toi-même avant (en grammes, ml, pièces…), qu'on ne touche jamais.
+
+function mesureDeLArticle(article) {
+  if (!article.quantite) return null;
+  const valeur = lireNombre(String(article.quantite));
+  return isNaN(valeur) ? null : versBase(valeur, article.unite || "pièce");
+}
+
+// Recalculer la quantité, le « pour mer. 25 » d'un article à partir de ses apports
+function recalculerArticle(article) {
+  const base = (article.apports.find((x) => x.base) || {}).base || (article.quantiteManuelle || {}).base;
+  let total = article.quantiteManuelle ? article.quantiteManuelle.valeur : 0;
+  article.apports.forEach((x) => {
+    if (x.valeur && x.base === base) total += x.valeur;
+  });
+  if (base && total > 0) {
+    const ecrit = ecrireMesure(total, base);
+    article.quantite = ecrit.quantite;
+    article.unite = ecrit.unite;
+  } else {
+    article.quantite = "";
+    article.unite = "";
+  }
+  article.pour = [...new Set(article.apports.map((x) => texteJourCourt(x.repas.split("|")[0])))];
+}
+
+function ajouterIngredientAuxCourses(ingredient, facteur, cleRepas) {
   const cle = cleIngredient(ingredient.nom);
   const mesure = ingredient.quantite !== null ? versBase(ingredient.quantite * facteur, ingredient.unite) : null;
+  const apport = { repas: cleRepas, valeur: mesure ? mesure.valeur : null, base: mesure ? mesure.base : null };
   // Le même ingrédient, pas encore pris, avec une unité qu'on peut additionner
   const existant = courses.articles.find((a) => {
     if (a.coche || cleIngredient(a.nom) !== cle) return false;
-    if (!mesure || !a.quantite) return !mesure || !a.quantite;
-    return versBase(lireNombre(String(a.quantite)), a.unite || "pièce").base === mesure.base;
+    const sienne = a.apports ? (a.apports.find((x) => x.base) || {}).base || (a.quantiteManuelle || {}).base : (mesureDeLArticle(a) || {}).base;
+    return !mesure || !sienne || sienne === mesure.base;
   });
   if (existant) {
-    if (mesure && existant.quantite) {
-      const avant = versBase(lireNombre(String(existant.quantite)), existant.unite || "pièce");
-      const total = ecrireMesure(avant.valeur + mesure.valeur, mesure.base);
-      existant.quantite = total.quantite;
-      existant.unite = total.unite;
-    } else if (mesure) {
-      const total = ecrireMesure(mesure.valeur, mesure.base);
-      existant.quantite = total.quantite;
-      existant.unite = total.unite;
+    // Un article noté à la main (ou d'une ancienne version) : on garde sa quantité à part
+    if (!existant.apports) {
+      existant.quantiteManuelle = mesureDeLArticle(existant);
+      existant.apports = [];
     }
-    existant.pour = [...new Set([...(existant.pour || []), etiquette])];
+    existant.apports.push(apport);
+    recalculerArticle(existant);
     return;
   }
-  const ecrit = mesure ? ecrireMesure(mesure.valeur, mesure.base) : { quantite: "", unite: "" };
-  courses.articles.push({
+  const article = {
     id: nouvelId(),
     nom: ingredient.nom,
-    quantite: ecrit.quantite,
-    unite: ecrit.unite,
+    quantite: "",
+    unite: "",
     rayonId: devinerRayon(ingredient.nom),
     coche: false,
     source: "repas",
-    pour: [etiquette],
+    apports: [apport],
+    quantiteManuelle: null,
+  };
+  recalculerArticle(article);
+  courses.articles.push(article);
+}
+
+// Retirer des courses ce qu'un repas avait ajouté (sauf ce qui est déjà dans le panier)
+function retirerDesCourses(date, moment) {
+  const cleRepas = `${date}|${moment}`;
+  let retires = 0;
+  courses.articles.forEach((article) => {
+    if (article.coche || !article.apports || !article.apports.some((x) => x.repas === cleRepas)) return;
+    article.apports = article.apports.filter((x) => x.repas !== cleRepas);
+    recalculerArticle(article);
+    retires++;
+  });
+  // Les articles qui ne venaient que des repas, et qui n'ont plus de raison d'être
+  courses.articles = courses.articles.filter(
+    (a) => a.coche || !a.apports || a.apports.length > 0 || a.quantiteManuelle || a.source !== "repas",
+  );
+  const leRepas = repasDu(date, moment);
+  if (leRepas) leRepas.envoye = false;
+  sauvegarderCourses();
+  return retires;
+}
+
+// Un repas change de jour : ses courses le suivent
+function deplacerApports(deCle, versCle) {
+  courses.articles.forEach((article) => {
+    if (!article.apports) return;
+    article.apports.forEach((x) => {
+      if (x.repas === deCle) x.repas = versCle;
+    });
+    recalculerArticle(article);
+  });
+}
+
+// Faire une action qui touche le repas ET les courses, avec « Annuler » pour les deux
+function agirSurRepasEtCourses(message, action) {
+  const copieRepas = JSON.stringify(repas);
+  const copieCourses = JSON.stringify(courses);
+  const texte = action() || message;
+  sauvegarderRepas();
+  sauvegarderCourses();
+  afficherRepas();
+  afficherCourses();
+  montrerPetitMessage(texte, () => {
+    remettreCommeAvant(repas, copieRepas);
+    remettreCommeAvant(courses, copieCourses);
+    sauvegarderRepas();
+    sauvegarderCourses();
+    afficherRepas();
+    afficherCourses();
   });
 }
 
@@ -597,7 +677,28 @@ function changerRepas(changement) {
   const { date, moment } = repasOuvert;
   if (!repas.jours[date]) repas.jours[date] = {};
   if (!repas.jours[date][moment]) repas.jours[date][moment] = nouveauRepas(date, moment);
-  changement(repas.jours[date][moment]);
+  const leRepas = repas.jours[date][moment];
+  const avant = { envoye: leRepas.envoye, recetteId: leRepas.recetteId, type: leRepas.type, gamelle: leRepas.gamelle };
+  changement(leRepas);
+  if (avant.envoye) {
+    const ancien = recetteDe(avant.recetteId);
+    if (leRepas.recetteId !== avant.recetteId || leRepas.type !== avant.type) {
+      leRepas.envoye = true; // pour que retirerDesCourses le remette à faux
+      retirerDesCourses(date, moment);
+      const nouvelle = leRepas.type === "cuisine" ? recetteDe(leRepas.recetteId) : null;
+      if (nouvelle) {
+        // On remplace directement dans les courses
+        envoyerAuxCourses(date, moment);
+        montrerPetitMessage(`Courses mises à jour : « ${nouvelle.nom} » remplace « ${ancien ? ancien.nom : "l'ancien plat"} »`);
+      } else {
+        montrerPetitMessage(`Les ingrédients de « ${ancien ? ancien.nom : "ce repas"} » sont retirés des courses`);
+      }
+    } else if (leRepas.gamelle !== avant.gamelle) {
+      envoyerAuxCourses(date, moment);
+      montrerPetitMessage("Quantités mises à jour dans tes courses");
+    }
+    afficherCourses();
+  }
   sauvegarderRepas();
   afficherRepas();
   afficherFeuilleJourRepas();
@@ -930,6 +1031,11 @@ function afficherFeuilleJourRepas() {
       if (!cible || cible === date) return;
       if (!repas.jours[cible]) repas.jours[cible] = {};
       const autre = repas.jours[cible][moment] || null;
+      // Les courses suivent les repas (en passant par une clé provisoire pour l'échange)
+      deplacerApports(`${date}|${moment}`, "echange");
+      deplacerApports(`${cible}|${moment}`, `${date}|${moment}`);
+      deplacerApports("echange", `${cible}|${moment}`);
+      sauvegarderCourses();
       repas.jours[cible][moment] = repas.jours[date][moment];
       if (autre) repas.jours[date][moment] = autre;
       else delete repas.jours[date][moment];
@@ -948,16 +1054,11 @@ function afficherFeuilleJourRepas() {
     vider.classList.add("lien", "lien-vider-repas");
     vider.textContent = "Ne rien prévoir ce jour-là";
     vider.addEventListener("click", () => {
-      agirAvecAnnuler({
-        tiroir: repas,
-        message: "Repas retiré",
-        action: () => {
-          delete repas.jours[date][moment];
-        },
-        apres: () => {
-          sauvegarderRepas();
-          afficherRepas();
-        },
+      agirSurRepasEtCourses("Repas retiré", () => {
+        const avaitCourses = leRepas.envoye;
+        if (avaitCourses) retirerDesCourses(date, moment);
+        delete repas.jours[date][moment];
+        return avaitCourses ? "Repas retiré, et ses ingrédients aussi" : "Repas retiré";
       });
       fermerFeuilleJourRepas();
     });
@@ -1906,21 +2007,19 @@ document.querySelectorAll("[data-changement]").forEach((bouton) => {
     const { date, moment } = changementOuvert;
     const sorte = bouton.dataset.changement;
     const garder = document.getElementById("changement-garder").checked;
-    let message = "C'est noté, bonne soirée 🌙";
-    const copie = JSON.stringify(repas); // pour pouvoir annuler
-    const prevu = repas.jours[date][moment];
-    // Le plat prévu attend dans la réserve, pour le replacer quand on veut
-    if (garder && prevu && prevu.recetteId) {
-      if (!repas.reserve.includes(prevu.recetteId)) repas.reserve.push(prevu.recetteId);
-      message = `C'est noté. « ${nomDuRepas(prevu)} » t'attend dans la réserve 🌙`;
-    }
-    repas.jours[date][moment] = { ...nouveauRepas(date, moment), type: sorte, gamelle: false };
-    sauvegarderRepas();
-    afficherRepas();
-    montrerPetitMessage(message, () => {
-      remettreCommeAvant(repas, copie);
-      sauvegarderRepas();
-      afficherRepas();
+    agirSurRepasEtCourses("C'est noté, bonne soirée 🌙", () => {
+      let message = "C'est noté, bonne soirée 🌙";
+      const prevu = repas.jours[date][moment];
+      const avaitCourses = prevu && prevu.envoye;
+      if (avaitCourses) retirerDesCourses(date, moment);
+      // Le plat prévu attend dans la réserve, pour le replacer quand on veut
+      if (garder && prevu && prevu.recetteId) {
+        if (!repas.reserve.includes(prevu.recetteId)) repas.reserve.push(prevu.recetteId);
+        message = `C'est noté. « ${nomDuRepas(prevu)} » t'attend dans la réserve`;
+      }
+      if (avaitCourses) message += ", ses ingrédients sont retirés des courses";
+      repas.jours[date][moment] = { ...nouveauRepas(date, moment), type: sorte, gamelle: false };
+      return `${message} 🌙`;
     });
     fermerChangementDePlan();
   });

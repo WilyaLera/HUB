@@ -1982,3 +1982,16 @@ body.en-cuisine .barre-nav {
   height: 20px;
   color: var(--accent);
 }
+.lien-vider-courses {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin: 8px auto 0;
+  color: var(--texte-doux);
+}
+.lien-vider-courses svg,
+.lien-vider-courses i {
+  width: 16px;
+  height: 16px;
+}

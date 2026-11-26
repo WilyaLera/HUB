@@ -235,6 +235,17 @@ function afficherCourses() {
     listeCourses.appendChild(carte);
   }
 
+  // Repartir de zéro : vider toute la liste (avec « Annuler »)
+  if (courses.articles.length > 0) {
+    const vider = document.createElement("button");
+    vider.type = "button";
+    vider.classList.add("lien", "lien-vider-courses");
+    vider.appendChild(creerIcone("rotate-ccw"));
+    vider.append(" Vider toute la liste");
+    vider.addEventListener("click", viderToutesLesCourses);
+    listeCourses.appendChild(vider);
+  }
+
   // Les articles déjà connus, proposés quand on tape
   const connus = document.getElementById("articles-connus");
   connus.replaceChildren();
@@ -340,6 +351,9 @@ document.getElementById("form-modif-article").addEventListener("submit", (evenem
     : "";
   if (article.unite) courses.unites[article.nom.toLowerCase()] = article.unite;
   article.rayonId = document.getElementById("modif-article-rayon").value;
+  delete article.apports;
+  delete article.quantiteManuelle;
+  article.source = "manuel";
   courses.memoire[article.nom.toLowerCase()] = article.rayonId;
   sauvegarderCourses();
   fermerFeuilleArticle();
@@ -369,6 +383,30 @@ document.getElementById("plus-courses").addEventListener("click", () => {
   afficherEcran("courses"); // navigation.js
   articleNom.focus();
 });
+
+// Vider toute la liste : les repas envoyés aux courses redeviennent « à envoyer »
+function viderToutesLesCourses() {
+  const copieCourses = JSON.stringify(courses);
+  const copieRepas = typeof repas !== "undefined" ? JSON.stringify(repas) : null;
+  courses.articles = [];
+  if (copieRepas) {
+    Object.values(repas.jours).forEach((jour) => Object.values(jour).forEach((r) => (r.envoye = false)));
+    sauvegarderRepas();
+    afficherRepas();
+  }
+  sauvegarderCourses();
+  afficherCourses();
+  montrerPetitMessage("La liste est vide, on repart de zéro 🌱", () => {
+    remettreCommeAvant(courses, copieCourses);
+    sauvegarderCourses();
+    afficherCourses();
+    if (copieRepas) {
+      remettreCommeAvant(repas, copieRepas);
+      sauvegarderRepas();
+      afficherRepas();
+    }
+  });
+}
 
 // ---------- 5. « J'ai fini mes courses » ----------
 
