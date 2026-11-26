@@ -1043,7 +1043,8 @@ button.envie-achat-haut {
   gap: 8px;
   margin: 12px 0;
 }
-.choix-besoin {
+.choix-besoin,
+.choix-changement {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1938,4 +1939,46 @@ body.en-cuisine .barre-nav {
 }
 #feuille-recette .feuille-haut {
   justify-content: flex-end;
+}
+.liste-reserve {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0;
+}
+.pastille-reserve {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid var(--trait);
+  border-radius: 999px;
+  background: var(--fond);
+}
+.pastille-reserve button {
+  min-height: 40px;
+  padding: 0 4px 0 12px;
+  border: none;
+  background: none;
+  color: var(--texte);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.pastille-reserve button:last-child {
+  width: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--texte-doux);
+}
+.pastille-reserve svg,
+.pastille-reserve i {
+  width: 16px;
+  height: 16px;
+}
+#feuille-changement .choix-changement svg,
+#feuille-changement .choix-changement i {
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
 }

@@ -63,7 +63,11 @@ const SORTES_REPAS = [
   ["cuisine", "Fait maison"],
   ["restaurant", "Restaurant"],
   ["sortie", "Sortie"],
+  ["restes", "Restes"],
+  ["commande", "On commande"],
 ];
+// La réserve : des plats mis de côté, à replacer quand on veut (comme « En réserve » dans ton plan)
+if (!repas.reserve) repas.reserve = [];
 // Reprise de la V36 : on ne prévoyait que le dîner
 if (!repas.reglages.moments) repas.reglages.moments = { matin: false, midi: false, soir: true };
 
@@ -99,8 +103,8 @@ function repasDu(date, moment) {
 // Le nom à afficher pour un repas
 function nomDuRepas(leRepas) {
   if (!leRepas) return "";
-  if (leRepas.type === "restaurant" || leRepas.type === "sortie") {
-    const sorte = leRepas.type === "restaurant" ? "Restaurant" : "Sortie";
+  if (leRepas.type !== "cuisine") {
+    const sorte = (SORTES_REPAS.find(([code]) => code === leRepas.type) || [, "Autre"])[1];
     return leRepas.texte ? `${sorte} · ${leRepas.texte}` : sorte;
   }
   const recette = recetteDe(leRepas.recetteId);
@@ -465,6 +469,52 @@ function afficherSemaineRepas() {
   const jours = joursDeLaSemaine(lundiRepas);
   jours.forEach((date) => momentsDu(date).forEach((moment) => zone.appendChild(creerLigneRepas(date, moment))));
   afficherAlertesRepas(jours);
+  afficherReserve();
+}
+
+function afficherReserve() {
+  const zone = document.getElementById("reserve-repas");
+  zone.replaceChildren();
+  repas.reserve = repas.reserve.filter((id) => recetteDe(id));
+  zone.hidden = repas.reserve.length === 0;
+  if (zone.hidden) return;
+  const titre = document.createElement("p");
+  titre.classList.add("etiquette");
+  titre.textContent = "En réserve";
+  const liste = document.createElement("div");
+  liste.classList.add("liste-reserve");
+  repas.reserve.forEach((id) => {
+    const recette = recetteDe(id);
+    const pastille = document.createElement("span");
+    pastille.classList.add("pastille-reserve");
+    const nom = document.createElement("button");
+    nom.type = "button";
+    nom.textContent = recette.nom;
+    nom.addEventListener("click", () => ouvrirFicheRecette(id));
+    const retirer = document.createElement("button");
+    retirer.type = "button";
+    retirer.setAttribute("aria-label", `Retirer ${recette.nom} de la réserve`);
+    retirer.appendChild(creerIcone("x"));
+    retirer.addEventListener("click", () => {
+      agirAvecAnnuler({
+        tiroir: repas,
+        message: "Retiré de la réserve",
+        action: () => {
+          repas.reserve = repas.reserve.filter((x) => x !== id);
+        },
+        apres: () => {
+          sauvegarderRepas();
+          afficherSemaineRepas();
+        },
+      });
+    });
+    pastille.append(nom, retirer);
+    liste.appendChild(pastille);
+  });
+  const aide = document.createElement("p");
+  aide.classList.add("sous-titre", "petit");
+  aide.textContent = "Touche un jour pour y replacer un plat de la réserve.";
+  zone.append(titre, liste, aide);
 }
 
 // Les petites alertes douces : trop de riz, pas encore de poisson ce mois-ci
@@ -687,7 +737,12 @@ function afficherFeuilleJourRepas() {
     const ou = document.createElement("input");
     ou.type = "text";
     ou.classList.add("champ-note");
-    ou.placeholder = leRepas.type === "restaurant" ? "Où ? (facultatif)" : "Chez qui, où ? (facultatif)";
+    ou.placeholder = {
+      restaurant: "Où ? (facultatif)",
+      sortie: "Chez qui, où ? (facultatif)",
+      restes: "Les restes de quoi ? (facultatif)",
+      commande: "Quoi, chez qui ? (facultatif)",
+    }[leRepas.type];
     ou.maxLength = 60;
     ou.value = leRepas.texte || "";
     ou.addEventListener("change", () => changerRepas((r) => (r.texte = ou.value.trim())));
@@ -776,7 +831,34 @@ function afficherFeuilleJourRepas() {
       ),
       creerBoutonEnvie("Un plat poisson", () => placerIdee(avecDuPoisson, "Pas de plat poisson dans ton carnet")),
     );
-    zone.append(titre, champ, resultats, idees);
+    zone.append(titre, champ, resultats);
+    if (repas.reserve.length) {
+      const reserve = document.createElement("div");
+      reserve.classList.add("envie-boutons");
+      repas.reserve.forEach((id) => {
+        const recette = recetteDe(id);
+        if (!recette || (leRepas && leRepas.recetteId === id)) return;
+        reserve.appendChild(
+          creerBoutonEnvie(recette.nom, () => {
+            repas.reserve = repas.reserve.filter((x) => x !== id);
+            changerRepas((leR) => {
+              leR.recetteId = id;
+              leR.texte = "";
+              leR.type = "cuisine";
+              leR.fait = false;
+              leR.envoye = false;
+            });
+          }),
+        );
+      });
+      if (reserve.children.length) {
+        const titreReserve = document.createElement("p");
+        titreReserve.classList.add("etiquette");
+        titreReserve.textContent = "Depuis la réserve";
+        zone.append(titreReserve, reserve);
+      }
+    }
+    zone.appendChild(idees);
   }
 
   // Gamelle et plaisir
@@ -1737,14 +1819,22 @@ function afficherCarteRepas() {
       zone.appendChild(gamelle);
     }
     const recette = recetteDe(leRepas.recetteId);
-    if (recette && leRepas.type === "cuisine") {
+    if (leRepas.type === "cuisine") {
       const boutons = document.createElement("div");
       boutons.classList.add("envie-boutons");
+      if (recette) {
+        boutons.appendChild(
+          creerBoutonEnvie("Je cuisine", (e) => {
+            e.stopPropagation();
+            ouvrirModeCuisine(recette.id, portionsDu(leRepas), { date: aujourdhui, moment });
+          }, true),
+        );
+      }
       boutons.appendChild(
-        creerBoutonEnvie("Je cuisine", (e) => {
+        creerBoutonEnvie("Changement de plan", (e) => {
           e.stopPropagation();
-          ouvrirModeCuisine(recette.id, portionsDu(leRepas), { date: aujourdhui, moment });
-        }, true),
+          ouvrirChangementDePlan(aujourdhui, moment);
+        }),
       );
       zone.appendChild(boutons);
     }
@@ -1759,6 +1849,57 @@ function afficherResumeRepas() {
     : `Ce soir : ${nomDuRepas(ceSoir)}`;
   document.getElementById("repas-resume").textContent = `${repas.recettes.length} recettes dans ton carnet`;
 }
+
+// ---------- 9 bis. Changement de plan (la flemme, des restes, on commande…) ----------
+// Pas de culpabilité : on remplace le repas du jour, et le plat prévu glisse au prochain soir libre.
+
+const feuilleChangement = document.getElementById("feuille-changement");
+let changementOuvert = null; // { date, moment }
+
+function ouvrirChangementDePlan(date, moment) {
+  changementOuvert = { date, moment };
+  const leRepas = repasDu(date, moment);
+  document.getElementById("changement-garder-texte").textContent = `Garder « ${nomDuRepas(leRepas)} » en réserve pour un autre jour`;
+  document.getElementById("changement-garder").checked = true;
+  feuilleChangement.hidden = false;
+  voile.hidden = false;
+}
+
+function fermerChangementDePlan() {
+  feuilleChangement.hidden = true;
+  voile.hidden = true;
+  changementOuvert = null;
+}
+document.getElementById("fermer-changement").addEventListener("click", fermerChangementDePlan);
+voile.addEventListener("click", () => {
+  if (!feuilleChangement.hidden) fermerChangementDePlan();
+});
+
+document.querySelectorAll("[data-changement]").forEach((bouton) => {
+  bouton.addEventListener("click", () => {
+    if (!changementOuvert) return;
+    const { date, moment } = changementOuvert;
+    const sorte = bouton.dataset.changement;
+    const garder = document.getElementById("changement-garder").checked;
+    let message = "C'est noté, bonne soirée 🌙";
+    const copie = JSON.stringify(repas); // pour pouvoir annuler
+    const prevu = repas.jours[date][moment];
+    // Le plat prévu attend dans la réserve, pour le replacer quand on veut
+    if (garder && prevu && prevu.recetteId) {
+      if (!repas.reserve.includes(prevu.recetteId)) repas.reserve.push(prevu.recetteId);
+      message = `C'est noté. « ${nomDuRepas(prevu)} » t'attend dans la réserve 🌙`;
+    }
+    repas.jours[date][moment] = { ...nouveauRepas(date, moment), type: sorte, gamelle: false };
+    sauvegarderRepas();
+    afficherRepas();
+    montrerPetitMessage(message, () => {
+      remettreCommeAvant(repas, copie);
+      sauvegarderRepas();
+      afficherRepas();
+    });
+    fermerChangementDePlan();
+  });
+});
 
 // ---------- 10. Les réglages ----------
 

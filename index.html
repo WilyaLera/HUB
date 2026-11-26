@@ -20,12 +20,12 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Kalam:wght@400;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=37" />
-    <link rel="stylesheet" href="css/navigation.css?v=37" />
-    <link rel="stylesheet" href="css/budget.css?v=37" />
-    <link rel="stylesheet" href="css/agenda.css?v=37" />
-    <link rel="stylesheet" href="css/confort.css?v=37" />
-    <link rel="stylesheet" href="css/ordinateur.css?v=37" />
+    <link rel="stylesheet" href="css/base.css?v=38" />
+    <link rel="stylesheet" href="css/navigation.css?v=38" />
+    <link rel="stylesheet" href="css/budget.css?v=38" />
+    <link rel="stylesheet" href="css/agenda.css?v=38" />
+    <link rel="stylesheet" href="css/confort.css?v=38" />
+    <link rel="stylesheet" href="css/ordinateur.css?v=38" />
   </head>
 
   <body>
@@ -280,6 +280,7 @@
           </button>
           <div id="liste-semaine-repas" class="carte"></div>
           <div id="alertes-repas"></div>
+          <div id="reserve-repas" class="carte" hidden></div>
           <button type="button" id="repas-vers-courses" class="bouton bouton-large">
             <i data-lucide="shopping-basket"></i> Ajouter des jours aux courses
           </button>
@@ -1888,6 +1889,22 @@
       <div id="jour-repas-contenu"></div>
     </div>
 
+    <!-- Changement de plan pour le repas du jour (repas.js) -->
+    <div id="feuille-changement" class="feuille" hidden>
+      <div class="feuille-haut">
+        <h2>Changement de plan</h2>
+        <button type="button" id="fermer-changement" class="bouton-supprimer" aria-label="Fermer"><i data-lucide="x"></i></button>
+      </div>
+      <p class="sous-titre">Ça arrive, et c'est très bien comme ça. Qu'est-ce qu'on fait à la place ?</p>
+      <div class="choix-besoins">
+        <button type="button" class="choix-changement" data-changement="restes"><i data-lucide="refrigerator"></i> On mange des restes</button>
+        <button type="button" class="choix-changement" data-changement="commande"><i data-lucide="bike"></i> On commande</button>
+        <button type="button" class="choix-changement" data-changement="restaurant"><i data-lucide="utensils"></i> On sort au restaurant</button>
+        <button type="button" class="choix-changement" data-changement="sortie"><i data-lucide="house"></i> On mange ailleurs</button>
+      </div>
+      <label class="case-repas"><input id="changement-garder" type="checkbox" checked /> <span id="changement-garder-texte">Garder le plat pour un autre soir</span></label>
+    </div>
+
     <!-- Choisir les jours à envoyer aux courses (repas.js) -->
     <div id="feuille-courses-repas" class="feuille" hidden>
       <div class="feuille-haut">
@@ -2233,33 +2250,33 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=37"></script>
-    <script src="js/outils/dates.js?v=37"></script>
-    <script src="js/outils/annuler.js?v=37"></script>
-    <script src="js/outils/icones.js?v=37"></script>
-    <script src="js/modules/navigation.js?v=37"></script>
-    <script src="js/modules/infos.js?v=37"></script>
-    <script src="js/modules/accueil.js?v=37"></script>
-    <script src="js/modules/budget.js?v=37"></script>
-    <script src="js/modules/budget-repartition.js?v=37"></script>
-    <script src="js/modules/budget-mois.js?v=37"></script>
-    <script src="js/modules/budget-raccourcis.js?v=37"></script>
-    <script src="js/modules/budget-epargne.js?v=37"></script>
-    <script src="js/modules/budget-point.js?v=37"></script>
-    <script src="js/donnees/sauvegarde.js?v=37"></script>
-    <script src="js/modules/agenda.js?v=37"></script>
-    <script src="js/modules/agenda-vues.js?v=37"></script>
-    <script src="js/modules/agenda-feuille.js?v=37"></script>
-    <script src="js/modules/agenda-reglages.js?v=37"></script>
-    <script src="js/modules/agenda-notifs.js?v=37"></script>
-    <script src="js/modules/accueil-cartes.js?v=37"></script>
-    <script src="js/modules/courses.js?v=37"></script>
-    <script src="js/modules/envies.js?v=37"></script>
-    <script src="js/modules/atelier.js?v=37"></script>
-    <script src="js/modules/soin.js?v=37"></script>
-    <script src="js/donnees/recettes-import.js?v=37"></script>
-    <script src="js/modules/repas.js?v=37"></script>
-    <script src="js/modules/moi.js?v=37"></script>
-    <script src="js/app.js?v=37"></script>
+    <script src="js/donnees/stockage.js?v=38"></script>
+    <script src="js/outils/dates.js?v=38"></script>
+    <script src="js/outils/annuler.js?v=38"></script>
+    <script src="js/outils/icones.js?v=38"></script>
+    <script src="js/modules/navigation.js?v=38"></script>
+    <script src="js/modules/infos.js?v=38"></script>
+    <script src="js/modules/accueil.js?v=38"></script>
+    <script src="js/modules/budget.js?v=38"></script>
+    <script src="js/modules/budget-repartition.js?v=38"></script>
+    <script src="js/modules/budget-mois.js?v=38"></script>
+    <script src="js/modules/budget-raccourcis.js?v=38"></script>
+    <script src="js/modules/budget-epargne.js?v=38"></script>
+    <script src="js/modules/budget-point.js?v=38"></script>
+    <script src="js/donnees/sauvegarde.js?v=38"></script>
+    <script src="js/modules/agenda.js?v=38"></script>
+    <script src="js/modules/agenda-vues.js?v=38"></script>
+    <script src="js/modules/agenda-feuille.js?v=38"></script>
+    <script src="js/modules/agenda-reglages.js?v=38"></script>
+    <script src="js/modules/agenda-notifs.js?v=38"></script>
+    <script src="js/modules/accueil-cartes.js?v=38"></script>
+    <script src="js/modules/courses.js?v=38"></script>
+    <script src="js/modules/envies.js?v=38"></script>
+    <script src="js/modules/atelier.js?v=38"></script>
+    <script src="js/modules/soin.js?v=38"></script>
+    <script src="js/donnees/recettes-import.js?v=38"></script>
+    <script src="js/modules/repas.js?v=38"></script>
+    <script src="js/modules/moi.js?v=38"></script>
+    <script src="js/app.js?v=38"></script>
   </body>
 </html>
