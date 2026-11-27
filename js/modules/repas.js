@@ -36,8 +36,10 @@ function grilleSimple(moments) {
 
 let repas = charger("repas", null);
 if (!repas) {
+  // Ton carnet et ton plan ne vont pas à une nouvelle personne : elle part d'un carnet vide
+  // (la bienvenue lui propose un carnet de départ, sans tes notes ni tes avis)
   repas = {
-    recettes: typeof RECETTES_IMPORT !== "undefined" ? RECETTES_IMPORT : [],
+    recettes: typeof RECETTES_IMPORT !== "undefined" && !PREMIERE_VISITE ? RECETTES_IMPORT : [],
     jours: {},
     reglages: {
       // Une nouvelle personne part de réglages neutres : le dîner chaque jour, rien d'autre d'imposé
@@ -52,7 +54,7 @@ if (!repas) {
     },
   };
   // Ton plan des semaines 2 à 4, repris du Carnet
-  if (typeof PLAN_IMPORT !== "undefined") {
+  if (typeof PLAN_IMPORT !== "undefined" && !PREMIERE_VISITE) {
     PLAN_IMPORT.forEach((p) => {
       const leRepas = nouveauRepas(p.date, p.moment);
       leRepas.recetteId = p.recetteId;
@@ -81,8 +83,10 @@ const SORTES_REPAS = [
 // Les nouvelles recettes de ton carnet (mises à jour du PDF) : on ajoute seulement celles jamais vues,
 // pour ne jamais faire revenir une recette que tu as retirée
 if (!repas.recettesVues) {
-  // Les 111 premières recettes du carnet étaient déjà là : celles retirées ne reviennent pas
-  const premieres = typeof RECETTES_IMPORT !== "undefined" ? RECETTES_IMPORT.slice(0, 111).map((r) => r.id) : [];
+  // Les 111 premières recettes du carnet étaient déjà là : celles retirées ne reviennent pas.
+  // Une nouvelle personne a « vu » tout le carnet : rien ne s'ajoute tout seul chez elle.
+  const vues = typeof RECETTES_IMPORT !== "undefined" ? RECETTES_IMPORT : [];
+  const premieres = (PREMIERE_VISITE ? vues : vues.slice(0, 111)).map((r) => r.id);
   repas.recettesVues = [...new Set([...premieres, ...repas.recettes.map((r) => r.id)])];
 }
 if (typeof RECETTES_IMPORT !== "undefined") {
@@ -2483,4 +2487,20 @@ function quandEvenementEnregistre(evenement) {
 function quandEvenementSupprime(evenement) {
   if (typeof moduleActif === "function" && !moduleActif("repas")) return;
   repasLiesA(evenement.id).forEach((l) => libererRepas(l, evenement.titre));
+}
+
+// ---------- 12. Le carnet de départ (proposé à la bienvenue) ----------
+// Les recettes du carnet, sans les notes ni les avis de quelqu'un d'autre
+function importerCarnetDeDepart() {
+  if (typeof RECETTES_IMPORT === "undefined") return 0;
+  let ajoutees = 0;
+  RECETTES_IMPORT.forEach((r) => {
+    if (repas.recettes.some((x) => x.id === r.id || x.nom === r.nom)) return;
+    const personnelle = Boolean(r.derniere || r.etoiles);
+    repas.recettes.push({ ...r, etoiles: 0, refaire: "", derniere: "", prix: null, notes: personnelle ? "" : r.notes });
+    ajoutees++;
+  });
+  sauvegarderRepas();
+  afficherRepas();
+  return ajoutees;
 }

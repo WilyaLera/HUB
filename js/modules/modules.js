@@ -33,6 +33,41 @@ function appliquerModules() {
   // Un espace sans aucun module actif se cache de la barre du bas
   const foyerVide = MODULES.filter((m) => m.espace === "foyer").every((m) => !moduleActif(m.code));
   document.body.classList.toggle("sans-foyer", foyerVide);
+  afficherADecouvrir();
+}
+
+// En bas de Foyer et de Moi : les modules rangés, à activer d'un tap (rien n'est verrouillé)
+function afficherADecouvrir() {
+  [["foyer", "decouvrir-foyer"], ["moi", "decouvrir-moi"]].forEach(([espace, id]) => {
+    const zone = document.getElementById(id);
+    if (!zone) return;
+    zone.replaceChildren();
+    const ranges = MODULES.filter((m) => m.espace === espace && !moduleActif(m.code));
+    zone.hidden = ranges.length === 0;
+    if (zone.hidden) return;
+    const titre = document.createElement("p");
+    titre.classList.add("etiquette");
+    titre.textContent = "À découvrir quand tu veux";
+    const liste = document.createElement("div");
+    liste.classList.add("liste-reserve");
+    ranges.forEach((m) => {
+      const bouton = document.createElement("button");
+      bouton.type = "button";
+      bouton.classList.add("tuile-decouvrir");
+      bouton.append(creerIcone(m.icone), m.nom);
+      bouton.setAttribute("aria-label", `Activer ${m.nom}`);
+      bouton.addEventListener("click", () => {
+        reglagesModules[m.code] = true;
+        sauvegarder("modules", reglagesModules);
+        appliquerModules();
+        reafficherApresModules();
+        if (typeof afficherReglagesModules === "function") afficherReglagesModules();
+        montrerPetitMessage(`${m.nom} est là 🌱`);
+      });
+      liste.appendChild(bouton);
+    });
+    zone.append(titre, liste);
+  });
 }
 appliquerModules();
 

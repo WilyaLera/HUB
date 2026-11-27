@@ -2736,3 +2736,122 @@ body.en-cuisine .barre-nav {
   flex-direction: column;
   gap: 10px;
 }
+
+/* =====================================================
+   La bienvenue
+   ===================================================== */
+.bienvenue {
+  position: fixed;
+  inset: 0;
+  z-index: 26;
+  display: flex;
+  flex-direction: column;
+  padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+  background: var(--fond);
+  overflow-y: auto;
+}
+.bienvenue[hidden] {
+  display: none;
+}
+body.en-bienvenue .barre-nav {
+  display: none;
+}
+.bienvenue-fil {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.bienvenue-fil[hidden] {
+  display: none;
+}
+.bienvenue-contenu {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 520px;
+  width: 100%;
+  margin: 0 auto;
+}
+.bienvenue-contenu h1 {
+  margin: 8px 0 10px;
+}
+.bienvenue-feuille {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 84px;
+  height: 84px;
+  margin: 12vh auto 10px;
+  border-radius: 50%;
+  background: var(--carte);
+  color: var(--sauge);
+}
+.bienvenue-feuille svg,
+.bienvenue-feuille i {
+  width: 42px;
+  height: 42px;
+}
+.bienvenue-feuille ~ h1,
+.bienvenue-feuille ~ p {
+  text-align: center;
+}
+.bienvenue-champ {
+  font-size: 18px;
+  margin: 8px 0 18px;
+}
+.bienvenue-boutons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 24px;
+}
+.bienvenue-plus-tard {
+  min-height: 44px;
+  color: var(--texte-doux);
+}
+.bienvenue-conseil {
+  color: var(--accent);
+  font-weight: 700;
+}
+.bienvenue-option {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--carte);
+}
+.bienvenue-option[hidden] {
+  display: none;
+}
+.carte-installation {
+  border: 1.5px dashed var(--accent);
+}
+.carte-installation[hidden] {
+  display: none;
+}
+.decouvrir {
+  margin-top: 18px;
+}
+.decouvrir[hidden] {
+  display: none;
+}
+.tuile-decouvrir {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1.5px dashed var(--trait);
+  border-radius: 999px;
+  background: none;
+  color: var(--texte);
+  font: inherit;
+  cursor: pointer;
+}
+.tuile-decouvrir svg,
+.tuile-decouvrir i {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+}

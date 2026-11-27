@@ -20,12 +20,12 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Kalam:wght@400;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=45" />
-    <link rel="stylesheet" href="css/navigation.css?v=45" />
-    <link rel="stylesheet" href="css/budget.css?v=45" />
-    <link rel="stylesheet" href="css/agenda.css?v=45" />
-    <link rel="stylesheet" href="css/confort.css?v=45" />
-    <link rel="stylesheet" href="css/ordinateur.css?v=45" />
+    <link rel="stylesheet" href="css/base.css?v=46" />
+    <link rel="stylesheet" href="css/navigation.css?v=46" />
+    <link rel="stylesheet" href="css/budget.css?v=46" />
+    <link rel="stylesheet" href="css/agenda.css?v=46" />
+    <link rel="stylesheet" href="css/confort.css?v=46" />
+    <link rel="stylesheet" href="css/ordinateur.css?v=46" />
   </head>
 
   <body>
@@ -106,6 +106,12 @@
         </article>
 
         <!-- Carte Courses : ce qu'il reste à prendre -->
+        <article id="carte-installation" class="carte carte-installation" hidden>
+          <h2>Finir de m'installer</h2>
+          <p class="sous-titre petit">Quand tu veux : ton prénom, ta petite famille, et ce qui t'aiderait. Deux minutes, pas plus.</p>
+          <button type="button" id="finir-installation" class="bouton">On y va</button>
+        </article>
+
         <article class="carte carte-accueil" data-carte="notes" data-module="notes">
           <h2>Pour tes rendez-vous du jour</h2>
           <div id="accueil-notes"></div>
@@ -224,6 +230,8 @@
       <section id="foyer" class="ecran">
         <h1>Foyer</h1>
         <p class="sous-titre">La maison et ce qui la fait tourner</p>
+        <!-- Les modules rangés, à découvrir d'un tap (modules.js) -->
+        <div id="decouvrir-foyer" class="decouvrir" hidden></div>
 
         <!-- Carte qui mène au Budget -->
         <button class="carte carte-lien" data-ecran="budget" data-module="budget">
@@ -1386,6 +1394,7 @@
           <i data-lucide="chevron-right"></i>
         </button>
 
+              <div id="decouvrir-moi" class="decouvrir" hidden></div>
       </section>
 
       <!-- ===================== Réglages ===================== -->
@@ -1407,13 +1416,10 @@
         <!-- Ma petite famille : les animaux (famille.js) -->
         <details id="carte-famille" class="carte carte-repliable">
           <summary><h2>Ma petite famille</h2></summary>
-          <p class="sous-titre petit">Tes animaux. Le placard leur prépare un rayon (croquettes, litière…).</p>
-          <div id="liste-animaux" class="liste-reserve"></div>
-          <form id="form-animal" class="form-animal">
-            <select id="animal-espece" class="champ-note" aria-label="Espèce"></select>
-            <input id="animal-nom" class="champ-note" type="text" maxlength="20" placeholder="Son nom" />
-            <button type="submit" class="bouton-rond bouton-rond-plein" aria-label="Ajouter cet animal"><i data-lucide="plus"></i></button>
-          </form>
+          <p class="sous-titre petit">Les personnes et les animaux de la maison. Le placard prépare un rayon pour tes animaux (croquettes, litière…).</p>
+          <div id="liste-animaux" class="liste-reserve" data-liste-famille></div>
+          <div id="form-animal-zone"></div>
+          <button type="button" id="relancer-bienvenue" class="lien lien-vider-repas">Relancer la bienvenue</button>
         </details>
 
         <!-- L'apparence (moi.js) -->
@@ -2098,6 +2104,12 @@
       </form>
     </div>
 
+    <!-- La bienvenue, au tout premier lancement (bienvenue.js) -->
+    <section id="bienvenue" class="bienvenue" hidden>
+      <div class="bienvenue-fil" id="bienvenue-fil"></div>
+      <div id="bienvenue-contenu" class="bienvenue-contenu"></div>
+    </section>
+
     <!-- Le mode cuisine, en plein écran (repas.js) -->
     <section id="mode-cuisine" hidden>
       <div class="cuisine-haut">
@@ -2399,38 +2411,39 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=45"></script>
-    <script src="js/outils/dates.js?v=45"></script>
-    <script src="js/outils/annuler.js?v=45"></script>
-    <script src="js/outils/icones.js?v=45"></script>
-    <script src="js/modules/modules.js?v=45"></script>
-    <script src="js/modules/navigation.js?v=45"></script>
-    <script src="js/outils/modifier.js?v=45"></script>
-    <script src="js/modules/infos.js?v=45"></script>
-    <script src="js/modules/accueil.js?v=45"></script>
-    <script src="js/modules/budget.js?v=45"></script>
-    <script src="js/modules/budget-repartition.js?v=45"></script>
-    <script src="js/modules/budget-mois.js?v=45"></script>
-    <script src="js/modules/budget-raccourcis.js?v=45"></script>
-    <script src="js/modules/budget-epargne.js?v=45"></script>
-    <script src="js/modules/budget-point.js?v=45"></script>
-    <script src="js/donnees/sauvegarde.js?v=45"></script>
-    <script src="js/modules/agenda.js?v=45"></script>
-    <script src="js/modules/agenda-vues.js?v=45"></script>
-    <script src="js/modules/agenda-feuille.js?v=45"></script>
-    <script src="js/modules/agenda-reglages.js?v=45"></script>
-    <script src="js/modules/agenda-notifs.js?v=45"></script>
-    <script src="js/modules/accueil-cartes.js?v=45"></script>
-    <script src="js/modules/courses.js?v=45"></script>
-    <script src="js/modules/envies.js?v=45"></script>
-    <script src="js/modules/atelier.js?v=45"></script>
-    <script src="js/modules/soin.js?v=45"></script>
-    <script src="js/donnees/recettes-import.js?v=45"></script>
-    <script src="js/modules/repas.js?v=45"></script>
-    <script src="js/modules/famille.js?v=45"></script>
-    <script src="js/modules/placard.js?v=45"></script>
-    <script src="js/modules/notes.js?v=45"></script>
-    <script src="js/modules/moi.js?v=45"></script>
-    <script src="js/app.js?v=45"></script>
+    <script src="js/donnees/stockage.js?v=46"></script>
+    <script src="js/outils/dates.js?v=46"></script>
+    <script src="js/outils/annuler.js?v=46"></script>
+    <script src="js/outils/icones.js?v=46"></script>
+    <script src="js/modules/modules.js?v=46"></script>
+    <script src="js/modules/navigation.js?v=46"></script>
+    <script src="js/outils/modifier.js?v=46"></script>
+    <script src="js/modules/infos.js?v=46"></script>
+    <script src="js/modules/accueil.js?v=46"></script>
+    <script src="js/modules/budget.js?v=46"></script>
+    <script src="js/modules/budget-repartition.js?v=46"></script>
+    <script src="js/modules/budget-mois.js?v=46"></script>
+    <script src="js/modules/budget-raccourcis.js?v=46"></script>
+    <script src="js/modules/budget-epargne.js?v=46"></script>
+    <script src="js/modules/budget-point.js?v=46"></script>
+    <script src="js/donnees/sauvegarde.js?v=46"></script>
+    <script src="js/modules/agenda.js?v=46"></script>
+    <script src="js/modules/agenda-vues.js?v=46"></script>
+    <script src="js/modules/agenda-feuille.js?v=46"></script>
+    <script src="js/modules/agenda-reglages.js?v=46"></script>
+    <script src="js/modules/agenda-notifs.js?v=46"></script>
+    <script src="js/modules/accueil-cartes.js?v=46"></script>
+    <script src="js/modules/courses.js?v=46"></script>
+    <script src="js/modules/envies.js?v=46"></script>
+    <script src="js/modules/atelier.js?v=46"></script>
+    <script src="js/modules/soin.js?v=46"></script>
+    <script src="js/donnees/recettes-import.js?v=46"></script>
+    <script src="js/modules/repas.js?v=46"></script>
+    <script src="js/modules/famille.js?v=46"></script>
+    <script src="js/modules/placard.js?v=46"></script>
+    <script src="js/modules/notes.js?v=46"></script>
+    <script src="js/modules/bienvenue.js?v=46"></script>
+    <script src="js/modules/moi.js?v=46"></script>
+    <script src="js/app.js?v=46"></script>
   </body>
 </html>
