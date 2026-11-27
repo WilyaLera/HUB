@@ -29,3 +29,14 @@ afficherCarteAujourdhui();
 if (window.lucide) {
   lucide.createIcons();
 }
+
+// Le hub ouvert deux fois (l'appli installée et un onglet Chrome, par exemple) :
+// si l'autre fenêtre a changé quelque chose, on recharge en revenant ici,
+// pour ne jamais écraser ses changements avec des données anciennes.
+let changeAilleurs = false;
+window.addEventListener("storage", () => {
+  changeAilleurs = true;
+});
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && changeAilleurs) location.reload();
+});

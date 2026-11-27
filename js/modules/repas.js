@@ -18,12 +18,21 @@
 //              derniere ("AAAA-MM-JJ"), prix }]
 // jours    : { "AAAA-MM-JJ": { soir: repas, midi: repas } }
 //            un repas : { recetteId, texte, type ("cuisine" | "restaurant"), gamelle, plaisir, fait, envoye }
-// reglages : { personnes, moments: { matin, midi, soir }, gamelle: [jours 0-6], plaisir: [jours 0-6],
-//              dimancheMidi, rizMax, poissonParMois }
+// reglages : { personnes, planning (le menu de la semaine, ou seulement le carnet),
+//              grille: { 0..6: { matin, midi, soir } }  quels repas, quel jour,
+//              personnesCases: { "6-midi": 1 }          combien de personnes, si ce n'est pas le nombre habituel,
+//              gamelle: [jours 0-6], plaisir: [jours 0-6], rizMax, poissonParMois }
 // Les sortes de repas : "cuisine" (fait maison), "restaurant", "sortie" (chez quelqu'un, pique-nique…)
 
 const CATEGORIES_RECETTE = ["Plat", "Cheat meal", "À partager", "Dessert", "Petit-déjeuner"];
 const NOMS_JOURS_COURTS = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
+
+// La grille des repas : pour chaque jour (0 = dimanche … 6 = samedi), quels repas on prévoit
+function grilleSimple(moments) {
+  const grille = {};
+  for (let jour = 0; jour <= 6; jour++) grille[jour] = { matin: !!moments.matin, midi: !!moments.midi, soir: !!moments.soir };
+  return grille;
+}
 
 let repas = charger("repas", null);
 if (!repas) {
@@ -31,12 +40,15 @@ if (!repas) {
     recettes: typeof RECETTES_IMPORT !== "undefined" ? RECETTES_IMPORT : [],
     jours: {},
     reglages: {
+      // Une nouvelle personne part de réglages neutres : le dîner chaque jour, rien d'autre d'imposé
       personnes: 2,
-      gamelle: [0, 1, 2, 3, 4], // du dimanche au jeudi soir : une gamelle pour le lendemain
-      plaisir: [5, 6], // vendredi et samedi : repas plaisir
-      dimancheMidi: true,
+      planning: true,
+      grille: grilleSimple({ matin: false, midi: false, soir: true }),
+      personnesCases: {},
+      gamelle: [],
+      plaisir: [],
       rizMax: 2,
-      poissonParMois: 1,
+      poissonParMois: 0,
     },
   };
   // Ton plan des semaines 2 à 4, repris du Carnet
@@ -91,8 +103,16 @@ if (typeof RECETTES_IMPORT !== "undefined") {
 
 // La réserve : des plats mis de côté, à replacer quand on veut (comme « En réserve » dans ton plan)
 if (!repas.reserve) repas.reserve = [];
-// Reprise de la V36 : on ne prévoyait que le dîner
-if (!repas.reglages.moments) repas.reglages.moments = { matin: false, midi: false, soir: true };
+// Reprise des anciennes versions : « les repas de chaque jour » + « dimanche midi » deviennent la grille
+if (!repas.reglages.grille) {
+  const anciens = repas.reglages.moments || { matin: false, midi: false, soir: true };
+  repas.reglages.grille = grilleSimple(anciens);
+  if (repas.reglages.dimancheMidi) repas.reglages.grille[0].midi = true;
+  delete repas.reglages.moments;
+  delete repas.reglages.dimancheMidi;
+}
+if (!repas.reglages.personnesCases) repas.reglages.personnesCases = {};
+if (repas.reglages.planning === undefined) repas.reglages.planning = true;
 
 function sauvegarderRepas() {
   sauvegarder("repas", repas);
@@ -152,11 +172,8 @@ function texteJourLong(date) {
 // Les moments d'un jour : ceux choisis dans les réglages, le midi du dimanche si activé,
 // et tout repas déjà prévu (pour ne jamais le cacher)
 function momentsDu(date) {
-  const choisis = repas.reglages.moments;
-  const dimanche = texteEnDate(date).getDay() === 0;
-  return MOMENTS_REPAS.map(([code]) => code).filter(
-    (code) => choisis[code] || (code === "midi" && dimanche && repas.reglages.dimancheMidi) || repasDu(date, code),
-  );
+  const choisis = repas.reglages.grille[texteEnDate(date).getDay()];
+  return MOMENTS_REPAS.map(([code]) => code).filter((code) => choisis[code] || repasDu(date, code));
 }
 
 function nomDuMoment(moment) {
@@ -339,8 +356,16 @@ function ecrireMesure(valeur, base) {
 }
 
 // Combien de portions pour ce repas : 2 personnes, et 2 de plus s'il y a une gamelle
-function portionsDu(leRepas) {
-  const personnes = repas.reglages.personnes || 2;
+// Combien de personnes à ce repas : celui-ci (si tu l'as changé), sinon la grille, sinon le nombre habituel
+function personnesDu(leRepas, date, moment) {
+  if (leRepas && leRepas.personnes) return leRepas.personnes;
+  const cle = `${texteEnDate(date).getDay()}-${moment}`;
+  return repas.reglages.personnesCases[cle] || repas.reglages.personnes || 2;
+}
+
+// Les portions à cuisiner : les personnes, et autant en plus s'il y a une gamelle
+function portionsDu(leRepas, date, moment) {
+  const personnes = personnesDu(leRepas, date, moment);
   return personnes * (leRepas && leRepas.gamelle ? 2 : 1);
 }
 
@@ -355,7 +380,7 @@ function envoyerAuxCourses(date, moment) {
   const leRepas = repasDu(date, moment);
   const recette = leRepas ? recetteDe(leRepas.recetteId) : null;
   if (!recette || leRepas.type !== "cuisine") return 0;
-  const facteur = portionsDu(leRepas) / (recette.portions || portionsDu(leRepas));
+  const facteur = portionsDu(leRepas, date, moment) / (recette.portions || portionsDu(leRepas, date, moment));
   // Si ce repas était déjà dans les courses, on retire d'abord sa part (pas de doublon)
   if (leRepas.envoye) retirerDesCourses(date, moment);
   let ajoutes = 0;
@@ -402,7 +427,16 @@ function recalculerArticle(article) {
     article.quantite = "";
     article.unite = "";
   }
-  article.pour = [...new Set(article.apports.map((x) => texteJourCourt(x.repas.split("|")[0])))];
+  // « mer. 2 · Paella » : le jour, et le plat (sans ses accompagnements)
+  article.pour = [
+    ...new Set(
+      article.apports.map((x) => {
+        const [date, moment] = x.repas.split("|");
+        const plat = nomDuRepas(repasDu(date, moment)).split(/[,(]/)[0].trim();
+        return plat ? `${texteJourCourt(date)} · ${plat}` : texteJourCourt(date);
+      }),
+    ),
+  ];
   if (article.placardId) article.pour.push("le placard");
 }
 
@@ -691,7 +725,7 @@ function changerRepas(changement) {
   if (!repas.jours[date]) repas.jours[date] = {};
   if (!repas.jours[date][moment]) repas.jours[date][moment] = nouveauRepas(date, moment);
   const leRepas = repas.jours[date][moment];
-  const avant = { envoye: leRepas.envoye, recetteId: leRepas.recetteId, type: leRepas.type, gamelle: leRepas.gamelle };
+  const avant = { envoye: leRepas.envoye, recetteId: leRepas.recetteId, type: leRepas.type, gamelle: leRepas.gamelle, personnes: leRepas.personnes };
   changement(leRepas);
   if (avant.envoye) {
     const ancien = recetteDe(avant.recetteId);
@@ -706,7 +740,7 @@ function changerRepas(changement) {
       } else {
         montrerPetitMessage(`Les ingrédients de « ${ancien ? ancien.nom : "ce repas"} » sont retirés des courses`);
       }
-    } else if (leRepas.gamelle !== avant.gamelle) {
+    } else if (leRepas.gamelle !== avant.gamelle || leRepas.personnes !== avant.personnes) {
       envoyerAuxCourses(date, moment);
       montrerPetitMessage("Quantités mises à jour dans tes courses");
     }
@@ -800,7 +834,7 @@ function afficherFeuilleJourRepas() {
     if (recette) {
       const detail = document.createElement("p");
       detail.classList.add("sous-titre", "petit");
-      detail.textContent = [recette.temps ? `${recette.temps} min` : "", `pour ${portionsDu(leRepas)} portions`, aTester(recette) ? "à tester" : `fait le ${formaterDate(recette.derniere, false)}`]
+      detail.textContent = [recette.temps ? `${recette.temps} min` : "", `pour ${portionsDu(leRepas, date, moment)} portions`, aTester(recette) ? "à tester" : `fait le ${formaterDate(recette.derniere, false)}`]
         .filter(Boolean)
         .join(" · ");
       prevu.appendChild(detail);
@@ -811,7 +845,7 @@ function afficherFeuilleJourRepas() {
       boutons.append(
         creerBoutonEnvie("Je cuisine", () => {
           fermerFeuilleJourRepas();
-          ouvrirModeCuisine(recette.id, portionsDu(leRepas), { date, moment });
+          ouvrirModeCuisine(recette.id, portionsDu(leRepas, date, moment), { date, moment });
         }, true),
         creerBoutonEnvie("Voir la recette", () => {
           fermerFeuilleJourRepas();
@@ -997,7 +1031,7 @@ function afficherFeuilleJourRepas() {
     }
     zone.appendChild(idees);
     // Un plat prêt du congélateur (placard.js) : on le note, et on sort une portion
-    if (typeof placard !== "undefined" && moduleActif("placard") && placard.plats.length) {
+    if (typeof placard !== "undefined" && placard.plats && moduleActif("placard") && placard.plats.length) {
       const titreCongel = document.createElement("p");
       titreCongel.classList.add("etiquette");
       titreCongel.textContent = "Déjà prêt, au congélateur";
@@ -1026,6 +1060,29 @@ function afficherFeuilleJourRepas() {
     cases.classList.add("cases-repas");
     if (leRepas.type === "cuisine") {
       cases.appendChild(creerCase("Une gamelle pour le lendemain", leRepas.gamelle, (oui) => changerRepas((r) => (r.gamelle = oui))));
+      // Combien de personnes ce jour-là (sans changer tes habitudes)
+      const ligne = document.createElement("div");
+      ligne.classList.add("ligne-reglage");
+      const texte = document.createElement("span");
+      const combien = personnesDu(leRepas, date, moment);
+      texte.textContent = `${combien} personne${combien > 1 ? "s" : ""} à ce repas`;
+      const boutons = document.createElement("span");
+      boutons.classList.add("fiche-portions");
+      [["−", -1, "Une personne de moins"], ["+", 1, "Une personne de plus"]].forEach(([signe, pas, etiquette]) => {
+        const bouton = document.createElement("button");
+        bouton.type = "button";
+        bouton.classList.add("fiche-plus-moins");
+        bouton.textContent = signe;
+        bouton.setAttribute("aria-label", etiquette);
+        bouton.addEventListener("click", () =>
+          changerRepas((r) => {
+            r.personnes = Math.max(1, Math.min(12, combien + pas));
+          }),
+        );
+        boutons.appendChild(bouton);
+      });
+      ligne.append(texte, boutons);
+      cases.appendChild(ligne);
     }
     cases.appendChild(creerCase("Repas plaisir", leRepas.plaisir, (oui) => changerRepas((r) => (r.plaisir = oui))));
     zone.appendChild(cases);
@@ -1074,6 +1131,10 @@ function afficherFeuilleJourRepas() {
       repas.jours[cible][moment] = repas.jours[date][moment];
       if (autre) repas.jours[date][moment] = autre;
       else delete repas.jours[date][moment];
+      // Les étiquettes « pour mer. 2 · Paella » suivent le nouveau jour
+      courses.articles.forEach((a) => a.apports && recalculerArticle(a));
+      sauvegarderCourses();
+      afficherCourses();
       sauvegarderRepas();
       afficherRepas();
       fermerFeuilleJourRepas();
@@ -1993,7 +2054,7 @@ function afficherCarteRepas() {
         boutons.appendChild(
           creerBoutonEnvie("Je cuisine", (e) => {
             e.stopPropagation();
-            ouvrirModeCuisine(recette.id, portionsDu(leRepas), { date: aujourdhui, moment });
+            ouvrirModeCuisine(recette.id, portionsDu(leRepas, aujourdhui, moment), { date: aujourdhui, moment });
           }, true),
         );
       }
@@ -2073,29 +2134,9 @@ function afficherReglagesRepas() {
   document.getElementById("repas-personnes").value = r.personnes;
   document.getElementById("repas-riz-max").value = r.rizMax;
   document.getElementById("repas-poisson").value = r.poissonParMois;
-  document.getElementById("repas-dimanche-midi").checked = r.dimancheMidi;
-  document.getElementById("ligne-dimanche-midi").hidden = r.moments.midi;
-  const zoneMoments = document.getElementById("repas-moments");
-  zoneMoments.replaceChildren();
-  MOMENTS_REPAS.forEach(([code, nom]) => {
-    const bouton = document.createElement("button");
-    bouton.type = "button";
-    bouton.classList.add("pastille-temps");
-    bouton.classList.toggle("choisie", r.moments[code]);
-    bouton.textContent = nom;
-    bouton.addEventListener("click", () => {
-      const autres = MOMENTS_REPAS.filter(([c]) => c !== code && r.moments[c]);
-      if (r.moments[code] && autres.length === 0) {
-        montrerPetitMessage("Garde au moins un repas à prévoir");
-        return;
-      }
-      r.moments[code] = !r.moments[code];
-      sauvegarderRepas();
-      afficherReglagesRepas();
-      afficherRepas();
-    });
-    zoneMoments.appendChild(bouton);
-  });
+  document.getElementById("repas-planning").checked = r.planning;
+  document.getElementById("reglages-planning").hidden = !r.planning;
+  afficherGrilleRepas();
   ["gamelle", "plaisir"].forEach((sorte) => {
     const zone = document.getElementById(`repas-jours-${sorte}`);
     zone.replaceChildren();
@@ -2127,11 +2168,111 @@ function afficherReglagesRepas() {
     afficherRepas();
   });
 });
-document.getElementById("repas-dimanche-midi").addEventListener("change", (e) => {
-  repas.reglages.dimancheMidi = e.target.checked;
+document.getElementById("repas-planning").addEventListener("change", (e) => {
+  repas.reglages.planning = e.target.checked;
   sauvegarderRepas();
+  appliquerPlanning();
+  // Le planning revient : on rouvre l'onglet Semaine
+  if (repas.reglages.planning) {
+    document.querySelectorAll("[data-panneau-repas]").forEach((o) => o.classList.toggle("actif", o.dataset.panneauRepas === "panneau-semaine-repas"));
+    document.querySelectorAll(".panneau-repas").forEach((p) => p.classList.toggle("actif", p.id === "panneau-semaine-repas"));
+  }
+  afficherReglagesRepas();
   afficherRepas();
 });
+
+// La grille : une ligne par jour, une case par repas ; le petit chiffre = le nombre de personnes
+const ORDRE_JOURS = [1, 2, 3, 4, 5, 6, 0];
+const NOMS_JOURS_LONGS = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+
+function afficherGrilleRepas() {
+  const r = repas.reglages;
+  const zone = document.getElementById("grille-repas");
+  zone.replaceChildren();
+  const entete = document.createElement("div");
+  entete.classList.add("grille-repas-ligne", "grille-repas-entete");
+  entete.appendChild(document.createElement("span"));
+  MOMENTS_REPAS.forEach(([, nom]) => {
+    const titre = document.createElement("span");
+    titre.textContent = nom === "Petit-déjeuner" ? "Matin" : nom;
+    entete.appendChild(titre);
+  });
+  zone.appendChild(entete);
+  ORDRE_JOURS.forEach((jour) => {
+    const ligne = document.createElement("div");
+    ligne.classList.add("grille-repas-ligne");
+    const nom = document.createElement("span");
+    nom.classList.add("grille-repas-jour");
+    nom.textContent = NOMS_JOURS_LONGS[jour];
+    ligne.appendChild(nom);
+    MOMENTS_REPAS.forEach(([code, nomMoment]) => {
+      const actif = r.grille[jour][code];
+      const cle = `${jour}-${code}`;
+      const cellule = document.createElement("span");
+      cellule.classList.add("grille-repas-cellule");
+      const bouton = document.createElement("button");
+      bouton.type = "button";
+      bouton.classList.add("grille-repas-case");
+      bouton.classList.toggle("choisie", actif);
+      bouton.setAttribute("aria-label", `${NOMS_JOURS_LONGS[jour]}, ${nomMoment} : ${actif ? "prévu" : "pas prévu"}`);
+      bouton.appendChild(creerIcone(actif ? "check" : "minus"));
+      bouton.addEventListener("click", () => {
+        r.grille[jour][code] = !r.grille[jour][code];
+        sauvegarderRepas();
+        afficherGrilleRepas();
+        afficherRepas();
+      });
+      cellule.appendChild(bouton);
+      // Le nombre de personnes de cette case (touche pour changer)
+      if (actif) {
+        const personnes = document.createElement("button");
+        personnes.type = "button";
+        personnes.classList.add("grille-repas-personnes");
+        personnes.classList.toggle("different", Boolean(r.personnesCases[cle]));
+        const nombre = r.personnesCases[cle] || r.personnes;
+        personnes.textContent = `${nombre} pers.`;
+        personnes.setAttribute("aria-label", `${nombre} personnes. Toucher pour changer.`);
+        personnes.addEventListener("click", () => {
+          // 1, 2, 3… jusqu'à 8, puis retour au nombre habituel
+          const suivant = nombre >= 8 ? r.personnes : nombre + 1;
+          if (suivant === r.personnes) delete r.personnesCases[cle];
+          else r.personnesCases[cle] = suivant;
+          sauvegarderRepas();
+          afficherGrilleRepas();
+        });
+        cellule.appendChild(personnes);
+      }
+      ligne.appendChild(cellule);
+    });
+    zone.appendChild(ligne);
+  });
+}
+
+// Les raccourcis : on remplit toute la grille d'un coup, puis on ajuste
+document.querySelectorAll("[data-grille-repas]").forEach((bouton) =>
+  bouton.addEventListener("click", () => {
+    const choix = {
+      soir: { matin: false, midi: false, soir: true },
+      "midi-soir": { matin: false, midi: true, soir: true },
+      tous: { matin: true, midi: true, soir: true },
+    }[bouton.dataset.grilleRepas];
+    repas.reglages.grille = grilleSimple(choix);
+    sauvegarderRepas();
+    afficherGrilleRepas();
+    afficherRepas();
+    montrerPetitMessage("Grille remplie, ajuste jour par jour si besoin 🌱");
+  }),
+);
+
+// Sans planning : on garde seulement le carnet (pas de semaine, pas de carte « Ce soir »)
+function appliquerPlanning() {
+  const sansPlanning = !repas.reglages.planning;
+  document.body.classList.toggle("sans-planning", sansPlanning);
+  if (sansPlanning) {
+    document.querySelectorAll("[data-panneau-repas]").forEach((o) => o.classList.toggle("actif", o.dataset.panneauRepas === "panneau-carnet-repas"));
+    document.querySelectorAll(".panneau-repas").forEach((p) => p.classList.toggle("actif", p.id === "panneau-carnet-repas"));
+  }
+}
 
 // ---------- Tout afficher ----------
 
@@ -2142,5 +2283,204 @@ function afficherRepas() {
   afficherResumeRepas();
 }
 
+appliquerPlanning();
 afficherRepas();
 afficherReglagesRepas();
+
+// ---------- 11. Le lien avec l'agenda : « on mange dehors » ----------
+// Un événement « Restaurant chez Patati » vendredi à 19 h : le hub propose d'ajuster le repas prévu
+// (le plat part en réserve, ses ingrédients sortent des courses). Si l'événement change ou disparaît,
+// il propose de remettre le plat.
+
+const MOTS_REPAS_DEHORS = /\b(restau(rant)?|resto|brasserie|pizzeria|cr[eê]perie|sushis?|fast[- ]?food|mcdo|burger|kfc|food ?truck|d[iî]ner|d[ée]jeuner|d[ée]j|brunch|soir[ée]e|ap[ée]ro|barbecue|bbq|pique[- ]nique|picnic|raclette|fondue|repas|bouffe)\b/i;
+const MOTS_RESTAURANT = /\b(restau(rant)?|resto|brasserie|pizzeria|cr[eê]perie|sushis?|fast[- ]?food|mcdo|burger|kfc|food ?truck)\b/i;
+
+// Le titre et l'heure disent-ils « on mange dehors » ?
+function detecterRepasDehors(titre, heure) {
+  if (MOTS_REPAS_DEHORS.test(titre)) return true;
+  // « Chez Léa » le soir : très probablement un repas
+  const h = heure ? Number(heure.split(":")[0]) : null;
+  return /\bchez\s+\S+/i.test(titre) && h !== null && (h >= 18 || (h >= 11 && h <= 13));
+}
+
+function momentDeLEvenement(evenement) {
+  if (evenement.heure) {
+    const [h, m] = evenement.heure.split(":").map(Number);
+    const heures = h + m / 60;
+    if (heures < 10) return "matin";
+    if (heures < 15) return "midi";
+    return "soir";
+  }
+  return /d[ée]j|midi|brunch/i.test(evenement.titre) ? "midi" : "soir";
+}
+
+// « Restaurant chez Patati » → sorte « restaurant », texte « chez Patati »
+function repasDeLEvenement(evenement) {
+  const type = MOTS_RESTAURANT.test(evenement.titre) ? "restaurant" : "sortie";
+  const texte = evenement.titre
+    .replace(/^(restau(rant)?|resto|soir[ée]e|d[iî]ner|d[ée]jeuner|ap[ée]ro|barbecue|repas)\s*/i, "")
+    .trim();
+  return { type, texte: texte || evenement.titre };
+}
+
+// Les repas reliés à un événement
+function repasLiesA(evenementId) {
+  const liens = [];
+  Object.entries(repas.jours).forEach(([date, jour]) =>
+    Object.entries(jour).forEach(([moment, leRepas]) => {
+      if (leRepas.evenementId === evenementId) liens.push({ date, moment, leRepas });
+    }),
+  );
+  return liens;
+}
+
+// Une petite fenêtre à la fois (on garde les suivantes en file)
+const feuilleAgendaRepas = document.getElementById("feuille-agenda-repas");
+const questionsAgendaRepas = [];
+
+function poserQuestionAgendaRepas(question) {
+  questionsAgendaRepas.push(question);
+  if (feuilleAgendaRepas.hidden) questionSuivanteAgendaRepas();
+}
+
+function questionSuivanteAgendaRepas() {
+  const question = questionsAgendaRepas.shift();
+  if (!question) {
+    feuilleAgendaRepas.hidden = true;
+    voile.hidden = true;
+    return;
+  }
+  document.getElementById("agenda-repas-texte").textContent = question.texte;
+  document.getElementById("agenda-repas-oui").textContent = question.oui;
+  document.getElementById("agenda-repas-non").textContent = question.non;
+  feuilleAgendaRepas.onReponse = question.quandReponse;
+  feuilleAgendaRepas.hidden = false;
+  voile.hidden = false;
+}
+
+document.getElementById("agenda-repas-oui").addEventListener("click", () => {
+  const reponse = feuilleAgendaRepas.onReponse;
+  feuilleAgendaRepas.hidden = true;
+  if (reponse) reponse(true);
+  questionSuivanteAgendaRepas();
+});
+document.getElementById("agenda-repas-non").addEventListener("click", () => {
+  const reponse = feuilleAgendaRepas.onReponse;
+  feuilleAgendaRepas.hidden = true;
+  if (reponse) reponse(false);
+  questionSuivanteAgendaRepas();
+});
+
+function texteMoment(date, moment) {
+  return `${majuscule(texteJourCourt(date))} ${nomDuMoment(moment)}`;
+}
+
+// Mettre le repas « dehors » à la place du plat prévu
+function ajusterPourEvenement(evenement, date, moment) {
+  const dehors = repasDeLEvenement(evenement);
+  agirSurRepasEtCourses("", () => {
+    if (!repas.jours[date]) repas.jours[date] = {};
+    const prevu = repas.jours[date][moment];
+    let message = `C'est ajusté : ${dehors.type === "restaurant" ? "restaurant" : "sortie"} ${texteJourCourt(date)} ${nomDuMoment(moment)}`;
+    if (prevu && prevu.envoye) {
+      retirerDesCourses(date, moment);
+      message += ", ingrédients retirés des courses";
+    }
+    if (prevu && prevu.recetteId && !repas.reserve.includes(prevu.recetteId)) repas.reserve.push(prevu.recetteId);
+    repas.jours[date][moment] = {
+      ...nouveauRepas(date, moment),
+      type: dehors.type,
+      texte: dehors.texte,
+      gamelle: false,
+      evenementId: evenement.id,
+      recetteAvant: prevu ? prevu.recetteId : null,
+    };
+    return `${message} 🌙`;
+  });
+}
+
+// L'événement a changé ou disparu : on propose de remettre le plat d'avant
+function libererRepas(lien, titre) {
+  const avant = recetteDe(lien.leRepas.recetteAvant);
+  const liberer = (remettre) => {
+    const leRepas = repasDu(lien.date, lien.moment);
+    if (!leRepas || leRepas.evenementId === undefined) return;
+    if (remettre && avant) {
+      repas.jours[lien.date][lien.moment] = { ...nouveauRepas(lien.date, lien.moment), recetteId: avant.id };
+      repas.reserve = repas.reserve.filter((id) => id !== avant.id);
+      montrerPetitMessage(`« ${avant.nom} » est de retour ${texteJourCourt(lien.date)} 🌱`);
+    } else if (!avant) {
+      delete repas.jours[lien.date][lien.moment];
+    } else {
+      delete leRepas.evenementId;
+    }
+    sauvegarderRepas();
+    afficherRepas();
+  };
+  if (!avant) {
+    liberer(false);
+    return;
+  }
+  poserQuestionAgendaRepas({
+    texte: `« ${titre} » a changé. ${texteMoment(lien.date, lien.moment)}, on remet « ${avant.nom} » ?`,
+    oui: "Oui, on le remet",
+    non: "Non, je laisse comme ça",
+    quandReponse: liberer,
+  });
+}
+
+// Appelé par l'agenda (agenda-feuille.js) après l'enregistrement d'un événement
+function quandEvenementEnregistre(evenement) {
+  if (typeof moduleActif === "function" && !moduleActif("repas")) return;
+  if (!repas.reglages.planning) return;
+  const cible =
+    evenement.type === "evenement" && evenement.repasDehors && evenement.date && !evenement.recurrence
+      ? { date: evenement.date, moment: momentDeLEvenement(evenement) }
+      : null;
+  // Les anciens liens qui ne correspondent plus
+  repasLiesA(evenement.id)
+    .filter((l) => !cible || l.date !== cible.date || l.moment !== cible.moment)
+    .forEach((l) => libererRepas(l, evenement.titre));
+  if (!cible) return;
+
+  const { date, moment } = cible;
+  const prevu = repasDu(date, moment);
+  if (prevu && prevu.evenementId === evenement.id) {
+    // Le même événement, renommé : on met juste le texte à jour
+    Object.assign(prevu, repasDeLEvenement(evenement));
+    sauvegarderRepas();
+    afficherRepas();
+    return;
+  }
+  if (repasVide(prevu) || prevu.type !== "cuisine") {
+    // Rien de prévu (ou déjà dehors) : on le note simplement dans les repas
+    if (!repas.jours[date]) repas.jours[date] = {};
+    const dehors = repasDeLEvenement(evenement);
+    repas.jours[date][moment] = {
+      ...nouveauRepas(date, moment),
+      type: dehors.type,
+      texte: dehors.texte,
+      gamelle: false,
+      evenementId: evenement.id,
+      recetteAvant: null,
+    };
+    sauvegarderRepas();
+    afficherRepas();
+    montrerPetitMessage(`Noté aussi dans tes repas : ${nomDuRepas(repas.jours[date][moment])}, ${texteJourCourt(date)} 🌙`);
+    return;
+  }
+  poserQuestionAgendaRepas({
+    texte: `${texteMoment(date, moment)}, tu avais prévu « ${nomDuRepas(prevu)} ». On ajuste le planning et les courses ?`,
+    oui: "Oui, on ajuste",
+    non: "Non, je cuisine quand même",
+    quandReponse: (oui) => {
+      if (oui) ajusterPourEvenement(evenement, date, moment);
+    },
+  });
+}
+
+// Appelé par l'agenda quand un événement est supprimé
+function quandEvenementSupprime(evenement) {
+  if (typeof moduleActif === "function" && !moduleActif("repas")) return;
+  repasLiesA(evenement.id).forEach((l) => libererRepas(l, evenement.titre));
+}

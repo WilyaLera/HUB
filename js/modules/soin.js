@@ -136,7 +136,34 @@ function afficherSoin() {
           },
         });
       });
-      ligne.append(caseACocher, nom, supprimer);
+      const modifier = creerBoutonModifier(`Modifier ${douceur.nom}`, () =>
+        ouvrirEdition({
+          titre: "Modifier la douceur",
+          champs: [
+            { cle: "nom", nom: "Nom", valeur: douceur.nom },
+            {
+              cle: "famille",
+              nom: "Famille",
+              type: "select",
+              valeur: douceur.famille,
+              options: Object.entries(FAMILLES_DOUCEURS).map(([code, f]) => [code, f.nom]),
+            },
+            {
+              cle: "duree",
+              nom: "Durée",
+              type: "select",
+              valeur: String(douceur.duree),
+              options: [["5", "5 min"], ["15", "15 min"], ["30", "Plus"]],
+            },
+          ],
+          enregistrer: (v) => {
+            Object.assign(douceur, { nom: v.nom || douceur.nom, famille: v.famille, duree: Number(v.duree) });
+            sauvegarderSoin();
+            afficherSoin();
+          },
+        }),
+      );
+      ligne.append(caseACocher, nom, modifier, supprimer);
       zone.appendChild(ligne);
     });
   });

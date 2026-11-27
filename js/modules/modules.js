@@ -7,6 +7,7 @@
 // =====================================================
 
 const MODULES = [
+  { code: "notes", nom: "Notes", espace: "agenda", icone: "sticky-note", detail: "Des notes pour retrouver une info, liées à tes rendez-vous" },
   { code: "budget", nom: "Budget", espace: "foyer", icone: "wallet", detail: "Tes bocaux, ton mois, ton épargne" },
   { code: "courses", nom: "Courses", espace: "foyer", icone: "shopping-basket", detail: "La liste, rayon par rayon" },
   { code: "repas", nom: "Repas", espace: "foyer", icone: "cooking-pot", detail: "Le menu de la semaine et ton carnet" },
@@ -38,7 +39,7 @@ appliquerModules();
 function afficherReglagesModules() {
   const zone = document.getElementById("liste-modules");
   zone.replaceChildren();
-  [["foyer", "Foyer"], ["moi", "Moi"]].forEach(([espace, nomEspace]) => {
+  [["agenda", "Agenda"], ["foyer", "Foyer"], ["moi", "Moi"]].forEach(([espace, nomEspace]) => {
     const titre = document.createElement("p");
     titre.classList.add("etiquette", "etiquette-espacee");
     titre.textContent = nomEspace;

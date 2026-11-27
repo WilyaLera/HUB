@@ -5,6 +5,7 @@
 
 const CARTES_ACCUEIL = [
   { code: "aujourdhui", nom: "Aujourd'hui", detail: "Tes rendez-vous et tâches du jour" },
+  { code: "notes", nom: "Notes du jour", detail: "Les notes de tes rendez-vous d'aujourd'hui" },
   { code: "repas", nom: "Ce soir", detail: "Le repas prévu, et le mode cuisine" },
   { code: "demain", nom: "Demain", detail: "L'aperçu du lendemain, le soir à partir de 17 h" },
   { code: "idee", nom: "Une idée du pense-bête", detail: "Une tâche sans date, piochée au hasard" },

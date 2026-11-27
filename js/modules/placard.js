@@ -34,6 +34,11 @@ const PLACARD_DE_DEPART = {
       ["Concentré de tomate", "boite"], ["Tomates concassées", "boite"], ["Lait de coco", "boite"],
       ["Bouillon", "boite"], ["Thon en boîte", "boite"], ["Paprika", "bocal"], ["Cumin", "bocal"],
       ["Curry", "bocal"], ["Herbes italiennes", "bocal"], ["Ail", "bocal"], ["Oignons", "bocal"],
+      // Ajoutés en V43 : le petit-déjeuner et les basiques de cuisine
+      ["Café", "bocal"], ["Thé", "boite"], ["Chocolat en poudre", "boite"], ["Lait", "bouteille"],
+      ["Céréales", "boite"], ["Flocons d'avoine", "boite"], ["Confiture", "bocal"], ["Biscuits", "boite"],
+      ["Huile neutre", "bouteille"], ["Vinaigre", "bouteille"], ["Levure", "boite"], ["Maïzena", "boite"],
+      ["Maïs en boîte", "boite"],
     ],
   },
   frigo: {
@@ -42,7 +47,7 @@ const PLACARD_DE_DEPART = {
     icone: "refrigerator",
     articles: [
       ["Beurre", "boite"], ["Œufs", "boite"], ["Lait végétal", "bouteille"], ["Crème légère", "bouteille"],
-      ["Fromage râpé", "boite"], ["Parmesan", "boite"], ["Yaourts", "boite"],
+      ["Fromage râpé", "boite"], ["Parmesan", "boite"], ["Yaourts", "boite"], ["Jambon", "boite"],
     ],
   },
   congel: {
@@ -58,21 +63,85 @@ const PLACARD_DE_DEPART = {
     articles: [
       ["Liquide vaisselle", "bouteille"], ["Lessive", "bouteille"], ["Papier toilette", "boite"],
       ["Sacs poubelle", "boite"], ["Éponges", "boite"], ["Essuie-tout", "boite"],
+      ["Produit multi-usage", "bouteille"], ["Javel", "bouteille"], ["Nettoyant WC", "bouteille"],
+      ["Papier aluminium", "boite"], ["Film alimentaire", "boite"], ["Papier cuisson", "boite"],
+      ["Sacs congélation", "boite"],
+    ],
+  },
+  sdb: {
+    nom: "Salle de bain",
+    couleur: "#D7B8D6",
+    icone: "bath",
+    articles: [
+      ["Gel douche", "bouteille"], ["Shampoing", "bouteille"], ["Après-shampoing", "bouteille"],
+      ["Savon pour les mains", "bouteille"], ["Dentifrice", "boite"], ["Brosses à dents", "boite"],
+      ["Déodorant", "bouteille"], ["Crème hydratante", "bocal"], ["Coton-tiges", "boite"],
+      ["Cotons démaquillants", "boite"], ["Mouchoirs", "boite"], ["Rasoirs", "boite"],
+      ["Protections hygiéniques", "boite"],
     ],
   },
 };
 
+// Le rayon Animaux : il apparaît quand ta petite famille a des animaux (famille.js)
+const RANGEMENT_ANIMAUX = { nom: "Animaux", couleur: "#E8C66A", icone: "paw-print" };
+const BASES_ANIMAUX = {
+  chat: [["Croquettes chat", "boite"], ["Pâtée chat", "boite"], ["Litière", "boite"], ["Friandises chat", "bocal"]],
+  chien: [["Croquettes chien", "boite"], ["Pâtée chien", "boite"], ["Friandises chien", "bocal"], ["Sacs à crottes", "boite"]],
+  rongeur: [["Granulés rongeur", "boite"], ["Foin", "boite"], ["Litière rongeur", "boite"]],
+  oiseau: [["Graines pour oiseaux", "bocal"]],
+  poisson: [["Nourriture poissons", "boite"]],
+  autre: [["Nourriture animaux", "boite"]],
+};
+
+// Les bases de la toute première version (V41) : déjà « vues », même si tu en as retiré
+const BASES_V41 = { epicerie: 25, frigo: 7, congel: 3, entretien: 6 };
+
 let placard = charger("placard", null);
+let nouvellesBases = 0;
 if (!placard) {
-  placard = { rangements: [], articles: [], plats: [], vue: "cuisine" };
-  Object.entries(PLACARD_DE_DEPART).forEach(([id, r]) => {
-    placard.rangements.push({ id, nom: r.nom, couleur: r.couleur, icone: r.icone });
-    r.articles.forEach(([nom, forme]) =>
-      placard.articles.push({ id: `${id}-${nouvelId()}-${placard.articles.length}`, nom, rangementId: id, forme, etat: "la" }),
-    );
+  placard = { rangements: [], articles: [], plats: [], vue: "cuisine", basesVues: [] };
+} else if (!placard.basesVues) {
+  // Un placard de la V41 : ses bases de départ comptent comme vues
+  placard.basesVues = [];
+  Object.entries(BASES_V41).forEach(([id, combien]) => {
+    placard.basesVues.push(`rangement:${id}`);
+    PLACARD_DE_DEPART[id].articles.slice(0, combien).forEach(([nom]) => placard.basesVues.push(`${id}:${nom}`));
   });
-  sauvegarder("placard", placard);
 }
+
+// Ajouter une base pas encore vue (jamais une base que tu as retirée)
+function ajouterBase(rangementId, rangementModele, nom, forme) {
+  const cle = `${rangementId}:${nom}`;
+  if (placard.basesVues.includes(cle)) return;
+  placard.basesVues.push(cle);
+  if (!placard.rangements.some((r) => r.id === rangementId)) {
+    if (placard.basesVues.includes(`rangement:${rangementId}`)) return; // rangement retiré : on respecte
+    placard.basesVues.push(`rangement:${rangementId}`);
+    placard.rangements.push({ id: rangementId, ...rangementModele });
+  }
+  if (placard.articles.some((a) => a.rangementId === rangementId && a.nom.toLowerCase() === nom.toLowerCase())) return;
+  placard.articles.push({ id: `${rangementId}-${nouvelId()}-${placard.articles.length}`, nom, rangementId, forme, etat: "la" });
+  nouvellesBases++;
+}
+
+Object.entries(PLACARD_DE_DEPART).forEach(([id, r]) =>
+  r.articles.forEach(([nom, forme]) => ajouterBase(id, { nom: r.nom, couleur: r.couleur, icone: r.icone }, nom, forme)),
+);
+
+// Les animaux de ta petite famille ont leur rayon
+function mettreAJourPlacardFamille() {
+  if (typeof especesDeLaFamille !== "function") return;
+  const avant = nouvellesBases;
+  especesDeLaFamille().forEach((espece) =>
+    (BASES_ANIMAUX[espece] || BASES_ANIMAUX.autre).forEach(([nom, forme]) => ajouterBase("animaux", RANGEMENT_ANIMAUX, nom, forme)),
+  );
+  if (nouvellesBases > avant) {
+    sauvegarderPlacard();
+    if (typeof afficherPlacard === "function" && document.getElementById("contenu-placard")) afficherPlacard();
+  }
+}
+
+sauvegarder("placard", placard);
 
 function sauvegarderPlacard() {
   sauvegarder("placard", placard);
@@ -137,6 +206,24 @@ function quandArticleAchete(articleCourses) {
     sauvegarderPlacard();
     afficherPlacard();
   }
+}
+
+// Filet de sécurité : à chaque affichage du placard, ce qui est coché dans les courses repasse à « Il y en a »
+function synchroniserAvecCourses() {
+  if (typeof courses === "undefined" || !moduleActif("courses")) return false;
+  let change = false;
+  placard.articles.forEach((article) => {
+    if (article.etat === "la") return;
+    const achete = courses.articles.some(
+      (c) => c.coche && (c.placardId === article.id || cleIngredient(c.nom) === cleIngredient(article.nom)),
+    );
+    if (achete) {
+      article.etat = "la";
+      change = true;
+    }
+  });
+  if (change) sauvegarderPlacard();
+  return change;
 }
 
 // ---------- 3. La vue cuisine ----------
@@ -567,12 +654,13 @@ function sortirUnePortion(plat) {
 
 // ---------- 7. Ce que les autres modules demandent au placard ----------
 
-// Un ingrédient de recette déjà au placard (il y en a, ou bientôt fini) : on ne l'ajoute pas aux courses
+// Un ingrédient de recette bien au placard (« Il y en a ») : on ne l'ajoute pas aux courses.
+// « Bientôt fini » ou « Plus là » : le plat en a besoin, il remonte dans les courses urgentes.
 function auPlacard(nomIngredient) {
   if (!moduleActif("placard")) return false;
   const cle = cleIngredient(nomIngredient);
   return placard.articles.some((a) => {
-    if (a.etat === "plus") return false;
+    if (a.etat !== "la") return false;
     const sienne = cleIngredient(a.nom);
     return sienne === cle || cle.startsWith(`${sienne} `);
   });
@@ -581,6 +669,7 @@ function auPlacard(nomIngredient) {
 // ---------- Tout afficher ----------
 
 function afficherPlacard() {
+  synchroniserAvecCourses();
   const zone = document.getElementById("contenu-placard");
   zone.replaceChildren();
   document.querySelectorAll("[data-vue-placard]").forEach((b) => b.classList.toggle("choisie", b.dataset.vuePlacard === placard.vue));
@@ -596,4 +685,9 @@ function afficherPlacard() {
   else afficherRangements(zone);
 }
 
+mettreAJourPlacardFamille();
 afficherPlacard();
+// Une petite nouvelle pour les placards déjà installés (pas au tout premier lancement)
+if (nouvellesBases > 0 && placard.articles.length > nouvellesBases) {
+  window.addEventListener("load", () => montrerPetitMessage(`${nouvellesBases} nouveaux basiques dans ton placard 🌱`));
+}

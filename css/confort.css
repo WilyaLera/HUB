@@ -2015,13 +2015,17 @@ body.en-cuisine .barre-nav {
 .sans-atelier [data-module~="atelier"] {
   display: none !important;
 }
+.sans-notes [data-module~="notes"] {
+  display: none !important;
+}
 .sans-soin [data-module~="soin"] {
   display: none !important;
 }
 .sans-foyer .onglet-foyer {
   display: none !important;
 }
-.ligne-module {
+.ligne-module,
+.ligne-interrupteur {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -2390,4 +2394,345 @@ body.en-cuisine .barre-nav {
   font-family: var(--police-texte);
   font-size: 11px;
   font-weight: 700;
+}
+
+/* Dicter ses courses */
+.ligne-article-dicter {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.ligne-article-dicter .champ-note {
+  flex: 1;
+}
+#dicter-courses.en-ecoute {
+  background: var(--accent);
+  color: #fff;
+  animation: ecoute 1.2s ease-in-out infinite;
+}
+@keyframes ecoute {
+  50% {
+    box-shadow: 0 0 0 8px rgba(184, 92, 46, 0.18);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #dicter-courses.en-ecoute {
+    animation: none;
+  }
+}
+
+/* Agenda → repas */
+.case-dehors {
+  display: flex;
+  margin-top: 8px;
+}
+.case-dehors[hidden] {
+  display: none;
+}
+.texte-question {
+  font-size: 17px;
+  line-height: 1.45;
+}
+.boutons-question {
+  flex-direction: column;
+}
+.boutons-question button {
+  width: 100%;
+  min-height: 48px;
+}
+.pastille-animal {
+  padding-left: 12px;
+  gap: 6px;
+}
+.pastille-animal input {
+  width: 90px;
+  min-height: 40px;
+  border: none;
+  background: none;
+  color: var(--texte);
+  font: inherit;
+  font-size: 14px;
+}
+.pastille-animal svg,
+.pastille-animal > i {
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+}
+#form-animal {
+  grid-template-columns: 110px 1fr 44px;
+}
+.form-animal {
+  display: grid;
+  grid-template-columns: 110px 1fr 44px;
+  gap: 6px;
+  margin-top: 10px;
+}
+.carte-pour-placard {
+  border: 1.5px dashed var(--trait);
+  background: transparent;
+  box-shadow: none;
+}
+.carte-pour-placard .ligne-article-pour {
+  color: #a86f12;
+}
+
+/* Réglages des repas : sans planning, on garde seulement le carnet */
+.sans-planning [data-panneau-repas="panneau-semaine-repas"],
+.sans-planning [data-carte="repas"],
+.sans-planning #bloc-dehors {
+  display: none !important;
+}
+
+/* La grille jours × repas */
+.grille-repas {
+  margin: 10px 0;
+}
+.grille-repas-ligne {
+  display: grid;
+  grid-template-columns: 88px repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  align-items: start;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--trait);
+}
+.grille-repas-entete {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--texte-doux);
+  text-align: center;
+  border-bottom: none;
+}
+.grille-repas-jour {
+  align-self: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+.grille-repas-cellule {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.grille-repas-case {
+  width: 100%;
+  min-height: 44px;
+  border: 1.5px solid var(--trait);
+  border-radius: 12px;
+  background: var(--carte);
+  color: var(--texte-doux);
+  cursor: pointer;
+}
+.grille-repas-case.choisie {
+  border-color: var(--sauge);
+  background: var(--sauge);
+  color: #fff;
+}
+.grille-repas-case svg,
+.grille-repas-case i {
+  width: 18px;
+  height: 18px;
+}
+.grille-repas-personnes {
+  min-height: 32px;
+  padding: 0 6px;
+  border: none;
+  background: none;
+  color: var(--texte-doux);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.grille-repas-personnes.different {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+/* =====================================================
+   Notes
+   ===================================================== */
+.entete-agenda {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.bouton-notes {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid var(--trait);
+  border-radius: 999px;
+  background: var(--carte);
+  color: var(--texte);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.bouton-notes svg,
+.bouton-notes i {
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+}
+.compte-notes:empty {
+  display: none;
+}
+.compte-notes {
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--fond);
+  font-size: 12px;
+}
+.liste-notes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.liste-notes > .message-vide,
+.liste-notes > p {
+  grid-column: 1 / -1;
+}
+.carte-note {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 96px;
+  padding: 12px 14px;
+  border: 1.5px solid color-mix(in srgb, var(--couleur-note) 70%, #3a2e28 8%);
+  border-radius: 16px;
+  background: var(--couleur-note);
+  color: #3a2e28;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.carte-note-haut {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+.carte-note-haut svg,
+.carte-note-haut i {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.carte-note-resume {
+  font-size: 13px;
+  line-height: 1.35;
+  color: #5a4a40;
+}
+.carte-note-lien {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: auto;
+  font-size: 12px;
+  font-weight: 700;
+  color: #7a3a18;
+}
+.carte-note-lien svg,
+.carte-note-lien i {
+  width: 14px;
+  height: 14px;
+}
+.carte-note-accueil {
+  min-height: 0;
+  width: 100%;
+  margin-top: 6px;
+}
+#feuille-note {
+  background: color-mix(in srgb, var(--couleur-note, var(--carte)) 45%, var(--carte));
+}
+.note-titre {
+  font-family: var(--police-titre);
+  font-size: 19px;
+  margin-bottom: 6px;
+}
+.note-texte {
+  width: 100%;
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+}
+.note-lien {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+.note-lien > svg,
+.note-lien > i {
+  display: none;
+}
+.ligne-note {
+  display: grid;
+  grid-template-columns: 28px 1fr 44px;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  border-bottom: 1px solid var(--trait);
+}
+.ligne-note input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--sauge);
+}
+.ligne-note input[type="text"] {
+  min-height: 40px;
+  border: none;
+  background: none;
+  color: var(--texte);
+  font: inherit;
+}
+.ligne-note-faite input[type="text"] {
+  color: var(--texte-doux);
+  text-decoration: line-through;
+}
+.notes-evenement {
+  margin-top: 10px;
+}
+.notes-evenement:empty {
+  display: none;
+}
+
+/* Modifier ce qu'on a écrit */
+.feuille-modifier {
+  z-index: 22;
+}
+.bouton-modifier svg,
+.bouton-modifier i {
+  width: 16px;
+  height: 16px;
+}
+.titre-modifiable {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.titre-modifiable h2 {
+  margin: 0;
+}
+.titre-modifiable svg,
+.titre-modifiable > i {
+  width: 16px;
+  height: 16px;
+  color: var(--texte-doux);
+}
+#modifier-champs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }

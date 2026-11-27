@@ -187,14 +187,21 @@ function creerLigneArticle(article) {
   return ligne;
 }
 
+// Un article qui sert seulement à remplir le placard (aucun repas prévu n'en a besoin) : pas urgent
+function pourLePlacardSeulement(article) {
+  return article.source === "placard" && !(article.apports && article.apports.length);
+}
+
 function afficherCourses() {
   listeCourses.replaceChildren();
   const aPrendre = courses.articles.filter((a) => !a.coche);
   const panier = courses.articles.filter((a) => a.coche);
+  const placardSeul = aPrendre.filter(pourLePlacardSeulement);
+  const necessaires = aPrendre.filter((a) => !pourLePlacardSeulement(a));
 
   // Rayon par rayon, dans ton ordre ; les rayons vides ne s'affichent pas
   courses.rayons.forEach((rayon) => {
-    const duRayon = aPrendre.filter((a) => rayonDe(a.rayonId).id === rayon.id);
+    const duRayon = necessaires.filter((a) => rayonDe(a.rayonId).id === rayon.id);
     if (duRayon.length === 0) return;
     const carte = document.createElement("article");
     carte.classList.add("carte", "carte-rayon");
@@ -205,7 +212,37 @@ function afficherCourses() {
     listeCourses.appendChild(carte);
   });
 
-  if (aPrendre.length === 0) {
+  // Pour remplir le placard : à part, en dessous, parce que ce n'est pas urgent
+  if (placardSeul.length > 0) {
+    const carte = document.createElement("details");
+    carte.classList.add("carte", "carte-repliable", "carte-pour-placard");
+    carte.open = true;
+    const resume = document.createElement("summary");
+    const titre = document.createElement("h2");
+    titre.textContent = `Pour remplir le placard · ${placardSeul.length}`;
+    resume.appendChild(titre);
+    const aide = document.createElement("p");
+    aide.classList.add("sous-titre", "petit");
+    aide.textContent = "Pas urgent : aucun repas prévu n'en a besoin. Si un plat en a besoin, il remonte dans son rayon.";
+    carte.append(resume, aide);
+    // Dans l'ordre de tes rayons, avec « plus là » d'abord
+    const rang = (a) => courses.rayons.findIndex((r) => r.id === rayonDe(a.rayonId).id);
+    const etat = (a) =>
+      typeof placard !== "undefined" && placard.articles
+        ? (placard.articles.find((x) => x.id === a.placardId) || {}).etat
+        : "";
+    placardSeul
+      .sort((a, b) => (etat(a) === "plus" ? 0 : 1) - (etat(b) === "plus" ? 0 : 1) || rang(a) - rang(b))
+      .forEach((article) => {
+        const ligne = creerLigneArticle(article);
+        const pour = ligne.querySelector(".ligne-article-pour");
+        if (pour) pour.textContent = etat(article) === "plus" ? "plus là" : "bientôt fini";
+        carte.appendChild(ligne);
+      });
+    listeCourses.appendChild(carte);
+  }
+
+  if (necessaires.length === 0 && placardSeul.length === 0) {
     const vide = document.createElement("article");
     vide.classList.add("carte");
     vide.appendChild(
@@ -419,6 +456,10 @@ function finirCourses() {
     tiroir: courses,
     message: "Le panier est vidé",
     action: () => {
+      // Tout ce qui est dans le panier repasse à « Il y en a » au placard (placard.js)
+      if (typeof quandArticleAchete === "function" && moduleActif("placard")) {
+        courses.articles.filter((a) => a.coche).forEach((a) => quandArticleAchete(a));
+      }
       courses.articles = courses.articles.filter((a) => !a.coche);
     },
     apres: () => {
@@ -534,9 +575,12 @@ function texteCombien(nombre) {
 }
 
 function afficherResumesCourses() {
-  const aPrendre = courses.articles.filter((a) => !a.coche);
-  document.getElementById("courses-resume").textContent = texteCombien(aPrendre.length);
-  document.getElementById("foyer-courses-resume").textContent = texteCombien(aPrendre.length);
+  // Ce qui sert seulement au placard n'est pas compté comme « à prendre »
+  const aPrendre = courses.articles.filter((a) => !a.coche && !pourLePlacardSeulement(a));
+  const placardSeul = courses.articles.filter((a) => !a.coche && pourLePlacardSeulement(a)).length;
+  const enPlus = placardSeul ? ` (+ ${placardSeul} pour le placard)` : "";
+  document.getElementById("courses-resume").textContent = texteCombien(aPrendre.length) + enPlus;
+  document.getElementById("foyer-courses-resume").textContent = texteCombien(aPrendre.length) + enPlus;
 
   // Sur l'accueil : le nombre, puis les premiers articles
   let texte = texteCombien(aPrendre.length);
@@ -548,3 +592,88 @@ function afficherResumesCourses() {
 }
 
 afficherCourses();
+
+// ---------- 7. Dicter ses courses ----------
+// « Gel douche, dentifrice et 2 kg de pommes » → trois articles, chacun dans son rayon.
+// La reconnaissance vocale est celle du téléphone (si elle n'est pas là, on propose le micro du clavier).
+
+const boutonDicter = document.getElementById("dicter-courses");
+const Reconnaissance = window.SpeechRecognition || window.webkitSpeechRecognition;
+let ecoute = null;
+
+// Couper la phrase en articles
+function articlesDicte(phrase) {
+  return phrase
+    .split(/,|;|\s+(?:et|puis|aussi|ensuite|avec)\s+/i)
+    .map((morceau) => morceau.trim().replace(/^(il (me )?faut|ajoute|rajoute|acheter|du|de la|de l'|des|un|une)\s+/i, "").trim())
+    .filter((morceau) => morceau.length > 1);
+}
+
+function ajouterArticlesDictes(phrase) {
+  const morceaux = articlesDicte(phrase);
+  if (morceaux.length === 0) return;
+  const copie = JSON.stringify(courses);
+  const noms = [];
+  morceaux.forEach((morceau) => {
+    // « 2 kg de pommes » : on garde la quantité (lireMorceau vient de repas.js)
+    const lu = typeof lireMorceau === "function" ? lireMorceau(morceau) : null;
+    const nom = majuscule(lu ? lu.nom : morceau);
+    const quantite = lu && lu.quantite !== null ? String(lu.quantite).replace(".", ",") : "";
+    courses.articles.push({
+      id: nouvelId(),
+      nom,
+      quantite,
+      unite: quantite ? lu.unite : "",
+      rayonId: devinerRayon(nom),
+      coche: false,
+      source: "manuel",
+    });
+    noms.push(nom.toLowerCase());
+  });
+  sauvegarderCourses();
+  afficherCourses();
+  montrerPetitMessage(`Ajouté : ${noms.join(", ")} 🌱`, () => {
+    remettreCommeAvant(courses, copie);
+    sauvegarderCourses();
+    afficherCourses();
+  });
+}
+
+boutonDicter.addEventListener("click", () => {
+  if (!Reconnaissance) {
+    montrerPetitMessage("La dictée n'est pas possible ici : utilise le micro de ton clavier");
+    articleNom.focus();
+    return;
+  }
+  if (ecoute) {
+    ecoute.stop();
+    return;
+  }
+  ecoute = new Reconnaissance();
+  ecoute.lang = "fr-FR";
+  ecoute.interimResults = false;
+  ecoute.maxAlternatives = 1;
+  boutonDicter.classList.add("en-ecoute");
+  montrerPetitMessage("Je t'écoute…");
+  ecoute.addEventListener("result", (e) => ajouterArticlesDictes(e.results[0][0].transcript));
+  ecoute.addEventListener("error", (e) => {
+    if (e.error === "not-allowed") montrerPetitMessage("Le micro n'est pas autorisé pour le hub");
+    else if (e.error !== "aborted") montrerPetitMessage("Je n'ai pas bien entendu, on réessaie ?");
+  });
+  ecoute.addEventListener("end", () => {
+    boutonDicter.classList.remove("en-ecoute");
+    ecoute = null;
+  });
+  ecoute.start();
+});
+
+// ---------- 8. Le raccourci de l'icône : « Ajouter aux courses » ----------
+// Un appui long sur l'icône du hub ouvre directement les courses, prêtes à remplir.
+window.addEventListener("load", () => {
+  const action = new URLSearchParams(location.search).get("action");
+  if (action !== "courses") return;
+  history.replaceState(null, "", location.pathname);
+  if (typeof moduleActif === "function" && !moduleActif("courses")) return;
+  afficherEcran("courses");
+  articleNom.focus();
+});

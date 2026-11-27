@@ -89,9 +89,22 @@ function afficherChoixCategories(codeChoisi) {
 }
 
 // Montre ou cache les champs selon le type et les cases cochées
+// « On mange dehors » : cochée toute seule si le titre ressemble à un repas (repas.js),
+// sauf si tu l'as touchée toi-même
+const elementDehors = document.getElementById("element-dehors");
+let dehorsTouche = false;
+elementDehors.addEventListener("change", () => (dehorsTouche = true));
+function devinerDehors() {
+  if (dehorsTouche || typeof detecterRepasDehors !== "function") return;
+  elementDehors.checked = detecterRepasDehors(elementTitre.value, elementJournee.checked ? "" : elementHeure.value);
+}
+elementTitre.addEventListener("input", devinerDehors);
+elementHeure.addEventListener("change", devinerDehors);
+
 function adapterFeuilleElement() {
   const tache = typeElementChoisi() === "tache";
   const anniversaire = typeElementChoisi() === "anniversaire";
+  document.getElementById("bloc-dehors").hidden = tache || anniversaire;
   const enModification = Boolean(elementEnModification);
 
   let titre = tache ? "Nouvelle tâche" : "Nouvel événement";
@@ -223,6 +236,8 @@ function ouvrirFeuilleElement(element, propose = {}) {
   // « Toute la journée » : seulement pour un événement existant sans heure
   elementJournee.checked = Boolean(element) && element.type === "evenement" && !element.heure;
   elementHeure.value = valeurs.heure || "09:00";
+  elementDehors.checked = Boolean(element && element.repasDehors);
+  dehorsTouche = Boolean(element); // un événement existant garde ton choix
   elementUrgent.checked = Boolean(valeurs.urgent);
   elementLimite.value = valeurs.dateLimite || "";
   // « Plus d'options » s'ouvre tout seul si l'élément en a déjà
@@ -235,6 +250,8 @@ function ouvrirFeuilleElement(element, propose = {}) {
   elementFinRepetition.value = valeurs.finRepetition || "";
   afficherChoixCategories(valeurs.categorie);
   adapterFeuilleElement();
+  // Les notes liées à cet événement (notes.js)
+  if (typeof afficherNotesDeLEvenement === "function") afficherNotesDeLEvenement(element);
 
   feuilleElement.hidden = false;
   voile.hidden = false;
@@ -265,6 +282,7 @@ document.getElementById("supprimer-element").addEventListener("click", () => {
     message: `« ${element.titre} » supprimé`,
     action: () => {
       agenda.elements = agenda.elements.filter((el) => el.id !== element.id);
+      if (typeof quandEvenementSupprime === "function") quandEvenementSupprime(element);
     },
     apres: () => {
       sauvegarderAgenda();
@@ -297,6 +315,7 @@ formElement.addEventListener("submit", (evenement) => {
     finRepetition: sansDate || !elementRepetition.value ? "" : elementFinRepetition.value,
     anniversaire: anniversaire,
     anneeNaissance: anniversaire && elementNaissance.value ? Number(elementNaissance.value) : "",
+    repasDehors: !tache && !anniversaire && elementDehors.checked,
   };
 
   // Un anniversaire : chaque année, toute la journée, sa couleur à lui
@@ -308,15 +327,19 @@ formElement.addEventListener("submit", (evenement) => {
   }
 
   const etaitUneModification = Boolean(elementEnModification);
+  let enregistre;
   if (elementEnModification) {
-    const element = agenda.elements.find((el) => el.id === elementEnModification);
-    Object.assign(element, valeurs);
+    enregistre = agenda.elements.find((el) => el.id === elementEnModification);
+    Object.assign(enregistre, valeurs);
   } else {
-    agenda.elements.push({ id: nouvelId(), ...valeurs, fait: false });
+    enregistre = { id: nouvelId(), ...valeurs, fait: false };
+    agenda.elements.push(enregistre);
   }
 
   sauvegarderAgenda();
   fermerFeuilleElement();
   rafraichirAgenda();
   montrerPetitMessage(etaitUneModification ? "C'est modifié 🌱" : "C'est noté 🌱");
+  // Un repas dehors ? Les Repas proposent d'ajuster le planning (repas.js)
+  if (typeof quandEvenementEnregistre === "function") quandEvenementEnregistre(enregistre);
 });

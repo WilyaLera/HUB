@@ -340,7 +340,7 @@ function changerLoisir(changement) {
   afficherFicheLoisir();
 }
 
-function creerLigneSimple(texte, quandOnSupprime, avant) {
+function creerLigneSimple(texte, quandOnSupprime, avant, quandOnModifie) {
   const ligne = document.createElement("div");
   ligne.classList.add("ligne-idee");
   if (avant) ligne.appendChild(avant);
@@ -355,6 +355,8 @@ function creerLigneSimple(texte, quandOnSupprime, avant) {
   supprimer.setAttribute("aria-label", "Retirer");
   supprimer.appendChild(creerIcone("x"));
   supprimer.addEventListener("click", quandOnSupprime);
+  // Tout ce qu'on écrit se modifie : un petit crayon avant la croix
+  if (quandOnModifie) ligne.appendChild(creerBoutonModifier("Modifier", quandOnModifie));
   ligne.appendChild(supprimer);
   return ligne;
 }
@@ -459,10 +461,23 @@ function afficherEssais(loisir) {
     .forEach((essai) => {
       const texte = [formaterDate(essai.date, false), essai.ressenti, essai.note].filter(Boolean).join(" · ");
       zone.appendChild(
-        creerLigneSimple(texte, () =>
-          changerLoisir((l) => {
-            l.essais = l.essais.filter((x) => x.id !== essai.id);
-          }),
+        creerLigneSimple(
+          texte,
+          () =>
+            changerLoisir((l) => {
+              l.essais = l.essais.filter((x) => x.id !== essai.id);
+            }),
+          null,
+          () =>
+            ouvrirEdition({
+              titre: "Modifier l'essai",
+              champs: [
+                { cle: "date", nom: "Date", type: "date", valeur: essai.date },
+                { cle: "ressenti", nom: "Ressenti", type: "select", valeur: essai.ressenti, options: [["", "—"], ...RESSENTIS.map((r) => [r, r])] },
+                { cle: "note", nom: "Note", valeur: essai.note },
+              ],
+              enregistrer: (v) => changerLoisir(() => Object.assign(essai, { ...v, date: v.date || essai.date })),
+            }),
         ),
       );
     });
@@ -516,6 +531,12 @@ function afficherEtapesLoisir(loisir) {
             l.etapes = l.etapes.filter((x) => x.id !== etape.id);
           }),
         caseACocher,
+        () =>
+          ouvrirEdition({
+            titre: "Modifier l'étape",
+            champs: [{ cle: "nom", nom: "Étape", valeur: etape.nom }],
+            enregistrer: (v) => changerLoisir(() => (etape.nom = v.nom || etape.nom)),
+          }),
       ),
     );
   });
@@ -543,10 +564,23 @@ function afficherRessources(loisir) {
     lien.rel = "noopener";
     lien.textContent = ressource.titre;
     zone.appendChild(
-      creerLigneSimple(lien, () =>
-        changerLoisir((l) => {
-          l.ressources = l.ressources.filter((x) => x.id !== ressource.id);
-        }),
+      creerLigneSimple(
+        lien,
+        () =>
+          changerLoisir((l) => {
+            l.ressources = l.ressources.filter((x) => x.id !== ressource.id);
+          }),
+        null,
+        () =>
+          ouvrirEdition({
+            titre: "Modifier la ressource",
+            champs: [
+              { cle: "titre", nom: "Titre", valeur: ressource.titre },
+              { cle: "url", nom: "Lien", type: "url", valeur: ressource.url },
+            ],
+            enregistrer: (v) =>
+              changerLoisir(() => Object.assign(ressource, { titre: v.titre || ressource.titre, url: v.url || ressource.url })),
+          }),
       ),
     );
   });
@@ -597,10 +631,32 @@ function afficherMateriel(loisir) {
     detail.textContent = morceaux.join(" · ");
     texte.append(nom, detail);
 
-    const ligne = creerLigneSimple(texte, () =>
-      changerLoisir((l) => {
-        l.materiel = l.materiel.filter((x) => x.id !== objet.id);
-      }),
+    const ligne = creerLigneSimple(
+      texte,
+      () =>
+        changerLoisir((l) => {
+          l.materiel = l.materiel.filter((x) => x.id !== objet.id);
+        }),
+      null,
+      () =>
+        ouvrirEdition({
+          titre: "Modifier le matériel",
+          champs: [
+            { cle: "nom", nom: "Nom", valeur: objet.nom },
+            { cle: "prix", nom: "Prix (F)", type: "number", valeur: objet.prix || "" },
+            { cle: "jai", nom: "Je l'ai ?", type: "select", valeur: objet.jai ? "oui" : "non", options: [["non", "Il manque"], ["oui", "Je l'ai"]] },
+          ],
+          enregistrer: (v) => {
+            changerLoisir(() => Object.assign(objet, { nom: v.nom || objet.nom, prix: v.prix, jai: v.jai === "oui" }));
+            // Déjà dans tes envies : le nouveau prix (et le nom) suivent
+            if (envie) {
+              envie.nom = objet.nom;
+              envie.prix = objet.prix;
+              sauvegarderEnvies();
+              afficherEnvies();
+            }
+          },
+        }),
     );
     // Les boutons : « Je l'ai » / « Il manque », et « Vers mes envies »
     const basculer = creerBoutonEnvie(objet.jai ? "Il manque" : "Je l'ai", () =>
@@ -818,6 +874,22 @@ function afficherTypesLoisirs() {
     });
     // On garde toujours au moins un type
     if (atelier.types.length === 1) ligne.lastChild.hidden = true;
+    // Renommer un type
+    ligne.insertBefore(
+      creerBoutonModifier(`Renommer ${type.nom}`, () =>
+        ouvrirEdition({
+          titre: "Renommer le type",
+          champs: [{ cle: "nom", nom: "Nom", valeur: type.nom }],
+          enregistrer: (v) => {
+            type.nom = v.nom || type.nom;
+            sauvegarderAtelier();
+            afficherTypesLoisirs();
+            afficherAtelier();
+          },
+        }),
+      ),
+      ligne.lastChild,
+    );
     zone.appendChild(ligne);
   });
 }
@@ -870,3 +942,14 @@ function versAtelier(ideeVivre) {
 sauvegarderAtelier();
 afficherTypesLoisirs();
 afficherAtelier();
+
+// Renommer le loisir : toucher son titre dans la fiche
+document.getElementById("loisir-titre-bouton").addEventListener("click", () => {
+  const loisir = loisirDe(loisirOuvert);
+  if (!loisir) return;
+  ouvrirEdition({
+    titre: "Renommer le loisir",
+    champs: [{ cle: "nom", nom: "Nom", valeur: loisir.nom }],
+    enregistrer: (v) => changerLoisir((l) => (l.nom = v.nom || l.nom)),
+  });
+});
