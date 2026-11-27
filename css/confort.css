@@ -2855,3 +2855,208 @@ body.en-bienvenue .barre-nav {
   height: 16px;
   color: var(--accent);
 }
+
+/* ===================== Maison (V48) ===================== */
+.sans-maison [data-module~="maison"] {
+  display: none !important;
+}
+/* Trois états doux, jamais de rouge : frais, commence à attendre, attend depuis un moment */
+:root {
+  --maison-0: color-mix(in srgb, var(--sauge) 40%, var(--carte));
+  --maison-1: color-mix(in srgb, #e3b867 50%, var(--carte));
+  --maison-2: color-mix(in srgb, var(--alerte, #c98a5a) 50%, var(--carte));
+}
+.point-maison-0 { background: color-mix(in srgb, var(--sauge) 70%, var(--carte)); }
+.point-maison-1 { background: #e3b867; }
+.point-maison-2 { background: var(--alerte, #c98a5a); }
+
+.sessions-maison h2 {
+  margin-bottom: 10px;
+}
+.choix-sessions {
+  display: flex;
+  gap: 8px;
+}
+.bouton-session {
+  flex: 1;
+  min-height: 48px;
+  border: 1.5px solid var(--trait);
+  border-radius: 14px;
+  background: var(--fond);
+  color: var(--texte);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.bouton-session:active {
+  background: var(--accent);
+  color: var(--carte);
+}
+
+/* Le plan : une grille de pièces, les grandes prennent deux cases */
+.plan-maison {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  padding: 6px;
+  margin: 12px 0 8px;
+  border: 3px solid var(--texte);
+  border-radius: 10px;
+  background: var(--texte);
+}
+@media (min-width: 700px) {
+  .plan-maison {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.piece {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 2px;
+  min-height: 96px;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.piece-grande {
+  grid-column: span 2;
+  min-height: 112px;
+}
+.piece svg {
+  width: 20px;
+  height: 20px;
+  margin-bottom: auto;
+  opacity: 0.7;
+}
+.piece-etat-0 { background: var(--maison-0); }
+.piece-etat-1 { background: var(--maison-1); }
+.piece-etat-2 { background: var(--maison-2); }
+.piece-nom {
+  font-family: var(--police-titre);
+  font-size: 17px;
+  font-weight: 700;
+}
+.piece-detail {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+/* Une pièce et ses tâches */
+.famille-menage h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+.famille-menage h3 svg {
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+}
+.ligne-tache-maison {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--trait);
+}
+.ligne-tache-maison:last-of-type {
+  border-bottom: none;
+}
+.ligne-tache-maison .point-legende {
+  flex: none;
+}
+.ligne-tache-texte {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.bouton-fait-maison {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid var(--trait);
+  border-radius: 50%;
+  background: var(--carte);
+  color: var(--accent);
+  cursor: pointer;
+}
+.bouton-fait-maison.deja-fait {
+  border-color: var(--sauge);
+  background: var(--maison-0);
+}
+.bouton-fait-maison svg {
+  width: 20px;
+  height: 20px;
+}
+.ligne-maison-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.ligne-maison-type svg {
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+}
+.champ-court {
+  width: 64px;
+  margin-left: 6px;
+}
+
+/* La petite session, en plein écran comme le mode cuisine */
+#session-maison {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  padding: max(16px, env(safe-area-inset-top)) 20px max(16px, env(safe-area-inset-bottom));
+  background: var(--fond);
+  overflow-y: auto;
+}
+#session-maison[hidden] {
+  display: none;
+}
+.cuisine-haut p {
+  font-family: var(--police-titre);
+}
+.carte-session {
+  margin: 20px 0;
+  padding: 28px 20px;
+  text-align: center;
+}
+.carte-session h2 {
+  font-size: 26px;
+  margin: 6px 0;
+}
+.carte-session.tache-etat-0 { background: var(--maison-0); }
+.carte-session.tache-etat-1 { background: var(--maison-1); }
+.carte-session.tache-etat-2 { background: var(--maison-2); }
+#session-contenu .bienvenue-boutons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#session-contenu > h2 {
+  margin-top: 40px;
+  text-align: center;
+}
+#session-contenu > .sous-titre {
+  text-align: center;
+}
+[data-carte="maison"] .bouton-petit {
+  margin-top: 8px;
+}

@@ -12,6 +12,7 @@ const MODULES = [
   { code: "courses", nom: "Courses", espace: "foyer", icone: "shopping-basket", detail: "La liste, rayon par rayon" },
   { code: "repas", nom: "Repas", espace: "foyer", icone: "cooking-pot", detail: "Le menu de la semaine et ton carnet" },
   { code: "placard", nom: "Placard", espace: "foyer", icone: "archive", detail: "Ce qu'il y a, ce qui manque" },
+  { code: "maison", nom: "Maison", espace: "foyer", icone: "house", detail: "Le ménage pièce par pièce, et « J'ai 15 minutes »" },
   { code: "envies", nom: "Envies", espace: "foyer", icone: "gift", detail: "Cadeaux, achats, choses à vivre" },
   { code: "atelier", nom: "Atelier découverte", espace: "moi", icone: "palette", detail: "Tester de nouveaux loisirs" },
   { code: "soin", nom: "Coin douceur", espace: "moi", icone: "flower-2", detail: "Les douceurs et la Journée difficile" },

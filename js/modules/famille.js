@@ -49,6 +49,10 @@ function foyerAPartager() {
 // Les modules qui dépendent de la famille se mettent à jour
 function quandFamilleChange() {
   if (typeof mettreAJourPlacardFamille === "function") mettreAJourPlacardFamille();
+  if (typeof mettreAJourMaisonFamille === "function") {
+    mettreAJourMaisonFamille();
+    afficherMaison();
+  }
   document.querySelectorAll("[data-liste-famille]").forEach((zone) => afficherFamille(zone));
 }
 

@@ -10,6 +10,7 @@ const CARTES_ACCUEIL = [
   { code: "demain", nom: "Demain", detail: "L'aperçu du lendemain, le soir à partir de 17 h" },
   { code: "idee", nom: "Une idée du pense-bête", detail: "Une tâche sans date, piochée au hasard" },
   { code: "budget", nom: "Mon mois", detail: "Ce qu'il te reste pour vivre" },
+  { code: "maison", nom: "La maison", detail: "Les pièces qui attendent, et « J'ai 15 minutes »" },
   { code: "courses", nom: "Courses", detail: "Ce qu'il reste à prendre" },
   { code: "cadeaux", nom: "Cadeaux", detail: "Quand une occasion approche (Noël, anniversaires)" },
   { code: "vivre", nom: "Et si…", detail: "Une idée À vivre quand ton week-end est libre" },
