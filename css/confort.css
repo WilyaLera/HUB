@@ -2120,7 +2120,7 @@ body.en-cuisine .barre-nav {
 }
 .point-plus,
 .point-etat.point-manque {
-  background: var(--accent);
+  background: var(--alerte, var(--accent));
 }
 
 /* Les quatre rangements, comme des portes de cuisine */
@@ -2285,7 +2285,7 @@ body.en-cuisine .barre-nav {
   color: #a86f12;
 }
 .pot-etat-plus .pot-etat {
-  color: var(--accent);
+  color: var(--alerte, var(--accent));
 }
 .aide-placard {
   margin: 10px 2px;
@@ -2331,7 +2331,7 @@ body.en-cuisine .barre-nav {
   color: #3a2e28;
 }
 .choix-etat .choix-etat-plus.choisi {
-  background: var(--accent);
+  background: var(--alerte, var(--accent));
   color: #fff;
 }
 
@@ -2412,7 +2412,7 @@ body.en-cuisine .barre-nav {
 }
 @keyframes ecoute {
   50% {
-    box-shadow: 0 0 0 8px rgba(184, 92, 46, 0.18);
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent) 18%, transparent);
   }
 }
 @media (prefers-reduced-motion: reduce) {

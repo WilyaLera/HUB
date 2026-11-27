@@ -32,6 +32,20 @@
   --trait: #e2dcea;
 }
 
+/* Nature : vert mousse, comme une balade en forêt */
+[data-theme="nature"] {
+  --fond: #eef2e7;
+  --texte: #25301f;
+  --carte: #fbfcf6;
+  --texte-doux: #5a6750;
+  --accent: #4e7a3c;
+  --sauge: #9bb56f;
+  --miel: #d9a441;
+  --trait: #dbe4cf;
+  /* Ce qui manque reste d'une couleur chaude, pour ne pas se confondre avec le vert */
+  --alerte: #c0663e;
+}
+
 h1,
 h2,
 h3 {

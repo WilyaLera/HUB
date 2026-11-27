@@ -119,7 +119,7 @@ function afficherBienvenue() {
     champ.value = charger("prenom", "");
     const ambiance = document.createElement("div");
     ambiance.classList.add("choix-refaire", "bienvenue-ambiances");
-    [["", "Terracotta"], ["lagon", "Lagon"], ["lavande", "Lavande"]].forEach(([code, nom]) => {
+    [["", "Terracotta"], ["lagon", "Lagon"], ["lavande", "Lavande"], ["nature", "Nature"]].forEach(([code, nom]) => {
       const bouton = document.createElement("button");
       bouton.type = "button";
       bouton.classList.add("pastille-temps", `ambiance-${code || "terracotta"}`);
