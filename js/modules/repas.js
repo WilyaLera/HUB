@@ -345,6 +345,12 @@ function portionsDu(leRepas) {
 }
 
 // Ajouter les ingrédients d'un repas à la liste de courses, en cumulant les quantités
+let ignoresPlacard = 0; // combien d'ingrédients étaient déjà au placard, au dernier envoi
+
+function texteDejaAuPlacard(nombre) {
+  return nombre ? ` (${nombre} déjà au placard)` : "";
+}
+
 function envoyerAuxCourses(date, moment) {
   const leRepas = repasDu(date, moment);
   const recette = leRepas ? recetteDe(leRepas.recetteId) : null;
@@ -353,8 +359,14 @@ function envoyerAuxCourses(date, moment) {
   // Si ce repas était déjà dans les courses, on retire d'abord sa part (pas de doublon)
   if (leRepas.envoye) retirerDesCourses(date, moment);
   let ajoutes = 0;
+  ignoresPlacard = 0;
   lignes(recette.ingredients).forEach((ligne) => {
     lireLigne(ligne).forEach((ingredient) => {
+      // Déjà au placard : on ne l'achète pas (placard.js)
+      if (typeof auPlacard === "function" && auPlacard(ingredient.nom)) {
+        ignoresPlacard++;
+        return;
+      }
       ajouterIngredientAuxCourses(ingredient, facteur, `${date}|${moment}`);
       ajoutes++;
     });
@@ -391,6 +403,7 @@ function recalculerArticle(article) {
     article.unite = "";
   }
   article.pour = [...new Set(article.apports.map((x) => texteJourCourt(x.repas.split("|")[0])))];
+  if (article.placardId) article.pour.push("le placard");
 }
 
 function ajouterIngredientAuxCourses(ingredient, facteur, cleRepas) {
@@ -983,6 +996,28 @@ function afficherFeuilleJourRepas() {
       }
     }
     zone.appendChild(idees);
+    // Un plat prêt du congélateur (placard.js) : on le note, et on sort une portion
+    if (typeof placard !== "undefined" && moduleActif("placard") && placard.plats.length) {
+      const titreCongel = document.createElement("p");
+      titreCongel.classList.add("etiquette");
+      titreCongel.textContent = "Déjà prêt, au congélateur";
+      const congel = document.createElement("div");
+      congel.classList.add("envie-boutons");
+      placard.plats.forEach((plat) =>
+        congel.appendChild(
+          creerBoutonEnvie(`${plat.nom} · ${plat.portions}`, () => {
+            changerRepas((leR) => {
+              leR.recetteId = null;
+              leR.texte = `${plat.nom} (congélateur)`;
+              leR.type = "cuisine";
+              leR.gamelle = false;
+            });
+            sortirUnePortion(plat);
+          }),
+        ),
+      );
+      zone.append(titreCongel, congel);
+    }
   }
 
   // Gamelle et plaisir
@@ -998,14 +1033,14 @@ function afficherFeuilleJourRepas() {
     // Les courses de ce jour
     const actions = document.createElement("div");
     actions.classList.add("envie-boutons");
-    if (recette && leRepas.type === "cuisine" && !leRepas.fait) {
+    if (recette && leRepas.type === "cuisine" && !leRepas.fait && moduleActif("courses")) {
       actions.appendChild(
         creerBoutonEnvie(leRepas.envoye ? "Remettre aux courses" : "Ajouter aux courses", () => {
           const nombre = envoyerAuxCourses(date, moment);
           afficherRepas();
           afficherCourses();
           afficherFeuilleJourRepas();
-          montrerPetitMessage(`${nombre} ingrédient${nombre > 1 ? "s" : ""} dans tes courses 🌱`);
+          montrerPetitMessage(`${nombre} ingrédient${nombre > 1 ? "s" : ""} dans tes courses${texteDejaAuPlacard(ignoresPlacard)} 🌱`);
         }),
       );
     }
@@ -1487,6 +1522,12 @@ function afficherFicheRecette() {
     lignes(r.ingredients).forEach((l) => {
       const li = document.createElement("li");
       li.textContent = ligneAdaptee(l, facteur);
+      // Ce qu'on a déjà au placard, en vert (placard.js)
+      const lus = lireLigne(l);
+      if (typeof auPlacard === "function" && lus.length && lus.every((x) => auPlacard(x.nom))) {
+        li.classList.add("au-placard");
+        li.title = "Déjà au placard";
+      }
       liste.appendChild(li);
     });
     bloc.append(titreIngredients, liste);

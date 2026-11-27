@@ -20,12 +20,12 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Kalam:wght@400;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/base.css?v=40" />
-    <link rel="stylesheet" href="css/navigation.css?v=40" />
-    <link rel="stylesheet" href="css/budget.css?v=40" />
-    <link rel="stylesheet" href="css/agenda.css?v=40" />
-    <link rel="stylesheet" href="css/confort.css?v=40" />
-    <link rel="stylesheet" href="css/ordinateur.css?v=40" />
+    <link rel="stylesheet" href="css/base.css?v=41" />
+    <link rel="stylesheet" href="css/navigation.css?v=41" />
+    <link rel="stylesheet" href="css/budget.css?v=41" />
+    <link rel="stylesheet" href="css/agenda.css?v=41" />
+    <link rel="stylesheet" href="css/confort.css?v=41" />
+    <link rel="stylesheet" href="css/ordinateur.css?v=41" />
   </head>
 
   <body>
@@ -42,7 +42,7 @@
           </div>
           <div class="entete-boutons">
           <!-- Journée difficile : l'accueil s'allège (soin.js) -->
-          <button type="button" id="ouvrir-journee" class="bouton-rond" aria-label="Journée difficile ?">
+          <button type="button" id="ouvrir-journee" data-module="soin" class="bouton-rond" aria-label="Journée difficile ?">
             <i data-lucide="cloud-sun"></i>
           </button>
           <!-- Choisir les cartes de l'accueil et leur ordre (accueil-cartes.js) -->
@@ -90,13 +90,13 @@
         </article>
 
         <!-- Carte Cadeaux : seulement quand une occasion approche (envies.js) -->
-        <article class="carte carte-accueil carte-touchable" data-carte="cadeaux" data-ecran="envies">
+        <article class="carte carte-accueil carte-touchable" data-carte="cadeaux" data-module="envies" data-ecran="envies">
           <h2>Cadeaux</h2>
           <p id="accueil-cadeaux" class="sous-titre"></p>
         </article>
 
         <!-- Carte « Et si… » : une idée À vivre quand le week-end est libre (envies.js) -->
-        <article class="carte carte-accueil" data-carte="vivre">
+        <article class="carte carte-accueil" data-carte="vivre" data-module="envies">
           <h2>Et si…</h2>
           <p id="accueil-vivre-texte"></p>
           <div class="form-categorie-boutons accueil-vivre-boutons">
@@ -106,12 +106,12 @@
         </article>
 
         <!-- Carte Courses : ce qu'il reste à prendre -->
-        <article class="carte carte-accueil carte-touchable" data-carte="repas" data-ecran="repas">
+        <article class="carte carte-accueil carte-touchable" data-carte="repas" data-module="repas" data-ecran="repas">
           <h2 id="titre-carte-repas">Ce soir</h2>
           <div id="accueil-repas"></div>
         </article>
 
-        <article class="carte carte-accueil carte-touchable" data-carte="courses" data-ecran="courses">
+        <article class="carte carte-accueil carte-touchable" data-carte="courses" data-module="courses" data-ecran="courses">
           <h2>Courses</h2>
           <p id="accueil-courses" class="sous-titre"></p>
         </article>
@@ -122,7 +122,7 @@
           <div id="zone-idee"></div>
         </article>
 
-        <article class="carte carte-mois carte-touchable carte-accueil" data-carte="budget" data-ecran="budget">
+        <article class="carte carte-mois carte-touchable carte-accueil" data-carte="budget" data-module="budget" data-ecran="budget">
           <div class="mois-entete">
             <h2 id="accueil-titre"></h2>
             <span id="accueil-jours" class="pastille-info"></span>
@@ -216,7 +216,7 @@
         <p class="sous-titre">La maison et ce qui la fait tourner</p>
 
         <!-- Carte qui mène au Budget -->
-        <button class="carte carte-lien" data-ecran="budget">
+        <button class="carte carte-lien" data-ecran="budget" data-module="budget">
           <span class="carte-lien-icone"><i data-lucide="piggy-bank"></i></span>
           <span class="carte-lien-texte">
             <strong>Budget</strong>
@@ -226,7 +226,7 @@
         </button>
 
         <!-- Carte qui mène aux Repas -->
-        <button class="carte carte-lien" data-ecran="repas">
+        <button class="carte carte-lien" data-ecran="repas" data-module="repas">
           <span class="carte-lien-icone"><i data-lucide="cooking-pot"></i></span>
           <span class="carte-lien-texte">
             <strong>Repas</strong>
@@ -235,8 +235,18 @@
           <i data-lucide="chevron-right"></i>
         </button>
 
+        <!-- Carte qui mène au Placard -->
+        <button class="carte carte-lien" data-ecran="placard" data-module="placard">
+          <span class="carte-lien-icone"><i data-lucide="archive"></i></span>
+          <span class="carte-lien-texte">
+            <strong>Placard</strong>
+            <span id="foyer-placard-resume" class="sous-titre">Ce qu'il y a, ce qui manque</span>
+          </span>
+          <i data-lucide="chevron-right"></i>
+        </button>
+
         <!-- Carte qui mène aux Courses -->
-        <button class="carte carte-lien" data-ecran="courses">
+        <button class="carte carte-lien" data-ecran="courses" data-module="courses">
           <span class="carte-lien-icone"><i data-lucide="shopping-basket"></i></span>
           <span class="carte-lien-texte">
             <strong>Courses</strong>
@@ -246,7 +256,7 @@
         </button>
 
         <!-- Carte qui mène aux Envies -->
-        <button class="carte carte-lien" data-ecran="envies">
+        <button class="carte carte-lien" data-ecran="envies" data-module="envies">
           <span class="carte-lien-icone"><i data-lucide="gift"></i></span>
           <span class="carte-lien-texte">
             <strong>Envies</strong>
@@ -281,7 +291,7 @@
           <div id="liste-semaine-repas" class="carte"></div>
           <div id="alertes-repas"></div>
           <div id="reserve-repas" class="carte" hidden></div>
-          <button type="button" id="repas-vers-courses" class="bouton bouton-large">
+          <button type="button" id="repas-vers-courses" class="bouton bouton-large" data-module="courses">
             <i data-lucide="shopping-basket"></i> Ajouter des jours aux courses
           </button>
         </div>
@@ -313,6 +323,31 @@
 
         <button type="button" class="lien-reglages" data-reglages="carte-reglages-repas">
           <i data-lucide="settings-2"></i> Tes habitudes (gamelles, repas plaisir, riz…) se modifient dans les réglages des repas
+        </button>
+      </section>
+
+      <!-- ===================== Placard ===================== -->
+      <section id="placard" class="ecran" data-parent="foyer">
+        <button class="retour" data-ecran="foyer">
+          <i data-lucide="chevron-left"></i> Foyer
+        </button>
+        <h1>Placard</h1>
+        <p id="placard-resume" class="sous-titre"></p>
+        <div class="carnet-entete">
+          <button type="button" id="modifier-placard" class="lien">Modifier</button>
+          <div class="vue-carnet">
+            <button type="button" class="bouton-rond" data-vue-placard="cuisine" aria-label="Voir la cuisine"><i data-lucide="layout-grid"></i></button>
+            <button type="button" class="bouton-rond" data-vue-placard="liste" aria-label="Voir en liste"><i data-lucide="list"></i></button>
+          </div>
+        </div>
+        <div class="legende-placard">
+          <span><i class="point-legende point-la"></i>Il y en a</span>
+          <span><i class="point-legende point-bientot"></i>Bientôt fini</span>
+          <span><i class="point-legende point-plus"></i>Plus là</span>
+        </div>
+        <div id="contenu-placard"></div>
+        <button type="button" class="lien-reglages" data-reglages="carte-modules">
+          <i data-lucide="settings-2"></i> Le placard peut être rangé (désactivé) dans les réglages, rubrique Mes modules
         </button>
       </section>
 
@@ -366,7 +401,7 @@
         <div id="liste-courses"></div>
 
         <!-- Une fois les courses faites -->
-        <div id="fin-courses" class="carte carte-fin-courses" hidden>
+        <div id="fin-courses" class="carte carte-fin-courses" data-module="budget" hidden>
           <p><strong>Bien joué 🌱</strong> Tu veux noter le total du ticket dans ton budget ?</p>
           <div class="form-categorie-boutons">
             <button type="button" id="fin-courses-non" class="lien">Pas cette fois</button>
@@ -1297,7 +1332,7 @@
         </div>
 
         <!-- Mes espaces (les modules « à moi ») -->
-        <button class="carte carte-lien" data-ecran="soin">
+        <button class="carte carte-lien" data-ecran="soin" data-module="soin">
           <span class="carte-lien-icone"><i data-lucide="flower-2"></i></span>
           <span class="carte-lien-texte">
             <strong>Mon coin douceur</strong>
@@ -1306,7 +1341,7 @@
           <i data-lucide="chevron-right"></i>
         </button>
 
-        <button class="carte carte-lien" data-ecran="atelier">
+        <button class="carte carte-lien" data-ecran="atelier" data-module="atelier">
           <span class="carte-lien-icone"><i data-lucide="palette"></i></span>
           <span class="carte-lien-texte">
             <strong>Atelier découverte</strong>
@@ -1334,6 +1369,13 @@
         </article>
 
         <!-- L'apparence (moi.js) -->
+        <!-- Mes modules (modules.js) -->
+        <details id="carte-modules" class="carte carte-repliable">
+          <summary><h2>Mes modules</h2></summary>
+          <p class="sous-titre petit">Active seulement ce qui te sert. Un module rangé garde toutes ses données.</p>
+          <div id="liste-modules"></div>
+        </details>
+
         <details id="carte-apparence" class="carte carte-repliable">
           <summary><h2>Apparence</h2></summary>
           <p class="etiquette">Thème</p>
@@ -1420,7 +1462,7 @@
         </details>
 
         <!-- Les réglages du budget -->
-        <details id="carte-reglages" class="carte carte-repliable">
+        <details id="carte-reglages" class="carte carte-repliable" data-module="budget">
           <summary><h2>Réglages du budget</h2></summary>
 
           <p class="etiquette">Je gère mon budget</p>
@@ -1510,7 +1552,7 @@
         </details>
 
         <!-- Les réglages des courses : les rayons -->
-        <details id="carte-rayons" class="carte carte-repliable">
+        <details id="carte-rayons" class="carte carte-repliable" data-module="courses">
           <summary><h2>Réglages des courses</h2></summary>
           <p class="sous-titre petit">
             Range tes rayons dans l'ordre de ton magasin, renomme-les, ajoute les tiens.
@@ -1525,7 +1567,7 @@
         </details>
 
         <!-- Les réglages des envies (envies.js) -->
-        <details id="carte-reglages-envies" class="carte carte-repliable">
+        <details id="carte-reglages-envies" class="carte carte-repliable" data-module="envies">
           <summary><h2>Réglages des envies</h2></summary>
           <p class="etiquette">La carte Cadeaux de l'accueil apparaît…</p>
           <div class="choix">
@@ -1552,7 +1594,7 @@
         </details>
 
         <!-- Les réglages des repas (repas.js) -->
-        <details id="carte-reglages-repas" class="carte carte-repliable">
+        <details id="carte-reglages-repas" class="carte carte-repliable" data-module="repas">
           <summary><h2>Réglages des repas</h2></summary>
           <p class="etiquette">Les repas à prévoir chaque jour</p>
           <div id="repas-moments" class="barre-filtre"></div>
@@ -1573,7 +1615,7 @@
         </details>
 
         <!-- Les réglages de l'atelier (atelier.js) -->
-        <details id="carte-reglages-atelier" class="carte carte-repliable">
+        <details id="carte-reglages-atelier" class="carte carte-repliable" data-module="atelier">
           <summary><h2>Réglages de l'atelier</h2></summary>
           <p class="etiquette">Le budget de mes loisirs</p>
           <div class="choix">
@@ -1709,7 +1751,7 @@
           />
 
           <!-- Relier la dépense à un loisir (Atelier, budget « suivi ») -->
-          <label id="bloc-depense-loisir" class="champ" hidden>
+          <label id="bloc-depense-loisir" class="champ" data-module="atelier" hidden>
             Pour un loisir de l'atelier ?
             <select id="depense-loisir" class="champ-note"></select>
           </label>
@@ -1768,10 +1810,10 @@
         <button type="button" id="plus-anniversaire" class="menu-plus-choix">
           <span class="menu-plus-icone"><i data-lucide="cake"></i></span> Un anniversaire
         </button>
-        <button type="button" id="plus-courses" class="menu-plus-choix">
+        <button type="button" id="plus-courses" class="menu-plus-choix" data-module="courses">
           <span class="menu-plus-icone"><i data-lucide="shopping-basket"></i></span> Un article de courses
         </button>
-        <button type="button" id="plus-depense" class="menu-plus-choix">
+        <button type="button" id="plus-depense" class="menu-plus-choix" data-module="budget">
           <span class="menu-plus-icone"><i data-lucide="wallet"></i></span> Une dépense
         </button>
       </div>
@@ -1831,7 +1873,7 @@
       </form>
 
       <!-- Après « C'est offert » : noter la dépense ? -->
-      <div id="offert-depense" class="carte-fin-courses offert-depense" hidden>
+      <div id="offert-depense" class="carte-fin-courses offert-depense" data-module="budget" hidden>
         <p><strong>Joli cadeau 🌱</strong> Tu veux noter la dépense dans ton budget ?</p>
         <div class="form-categorie-boutons">
           <button type="button" id="offert-depense-non" class="lien">Pas cette fois</button>
@@ -2239,7 +2281,7 @@
       <button class="bouton-plus" aria-label="Ajouter">
         <i data-lucide="plus"></i>
       </button>
-      <button class="onglet" data-ecran="foyer" aria-label="Foyer">
+      <button class="onglet onglet-foyer" data-ecran="foyer" aria-label="Foyer">
         <i data-lucide="sofa"></i>
         <span>Foyer</span>
       </button>
@@ -2250,33 +2292,35 @@
     </nav>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/donnees/stockage.js?v=40"></script>
-    <script src="js/outils/dates.js?v=40"></script>
-    <script src="js/outils/annuler.js?v=40"></script>
-    <script src="js/outils/icones.js?v=40"></script>
-    <script src="js/modules/navigation.js?v=40"></script>
-    <script src="js/modules/infos.js?v=40"></script>
-    <script src="js/modules/accueil.js?v=40"></script>
-    <script src="js/modules/budget.js?v=40"></script>
-    <script src="js/modules/budget-repartition.js?v=40"></script>
-    <script src="js/modules/budget-mois.js?v=40"></script>
-    <script src="js/modules/budget-raccourcis.js?v=40"></script>
-    <script src="js/modules/budget-epargne.js?v=40"></script>
-    <script src="js/modules/budget-point.js?v=40"></script>
-    <script src="js/donnees/sauvegarde.js?v=40"></script>
-    <script src="js/modules/agenda.js?v=40"></script>
-    <script src="js/modules/agenda-vues.js?v=40"></script>
-    <script src="js/modules/agenda-feuille.js?v=40"></script>
-    <script src="js/modules/agenda-reglages.js?v=40"></script>
-    <script src="js/modules/agenda-notifs.js?v=40"></script>
-    <script src="js/modules/accueil-cartes.js?v=40"></script>
-    <script src="js/modules/courses.js?v=40"></script>
-    <script src="js/modules/envies.js?v=40"></script>
-    <script src="js/modules/atelier.js?v=40"></script>
-    <script src="js/modules/soin.js?v=40"></script>
-    <script src="js/donnees/recettes-import.js?v=40"></script>
-    <script src="js/modules/repas.js?v=40"></script>
-    <script src="js/modules/moi.js?v=40"></script>
-    <script src="js/app.js?v=40"></script>
+    <script src="js/donnees/stockage.js?v=41"></script>
+    <script src="js/outils/dates.js?v=41"></script>
+    <script src="js/outils/annuler.js?v=41"></script>
+    <script src="js/outils/icones.js?v=41"></script>
+    <script src="js/modules/modules.js?v=41"></script>
+    <script src="js/modules/navigation.js?v=41"></script>
+    <script src="js/modules/infos.js?v=41"></script>
+    <script src="js/modules/accueil.js?v=41"></script>
+    <script src="js/modules/budget.js?v=41"></script>
+    <script src="js/modules/budget-repartition.js?v=41"></script>
+    <script src="js/modules/budget-mois.js?v=41"></script>
+    <script src="js/modules/budget-raccourcis.js?v=41"></script>
+    <script src="js/modules/budget-epargne.js?v=41"></script>
+    <script src="js/modules/budget-point.js?v=41"></script>
+    <script src="js/donnees/sauvegarde.js?v=41"></script>
+    <script src="js/modules/agenda.js?v=41"></script>
+    <script src="js/modules/agenda-vues.js?v=41"></script>
+    <script src="js/modules/agenda-feuille.js?v=41"></script>
+    <script src="js/modules/agenda-reglages.js?v=41"></script>
+    <script src="js/modules/agenda-notifs.js?v=41"></script>
+    <script src="js/modules/accueil-cartes.js?v=41"></script>
+    <script src="js/modules/courses.js?v=41"></script>
+    <script src="js/modules/envies.js?v=41"></script>
+    <script src="js/modules/atelier.js?v=41"></script>
+    <script src="js/modules/soin.js?v=41"></script>
+    <script src="js/donnees/recettes-import.js?v=41"></script>
+    <script src="js/modules/repas.js?v=41"></script>
+    <script src="js/modules/placard.js?v=41"></script>
+    <script src="js/modules/moi.js?v=41"></script>
+    <script src="js/app.js?v=41"></script>
   </body>
 </html>

@@ -611,6 +611,7 @@ function afficherMateriel(loisir) {
     ligne.insertBefore(basculer, ligne.lastChild);
     if (!objet.jai && !envie) {
       const versEnvies = creerBoutonEnvie("Vers mes envies", () => envoyerVersEnvies(loisir, objet));
+      versEnvies.dataset.module = "envies";
       ligne.insertBefore(versEnvies, basculer);
     }
     zone.appendChild(ligne);
@@ -664,7 +665,7 @@ function depensesDuLoisir(loisir) {
 function afficherBudgetLoisir(loisir) {
   const niveau = atelier.reglages.budget;
   const section = document.getElementById("section-budget-loisir");
-  section.hidden = niveau === "aucun";
+  section.hidden = niveau === "aucun" || !moduleActif("budget");
   const zone = document.getElementById("budget-loisir");
   zone.replaceChildren();
   if (niveau === "aucun") return;

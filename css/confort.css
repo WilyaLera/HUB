@@ -1995,3 +1995,399 @@ body.en-cuisine .barre-nav {
   width: 16px;
   height: 16px;
 }
+
+/* ---------- Mes modules : un module rangé disparaît partout ---------- */
+.sans-budget [data-module~="budget"] {
+  display: none !important;
+}
+.sans-courses [data-module~="courses"] {
+  display: none !important;
+}
+.sans-repas [data-module~="repas"] {
+  display: none !important;
+}
+.sans-placard [data-module~="placard"] {
+  display: none !important;
+}
+.sans-envies [data-module~="envies"] {
+  display: none !important;
+}
+.sans-atelier [data-module~="atelier"] {
+  display: none !important;
+}
+.sans-soin [data-module~="soin"] {
+  display: none !important;
+}
+.sans-foyer .onglet-foyer {
+  display: none !important;
+}
+.ligne-module {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--trait);
+  cursor: pointer;
+}
+.ligne-module-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--fond);
+  color: var(--accent);
+}
+.ligne-module-icone svg,
+.ligne-module-icone i {
+  width: 20px;
+  height: 20px;
+}
+.ligne-module-texte {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+/* Un interrupteur doux */
+.interrupteur {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  width: 52px;
+  height: 32px;
+  flex-shrink: 0;
+  margin: 0;
+  border-radius: 999px;
+  background: var(--trait);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.interrupteur::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(58, 46, 40, 0.25);
+  transition: transform 0.2s;
+}
+.interrupteur:checked {
+  background: var(--sauge);
+}
+.interrupteur:checked::after {
+  transform: translateX(20px);
+}
+
+/* =====================================================
+   Placard
+   ===================================================== */
+.legende-placard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 4px 0 10px;
+  font-size: 13px;
+  color: var(--texte-doux);
+}
+.legende-placard span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.point-legende,
+.point-etat {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.point-la,
+.point-etat {
+  background: var(--sauge);
+}
+.point-bientot {
+  background: #e8c66a;
+}
+.point-plus,
+.point-etat.point-manque {
+  background: var(--accent);
+}
+
+/* Les quatre rangements, comme des portes de cuisine */
+.grille-rangements {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.rangement {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 0 12px;
+  border: 1.5px solid var(--trait);
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--carte);
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.rangement-porte {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 96px;
+  margin: 8px 8px 6px;
+  border-radius: 12px;
+  background: var(--couleur-rangement);
+  color: rgba(58, 46, 40, 0.7);
+  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.25);
+}
+.rangement-porte svg,
+.rangement-porte i {
+  width: 34px;
+  height: 34px;
+}
+.rangement-poignee {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 6px;
+  height: 30px;
+  margin-top: -15px;
+  border-radius: 999px;
+  background: rgba(58, 46, 40, 0.35);
+}
+.rangement-nom {
+  padding: 0 12px;
+  font-family: var(--police-titre);
+  font-size: 16px;
+}
+.rangement-detail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  font-size: 13px;
+  color: var(--texte-doux);
+}
+
+/* Les étagères et leurs pots qui se vident */
+.lien-retour-placard {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+}
+.titre-rangement {
+  margin: 0 0 8px;
+}
+.etageres {
+  padding: 10px 10px 2px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--couleur-rangement) 30%, var(--carte));
+  box-shadow: inset 0 0 0 4px color-mix(in srgb, var(--couleur-rangement) 55%, var(--carte));
+}
+.etagere {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  align-items: end;
+  padding: 8px 4px 0;
+  margin-bottom: 10px;
+  border-bottom: 6px solid color-mix(in srgb, var(--couleur-rangement) 70%, #8a6a52);
+  border-radius: 0 0 4px 4px;
+}
+.etagere .ligne-modifier-placard {
+  grid-column: 1 / -1;
+}
+.etagere:has(.ligne-modifier-placard) {
+  display: block;
+  border-bottom: none;
+}
+.pot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 44px;
+  padding: 0 0 6px;
+  border: none;
+  background: none;
+  color: var(--texte);
+  font: inherit;
+  cursor: pointer;
+}
+.pot-forme {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border: 2.5px solid rgba(58, 46, 40, 0.45);
+  background: rgba(255, 255, 255, 0.55);
+}
+.pot-bocal .pot-forme {
+  width: 46px;
+  height: 52px;
+  border-radius: 10px 10px 12px 12px;
+  border-top-width: 7px;
+}
+.pot-boite .pot-forme {
+  width: 56px;
+  height: 40px;
+  border-radius: 6px;
+}
+.pot-bouteille .pot-forme {
+  width: 30px;
+  height: 62px;
+  border-radius: 12px 12px 8px 8px;
+  border-top-width: 9px;
+}
+.pot-contenu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--remplissage);
+  background: var(--couleur-pot);
+  transition: height 0.3s;
+}
+.pot-etat-bientot .pot-contenu {
+  background: #e8c66a;
+}
+.pot-etat-plus .pot-forme {
+  border-style: dashed;
+}
+.pot-nom {
+  max-width: 100%;
+  font-size: 13px;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.pot-etat {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--texte-doux);
+}
+.pot-etat-bientot .pot-etat {
+  color: #a86f12;
+}
+.pot-etat-plus .pot-etat {
+  color: var(--accent);
+}
+.aide-placard {
+  margin: 10px 2px;
+}
+
+/* La vue liste */
+.ligne-placard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--trait);
+}
+.ligne-placard:last-child {
+  border-bottom: none;
+}
+.choix-etat {
+  display: flex;
+  flex-shrink: 0;
+  border: 1.5px solid var(--trait);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.choix-etat button {
+  min-height: 40px;
+  padding: 0 9px;
+  border: none;
+  background: none;
+  color: var(--texte-doux);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.choix-etat .choix-etat-la.choisi {
+  background: var(--sauge);
+  color: #fff;
+}
+.choix-etat .choix-etat-bientot.choisi {
+  background: #e8c66a;
+  color: #3a2e28;
+}
+.choix-etat .choix-etat-plus.choisi {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Modifier */
+.ligne-modifier-placard {
+  display: grid;
+  grid-template-columns: 1fr 104px 44px;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 0;
+}
+.form-placard {
+  margin-top: 10px;
+}
+.modifier-rangement {
+  margin-top: 14px;
+}
+.couleurs-rangement {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.pastille-couleur {
+  width: 36px;
+  height: 36px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.pastille-couleur.choisie {
+  border-color: var(--texte);
+}
+
+/* Les plats prêts */
+.plats-prets {
+  margin-top: 14px;
+}
+.plats-prets h3 {
+  margin: 0 0 6px;
+  font-family: var(--police-titre);
+}
+.plat-pret-texte {
+  display: flex;
+  flex-direction: column;
+}
+.form-plat-pret {
+  display: grid;
+  grid-template-columns: 1fr 64px 44px;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+/* Dans la fiche recette : ce qui est déjà au placard */
+.liste-ingredients .au-placard {
+  color: #5d7148;
+}
+.liste-ingredients .au-placard::after {
+  content: " · au placard";
+  font-family: var(--police-texte);
+  font-size: 11px;
+  font-weight: 700;
+}

@@ -288,7 +288,7 @@ function ideesDuBesoin(besoin) {
   if (besoin === "idees") return IDEES_CHANGER.map((texte) => ({ texte }));
   if (besoin === "evader") {
     // Le premier petit pas d'un loisir de l'atelier, les idées « 1 h » d'À vivre, et quelques classiques
-    const atelierPas = atelier.loisirs
+    const atelierPas = (moduleActif("atelier") ? atelier.loisirs : [])
       .filter((l) => l.etape === "envie" || l.etape === "test")
       .map((l) => ({ loisir: l, etape: l.etapes.find((e) => !e.fait) }))
       .filter((x) => x.etape)

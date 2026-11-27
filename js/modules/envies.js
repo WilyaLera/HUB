@@ -708,11 +708,13 @@ function murirLesEnvies() {
 
 // Le bocal « Plaisirs » (ou un bocal qui y ressemble), s'il existe
 function bocalPlaisirs() {
+  if (typeof moduleActif === "function" && !moduleActif("budget")) return null;
   return budget.bocaux.find((b) => /plaisir|loisir|envie/i.test(b.nom)) || null;
 }
 
 // Ce que le Budget en pense : « ça tient dans tes Plaisirs » ou un projet
 function conseilBudget(envie) {
+  if (typeof moduleActif === "function" && !moduleActif("budget")) return "";
   if (!envie.prix) return "";
   const bocal = bocalPlaisirs();
   if (bocal && bocal.montant > 0) {
@@ -1175,7 +1177,7 @@ function creerLigneVivre(idee) {
   boutons.append(
     creerBoutonEnvie("Le planifier", () => planifierIdee(idee)),
     creerBoutonEnvie("C'est vécu !", () => vivre(idee)),
-    creerBoutonEnvie("Un loisir à tester", () => versAtelier(idee)), // atelier.js
+    ...(moduleActif("atelier") ? [creerBoutonEnvie("Un loisir à tester", () => versAtelier(idee))] : []), // atelier.js
   );
   carte.appendChild(boutons);
 

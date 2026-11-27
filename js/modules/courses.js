@@ -154,6 +154,8 @@ function creerLigneArticle(article) {
   caseACocher.setAttribute("aria-label", `${article.nom} pris`);
   caseACocher.addEventListener("change", () => {
     article.coche = caseACocher.checked;
+    // Ce qui est acheté repasse à « Il y en a » dans le placard (placard.js)
+    if (typeof quandArticleAchete === "function" && moduleActif("placard")) quandArticleAchete(article);
     sauvegarderCourses();
     afficherCourses();
   });
